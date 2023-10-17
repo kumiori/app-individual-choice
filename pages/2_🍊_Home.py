@@ -29,22 +29,22 @@ survey = ss.StreamlitSurvey()
 
 
 with st.expander("Some questions:", expanded=True):
-    survey = ss.StreamlitSurvey("Questions Example")
+    survey = ss.StreamlitSurvey("Home")
     pages = survey.pages(2, on_submit=lambda: 
         st.success("Your responses have been recorded. Thank you!"))
     
     with pages:
         if pages.current == 0:
             st.write("Do you want to live together with me?")
-            used_before = survey.radio(
-                "used_st_before", options=["nan", "Yes", "No"], index=0,
+            love_together = survey.radio(
+                "love_together", options=["nan", "Yes", "No"], index=0,
                 label_visibility="collapsed", horizontal=True
             )
 
-            if used_before == "Yes":
+            if love_together == "Yes":
                 st.write("Are you willing to transfer to Rome?")
                 move_to_rome = survey.select_slider(
-                    "st_move_to_rome",
+                    "move_to_rome",
                     value = "nan",
                     options=["Yes", "nan", "No"],
                     label_visibility="collapsed",
@@ -52,7 +52,7 @@ with st.expander("Some questions:", expanded=True):
                 
                 st.write("Would you like me to move to Paris?")
                 move_to_paris = survey.select_slider(
-                    "st_move_to_paris",
+                    "move_to_paris",
                     value = "nan",
                     options=["Yes", "nan", "No"],
                     label_visibility="collapsed",
@@ -60,7 +60,7 @@ with st.expander("Some questions:", expanded=True):
 
                 st.write("Do you want to live with me within the next 12 months?")
                 move_within_12_months = survey.select_slider(
-                    "st_move_within_12_months",
+                    "move_within_12_months",
                     value = "nan",
                     options=["Yes", "nan", "No"],
                     label_visibility="collapsed",
@@ -69,12 +69,12 @@ with st.expander("Some questions:", expanded=True):
                 if move_within_12_months == "Yes":
                     st.write("When?")
                     date_input = survey.select_slider(
-                    "st_move_when",
+                    "move_when",
                     options = ["October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August", "September"],
                     label_visibility="collapsed",
                 )       
                     
-            elif used_before == "No":
+            elif love_together == "No":
                 st.write("Please write why and lets talk about it.")
                 
                 survey.text_input("Here are some thoughts...", id="Q3")
@@ -97,15 +97,15 @@ with st.expander("Some questions:", expanded=True):
 # st.subheader("The data 🍊")
 
 json = survey.to_json()
-# st.json(json)
+st.json(json)
 # st.text(dir(survey))
 
 # st.text(survey)
 st.download_button(
     label="Download Mai's Questionnaire",
     data=json,
-    file_name='survey.csv',
-    mime='text/csv',
+    file_name='survey.json',
+    mime='text/json',
 )
 # survey.download_button("Export Survey Data", use_container_width=True)
 # survey.importer("Import Survey Data:")
