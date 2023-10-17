@@ -70,7 +70,7 @@ with st.expander("Some questions:", expanded=True):
                     st.write("When?")
                     date_input = survey.select_slider(
                     "st_move_when",
-                    options = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                    options = ["October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August", "September"],
                     label_visibility="collapsed",
                 )       
                     
