@@ -94,10 +94,10 @@ with st.expander("Some questions:", expanded=True):
             )
 
 
-st.subheader("The data 🍊")
+# st.subheader("The data 🍊")
 
 json = survey.to_json()
-st.json(json)
+# st.json(json)
 # st.text(dir(survey))
 
 # st.text(survey)
