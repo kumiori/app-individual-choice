@@ -28,7 +28,7 @@ survey = ss.StreamlitSurvey()
 # )
 
 
-# st.text(dir(st))
+st.text(dir(ss))
 st.text(ss.__version__)
 
 with st.expander("Some questions:", expanded=True):
@@ -101,8 +101,9 @@ st.subheader("The data 🍊")
 
 json = survey.to_json()
 st.json(json)
-
-
+st.text(dir(survey))
 survey.download_button("Export Survey Data", use_container_width=True)
+
+
 # survey.importer("Import Survey Data:")
 
