@@ -28,9 +28,6 @@ survey = ss.StreamlitSurvey()
 # )
 
 
-st.text(dir(ss))
-st.text(ss.__version__)
-
 with st.expander("Some questions:", expanded=True):
     survey = ss.StreamlitSurvey("Questions Example")
     pages = survey.pages(2, on_submit=lambda: 
