@@ -101,9 +101,15 @@ st.subheader("The data 🍊")
 
 json = survey.to_json()
 st.json(json)
-st.text(dir(survey))
-survey.download_button("Export Survey Data", use_container_width=True)
+# st.text(dir(survey))
 
-
+# st.text(survey)
+st.download_button(
+    label="Download Mai's Questionnaire",
+    data=json,
+    file_name='survey.csv',
+    mime='text/csv',
+)
+# survey.download_button("Export Survey Data", use_container_width=True)
 # survey.importer("Import Survey Data:")
 
