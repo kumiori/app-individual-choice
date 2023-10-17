@@ -6,7 +6,7 @@ st.set_page_config(page_title="Home", page_icon="🍊")
 st.header("Home 🍊")
 
 st.markdown('''
-Sometimes, sadness has an underlying reason which was the feeling of uncertainty regarding our future life together.
+Sometimes, sadness has an underlying reason which is the feeling of uncertainty regarding our future life together.
 
 Therefore, let's to discuss our future in an intentional and clear way.
 
