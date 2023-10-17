@@ -28,6 +28,8 @@ survey = ss.StreamlitSurvey()
 # )
 
 
+# st.text(dir(st))
+st.text(ss.__version__)
 
 with st.expander("Some questions:", expanded=True):
     survey = ss.StreamlitSurvey("Questions Example")
@@ -93,7 +95,6 @@ with st.expander("Some questions:", expanded=True):
                 options=["Very Unsatisfied", "Unsatisfied", "Neutral", "Satisfied", "Very Satisfied"],
                 label_visibility="collapsed",
             )
-
 
 
 st.subheader("The data 🍊")
