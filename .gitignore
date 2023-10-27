@@ -1,2 +1,3 @@
 .streamlit/secrets.toml
-webapp/*
+webapp/
+my_component/frontend/node_modules/
