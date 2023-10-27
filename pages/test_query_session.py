@@ -67,4 +67,4 @@ responses = {
     "component_response": st.session_state.session_state.get("component_response")
 }
 st.write("Collected Responses:")
-st.write(json.dumps(responses, indent=2))
+st.json(responses)
