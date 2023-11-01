@@ -3,13 +3,11 @@ from st_supabase_connection import SupabaseConnection
 import streamlit.components.v1 as components
 
 # Initialize connection.
-conn = st.experimental_connection("supabase",type=SupabaseConnection)
+conn = st.connection("supabase",type=SupabaseConnection)
 
 # Perform query.
 rows = conn.query("*", table="address_book", ttl="10m").execute()
 
-
-    
 st.text("Hello")
 
 _my_component = components.declare_component(
@@ -20,7 +18,6 @@ _my_component = components.declare_component(
 
 def my_component(name, greeting="Hello", key=None):
     return _my_component(name=name, greeting=greeting, default=0, key=key)
-
 
 
 # Print results.
