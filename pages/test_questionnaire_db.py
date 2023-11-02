@@ -4,6 +4,22 @@ import json
 
 table_name = "questionnaire"
 
+def check_existence(conn, username):
+    if username == "":
+        st.error("Please provide a username.")
+        return
+    # Check if the username already exists
+    st.write(f'checking if {username} exists')
+    # breakpoint()
+    # user_exists = conn.table('questionnaire').select().execute()
+    user_exists, count = conn.table("questionnaire")       \
+        .select("*")                                \
+        .ilike('name', f'%{username}%')             \
+        .execute()
+
+    st.write(user_exists, 'count len', len(user_exists[1]))
+    return
+
 def insert_data(conn, username, response_data):
     # Insert the return_value into the PostgreSQL table
     
@@ -14,7 +30,7 @@ def insert_data(conn, username, response_data):
     # ]).execute()
     
     api.upsert([
-        {"name": username, "responses": response_data}
+        {"name": username, "response_data": response_data}
     ]).execute()
     
     st.write("Data stored in the table.")
@@ -30,8 +46,7 @@ def insert_or_update_data(conn, username, response_data):
             .ilike('name', f'%{username}%')             \
             .execute()
 
-        # .eq('name', username).execute()
-        st.write(user_exists, 'count', count)
+        st.write(user_exists, 'count key', count)
         
         user_exists, count = conn.table("questionnaire")       \
             .select("*")                                \
@@ -39,25 +54,30 @@ def insert_or_update_data(conn, username, response_data):
             .execute()
 
         # .eq('name', username).execute()
-        st.write(user_exists, 'count', len(user_exists[1]))
+        st.write(user_exists, 'count len', len(user_exists[1]))
         
-        st.write('user_exists', len(user_exists[1]), ' records')
-        
+        count = len(user_exists[1])
         # breakpoint()
-        # if user_exists.get('count', 0) > 0:
-        #     # Username exists, update the existing record
-        #     data = {
-        #         'response_data': json.dumps(response_data)
-        #     }
-        #     update_result = supabase.from_table('user_responses').eq('username', username).update(data).execute()
-
+        if count > 0:
+            st.write('user_exists', len(user_exists[1]), ' records')
+            # Username exists, update the existing record
+            data = {
+                'response_data': json.dumps(response_data)
+            }
+            # update_query = conn.table("questionnaire").select("*").eq('name', username).update(data).execute()
+            update_query = conn.table("questionnaire").update(data).eq('name', username).execute()
+            
+            if update_query:
+                st.success("Data updated successfully.")
+            else:
+                st.error("Failed to update data.")
         #     if update_result['status'] == 200:
         #         st.success("Data updated successfully in the database!")
         #     else:
         #         st.error("Failed to update data.")
 
-        # else:
-        #     # Username does not exist, insert a new record
+        else:
+            # Username does not exist, insert a new record
         #     data = {
         #         'username': username,
         #         'response_data': json.dumps(response_data)
@@ -67,7 +87,7 @@ def insert_or_update_data(conn, username, response_data):
         #     if insert_result['status'] == 201:
         #         st.success("Data inserted successfully in the database!")
         #     else:
-        #         st.error("Failed to insert data.")
+            st.error("Username does not exist.")
 
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
@@ -82,11 +102,23 @@ table_name = "questionnaire"
 json_data = '''
 '''
 # data = json.loads(json_data)
-st.write('test')
-username = st.text_input("Check name", "")
-if st.button("Submit"):
+st.markdown('## Check existence')
+username = st.text_input("Check name", "", key="existence")
+
+if st.button("Submit", key="check"):
     try:
-        insert_or_update_data(conn, username, "")
+        check_existence(conn, username)
+    except json.JSONDecodeError:
+        st.error("Invalid JSON format. Please provide a valid JSON string.")
+
+st.markdown('## Update data')
+username = st.text_input("Name", "")
+response_data = st.text_area("Update Data (JSON)", "{}", key="update_json")
+
+if st.button("Submit", key="update"):
+    try:
+        response_data_json = json.loads(response_data)  # Convert the JSON string to a Python dictionary
+        insert_or_update_data(conn, username, response_data_json)
     except json.JSONDecodeError:
         st.error("Invalid JSON format. Please provide a valid JSON string.")
 
@@ -96,11 +128,11 @@ st.title("Add User Responses to the Database")
 
 # User input fields
 username = st.text_input("Username", "")
-response_data = st.text_area("Response Data (JSON)", "")
+response_data = st.text_area("Response Data (JSON)", "{}")
 
 st.json(response_data)
 
-st.write(dir(conn.table(table_name)))
+# st.write(dir(conn.table(table_name)))
 
 
 if st.button("Submit"):
