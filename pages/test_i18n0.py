@@ -4,19 +4,26 @@ import gettext
 
 # Define a dictionary for supported languages and their locales
 languages = {
-    "English": "en_US.UTF-8",
-    "French": "fr_FR.UTF-8"
+    "English": "en_US",
+    "French": "fr_FR"
 }
 
 # Create a language selection dropdown
 selected_lang = st.selectbox("Select a language", list(languages.keys()))
 
 # Set the path to your custom directory
-# custom_locale_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'i18n')
 custom_locale_directory = 'i18n'
+
+def setup_translation(locale):
+    t = gettext.translation("app", localedir=custom_locale_directory, languages=[locale], fallback=True)
+    _ = t.gettext
+    return _
+
+_ = setup_translation(languages[selected_lang])
 
 # Load the translation object for the selected language
 translation = gettext.translation('messages', localedir=custom_locale_directory, languages=[languages[selected_lang]])
+translation.install()
 
 def translate_text(text):
     return translation.gettext(text)
@@ -34,4 +41,5 @@ if selected_lang != "English":
 else:
     st.write(translate_text("You are using the English version."))
 
+st.write(_("Hello, world"))
 # Other app content

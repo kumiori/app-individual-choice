@@ -126,7 +126,8 @@ class Dichotomy extends StreamlitComponentBase<State> {
             <div id="happy">
                 <span>
                     {greeting}, {name}! &nbsp;
-                    <p>Pick a number below</p>
+                    <br />
+                    <p>Boundaries matter, see below...</p>
                 </span>
                 <svg className="col-md-12 col-sm-12" height="200" >
                     <defs>
