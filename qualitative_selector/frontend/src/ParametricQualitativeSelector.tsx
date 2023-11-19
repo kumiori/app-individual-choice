@@ -20,6 +20,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
   public render = (): ReactNode => {
     const name = this.props.args["name"]
     const question = this.props.args["question"]
+    const areas = this.props.args["areas"]
 
     // const { theme } = this.props
     // const style: React.CSSProperties = {}
@@ -92,7 +93,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
           <p>Make a choice, below</p>
         </span>
         <svg className="col-md-12 col-sm-12" height="200">
-          {renderActiveAreas(5)}
+          {renderActiveAreas(areas)}
         </svg>
         <hr />
       </div>
