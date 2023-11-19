@@ -17,7 +17,7 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
     const name = this.props.args["name"]
-    const greeting = this.props.args["greeting"]
+    const question = this.props.args["question"]
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
@@ -61,7 +61,7 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
     return (
       <div id="happy">
       <span>
-        {greeting}, {name}, &nbsp;
+        Hello, {name},
         <button
           style={style}
           onClick={this.onClicked}
