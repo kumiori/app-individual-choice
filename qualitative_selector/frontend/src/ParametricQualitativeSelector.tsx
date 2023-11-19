@@ -19,7 +19,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
 
   public render = (): ReactNode => {
     const name = this.props.args["name"]
-    const greeting = this.props.args["greeting"]
+    const question = this.props.args["question"]
 
     // const { theme } = this.props
     // const style: React.CSSProperties = {}
@@ -87,7 +87,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     return (
       <div id="happy">
         <span>
-          {greeting}, {name}! &nbsp;
+          Hello, {name}!
           <p>Beware: boundaries always fade...</p>
           <p>Make a choice, below</p>
         </span>

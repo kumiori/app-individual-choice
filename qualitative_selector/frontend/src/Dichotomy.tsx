@@ -15,7 +15,7 @@ class Dichotomy extends StreamlitComponentBase<State> {
 
     public render = (): ReactNode => {
         const name = this.props.args["name"]
-        const greeting = this.props.args["greeting"]
+        const question = this.props.args["question"]
         const rotationAngle = 0; // Specify the desired rotation angle in degrees
 
         function inverseRotatePoint(x: number, y: number, rotationAngle: number): { x: number; y: number } {
@@ -125,9 +125,9 @@ class Dichotomy extends StreamlitComponentBase<State> {
         return (
             <div id="happy">
                 <span>
-                    {greeting}, {name}! &nbsp;
+                    Hello, {name}
                     <br />
-                    <p>Boundaries matter, see below...</p>
+                    <p>{question}</p>
                 </span>
                 <svg className="col-md-12 col-sm-12" height="200" >
                     <defs>
@@ -173,5 +173,5 @@ class Dichotomy extends StreamlitComponentBase<State> {
 
 }
 
-export default withStreamlitConnection(Dichotomy)
-// export default Dichotomy
+// export default withStreamlitConnection(Dichotomy)
+export default Dichotomy
