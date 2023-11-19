@@ -174,3 +174,4 @@ class Dichotomy extends StreamlitComponentBase<State> {
 }
 
 export default withStreamlitConnection(Dichotomy)
+// export default Dichotomy
