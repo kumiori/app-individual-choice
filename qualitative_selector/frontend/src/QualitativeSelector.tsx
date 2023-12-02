@@ -18,7 +18,11 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
     // via `this.props.args`. Here, we access the "name" arg.
     const name = this.props.args["name"]
     const question = this.props.args["question"]
-
+    const dataValues: number[] = this.props.args['data_values'];
+    const lastIndex = dataValues.length-1;
+    const cx = 300;
+    const cy = 100;
+    
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
     // streamlit app.
@@ -30,9 +34,8 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
     if (theme) {
       // Use the theme object to style our button border. Alternatively, the
       // theme style is defined in CSS vars.
-      const borderStyling = `1px solid ${
-        this.state.isFocused ? theme.primaryColor : "gray"
-      }`
+      const borderStyling = `1px solid ${this.state.isFocused ? theme.primaryColor : "gray"
+        }`
       style.border = borderStyling
       style.outline = borderStyling
     }
@@ -45,7 +48,7 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
       const hoveredElement = event.target as SVGElement;
       // Example: Add a subtle shadow to the element on hover
       const customDataValue = hoveredElement.getAttribute('data-value');
-      const blurRadius = customDataValue ? 200 / Number(customDataValue) : 0; // You can adjust this formula as needed
+      const blurRadius = customDataValue ? 50 / Number(customDataValue) : 0; // You can adjust this formula as needed
 
       hoveredElement.style.filter = `blur(${blurRadius}px)`;
     }
@@ -60,109 +63,103 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
 
     return (
       <div id="happy">
-      <span>
-        Hello, {name},
-        <button
-          style={style}
-          onClick={this.onClicked}
-          disabled={this.props.disabled}
-          onFocus={this._onFocus}
-          onBlur={this._onBlur}
-        >
-          Don't click Me!
-        </button>
-        <br />
-        <p>Make a choice, below</p>
-      </span>
-      <svg className="col-md-12 col-sm-12" height="200">
-      <rect
-        className="interface"
-        id="button5"
-        data-value='5'
-        width="100%"
-        height="100%"
-        fill="#383838"
-        onClick={handleElementEvent}
-      ></rect>
-      <ellipse
-        className="interface"
-        id="button10"
-        data-value='10'
-        cx="300"
-        cy="100"
-        rx="250"
-        ry="150"
-        fill="#c9c9c9"
-        onClick={handleElementEvent}
-        onMouseEnter={handleElementHover}
-        onMouseLeave={handleElementLeave}
-      ></ellipse>
-      <ellipse
-        className="interface"
-        id="button15"
-        data-value='15'
-        cx="300"
-        cy="100"
-        rx="160"
-        fill="#878787"
-        onClick={handleElementEvent}
-        onMouseEnter={handleElementHover}
-        onMouseLeave={handleElementLeave}
-      ></ellipse>
-      <circle
-        className="interface"
-        id="button25"
-        data-value='25'
-        cx="280"
-        cy="100"
-        r="40"
-        fill="black"
-        onClick={handleElementEvent}
-      ></circle>
-      <circle className="interface" id="target" cx="-330" cy="-100" r="4" fill="red"></circle>
-      <text x="5" y="15" fill="darkGrey">
-        5
-      </text>
-      <text x="272" y="90" fill="white">
-        25
-      </text>
-      <text x="180" y="65" fill="lightGrey">
-        15
-      </text>
-      <text x="90" y="43" fill="#606060">
-        10
-      </text>
-    </svg>
-    <hr />
-    </div>
+        <span>
+          Hello, {name},
+          <br />
+          <p>{question}, {lastIndex}</p>
+        </span>
+        <svg className="col-md-12 col-sm-12" height="200">
+          {dataValues.map((value, index) => (
+            <React.Fragment key={index}>
+              {index === 0 && (
+                <rect
+                  className="interface"
+                  id={`button${value}`}
+                  data-value={value}
+                  width="100%"
+                  height="100%"
+                  fill="#383838"
+                  onClick={handleElementEvent}
+                ></rect>
+              )}
+              {index > 0 && index < lastIndex && (
+                <ellipse
+                  className="interface"
+                  id={`button${value}`}
+                  data-value={value}
+                  cx={cx}
+                  cy={cy}
+                  rx={250 - index * 60}
+                  ry={150 - index * 20}
+                  fill={index % 2 === 0 ? '#c9c9c9' : '#878787'}
+                  onClick={handleElementEvent}
+                  onMouseEnter={handleElementHover}
+                  onMouseLeave={handleElementLeave}
+                ></ellipse>
+              )}
+              {index === lastIndex && (
+                <circle
+                  className="interface"
+                  id={`button${value}`}
+                  data-value={value}
+                  cx="290"
+                  cy="100"
+                  r={30}
+                  // fill={index % 2 === 0 ? '#c9c9c9' : '#878787'}
+                  fill="black"
+                  onClick={handleElementEvent}
+                ></circle>
+              )}
+              <text x={index * 90 + 5} y={index * 11 + 15} fill="darkGrey">
+                {value}, {index}
+              </text>
+            </React.Fragment>
+          ))}
+
+          <circle className="interface" id="target" cx="300" cy="110" r="4" fill="red"></circle>
+          {dataValues.map((value, index) => (
+            <React.Fragment key={index}>
+              <text
+                key={`text${index}`}
+                x={cx - 0.9*(250 - index * 60)} // Adjusted x position for text
+                y={.55*index/lastIndex * cy + 50} // Fixed y position for text
+                // fill="red"
+                // fill={index % 2 === 0 ? '#c9c9c9' : 'black'}
+                fill={index === lastIndex ? 'red' : (index % 2 === 0 ? '#878787' : '#c9c9c9')}
+              >
+                {value}
+              </text>
+            </React.Fragment>
+          ))}
+          <hr />
+        </svg>
+      </div>
     )
   }
 
-  
+
   handleClick = (event: React.MouseEvent<SVGElement>) => {
     const clickedElement = event.target as SVGElement;
     const elementId = clickedElement.id;
-  
+
     // Check if the clicked element has a 'data-value' attribute before retrieving it
     const customDataValue = clickedElement.getAttribute('data-value');
-  
-    console.log("Clicked element ID: " + elementId);
+
+    // console.log("Clicked element ID: " + elementId);
     Streamlit.setComponentValue(customDataValue);
   };
 
-  // handleElementClick = () => {
-    handleElementClick = (elementId: string) => {
+  handleElementClick = (elementId: string) => {
     // Handle the click event for the clicked element
     // console.log(`Clicked element with ID: ${elementId}`);
     // You can perform any additional actions here based on the elementId
-  
+
     // If you need to access the clicked element, you can use the elementId
     const clickedElement = document.getElementById(elementId);
     // You can perform additional actions with the clicked element if needed
-    console.log(clickedElement);
     // If you want to update the state based on the clicked element, you can do so here
     // For example, you can increment a counter or change the appearance of the element
-  
+
     // If you need to communicate with Streamlit and pass data back to Python, you can do so as well
     Streamlit.setComponentValue(elementId);
   };

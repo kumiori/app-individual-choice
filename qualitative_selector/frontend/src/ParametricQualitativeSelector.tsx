@@ -21,6 +21,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     const name = this.props.args["name"]
     const question = this.props.args["question"]
     const areas = this.props.args["areas"]
+    const dataValues: number[] = this.props.args['data_values'];
 
     // const { theme } = this.props
     // const style: React.CSSProperties = {}
@@ -32,7 +33,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     function handleElementHover(event: React.MouseEvent<SVGElement>): void {
       const hoveredElement = event.target as SVGElement;
       const customDataValue = hoveredElement.getAttribute('data-value');
-      const blurRadius = customDataValue ? 20 / Number(customDataValue) : 0; // You can adjust this formula as needed
+      const blurRadius = customDataValue ? 100 / Number(customDataValue) : 0; // You can adjust this formula as needed
       hoveredElement.style.filter = `blur(${blurRadius}px)`;
     }
     function handleElementEvent(event: React.MouseEvent<SVGElement>): void {
@@ -40,11 +41,11 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
       const elementId = clickedElement.id;
       const customDataValue = clickedElement.getAttribute('data-value');
 
-      console.log("Clicked element ID: " + elementId);
+      // console.log("Clicked element ID: " + elementId);
       Streamlit.setComponentValue(customDataValue);
     }
 
-    const renderActiveAreas = (numberOfActiveAreas: number) => {
+    const renderActiveAreas = (numberOfActiveAreas: number, dataValues: number[]) => {
       const activeAreas = [];
 
       for (let i = 0; i < numberOfActiveAreas; i++) {
@@ -56,7 +57,6 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
         };
 
         if (i === 0) {
-          // Customize the first active area (rect)
           areaProps.width = '100%';
           areaProps.height = '100%';
           areaProps.fill = '#383838';
@@ -66,13 +66,11 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
           areaProps.ry = 250;
           areaProps.fill = '#444444'; // Alternate colors
         } else {
-          // Customize other active areas (ellipses, circles, etc.)
-          // Example: ellipse
           areaProps.cx = 300;
           areaProps.cy = 100;
-          areaProps.rx = 250 - i * 60; // Customize ellipse properties
-          areaProps.ry = 150 - i * 20;
-          areaProps.fill = i % 2 === 0 ? '#c9c9c9' : '#878787'; // Alternate colors
+          areaProps.rx = 250 - 2*i * 60; // Customize ellipse properties
+          areaProps.ry = 150 - 2*i * 20;
+          areaProps.fill = i % 2 === 0 ? '#000000' : '#878787'; // Alternate colors
           areaProps.onMouseEnter = handleElementHover;
           areaProps.onMouseLeave = handleElementLeave;
         }
@@ -85,15 +83,62 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
 
       return activeAreas;
     };
+
+    function displayEllipses(areas: number, dataValues: number[]) {
+      const radius = 20; // Adjust as needed
+      const spacing = 30; // Adjust as needed
+      const centerX = 100; // Adjust as needed
+      const centerY = 100; // Adjust as needed
+    
+      const ellipses = dataValues.map((value, index) => {
+        const areaProps: React.SVGProps<SVGEllipseElement> & { 'data-value': number } = {
+          className: 'interface',
+          'data-value': value,
+          onClick: handleElementEvent,
+        };
+
+        if (index === 0) {
+          areaProps.width = '100%';
+          areaProps.height = '100%';
+          areaProps.fill = '#383838';
+          areaProps.cx = 300;
+          areaProps.cy = 100;
+          areaProps.rx = 450; // Customize ellipse properties
+          areaProps.ry = 250;
+          areaProps.fill = '#444444'; // Alternate colors
+        } else {
+          areaProps.cx = 300;
+          areaProps.cy = 100;
+          areaProps.rx = 250 - 2*index * 60; // Customize ellipse properties
+          areaProps.ry = 150 - 2*index * 20;
+          areaProps.fill = index % 2 === 0 ? '#000000' : '#878787'; // Alternate colors
+          areaProps.onMouseEnter = handleElementHover;
+          areaProps.onMouseLeave = handleElementLeave;
+        }
+
+        return (
+          <ellipse key={index} {...areaProps} />
+        );
+      }
+      );
+    
+      return (
+        <svg className="col-md-12 col-sm-12" height="200" xmlns="http://www.w3.org/2000/svg">
+          {ellipses}
+        </svg>
+      );
+    }
+
     return (
       <div id="happy">
         <span>
-          Hello, {name}!
+          For you to decide, {name}!
           <p>Beware: boundaries always fade...</p>
           <p>Make a choice, below</p>
         </span>
         <svg className="col-md-12 col-sm-12" height="200">
-          {renderActiveAreas(areas)}
+          {/* {renderActiveAreas(areas, dataValues)} */}
+          {displayEllipses(areas, dataValues)}
         </svg>
         <hr />
       </div>
@@ -108,20 +153,16 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     // Check if the clicked element has a 'data-value' attribute before retrieving it
     const customDataValue = clickedElement.getAttribute('data-value');
 
-    console.log("Clicked element ID: " + elementId);
+    // console.log("Clicked element ID: " + elementId);
     Streamlit.setComponentValue(customDataValue);
   };
 
   // handleElementClick = () => {
   handleElementClick = (elementId: string) => {
-    // Handle the click event for the clicked element
-    // console.log(`Clicked element with ID: ${elementId}`);
-    // You can perform any additional actions here based on the elementId
-
     // If you need to access the clicked element, you can use the elementId
     const clickedElement = document.getElementById(elementId);
     // You can perform additional actions with the clicked element if needed
-    console.log(clickedElement);
+    // console.log(clickedElement);
     // If you want to update the state based on the clicked element, you can do so here
     // For example, you can increment a counter or change the appearance of the element
 
@@ -150,10 +191,4 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
   }
 }
 
-// "withStreamlitConnection" is a wrapper function. It bootstraps the
-// connection between your component and the Streamlit app, and handles
-// passing arguments from Python -> Component.
-//
-// You don't need to edit withStreamlitConnection (but you're welcome to!).
-// export default withStreamlitConnection(QualitativeParametricSelector)
 export default QualitativeParametricSelector

@@ -65,10 +65,7 @@ class Dichotomy extends StreamlitComponentBase<State> {
             const clickedElement = event.target as SVGElement;
             const x = event.nativeEvent.offsetX;
             const y = event.nativeEvent.offsetY;
-            console.log("");
-            console.log("Clicked element coordinates:", x, y);
             const computedStyle = window.getComputedStyle(clickedElement);
-            console.log("clickedElement:", clickedElement);
 
             const rect = clickedElement.getBoundingClientRect();
 
@@ -82,16 +79,15 @@ class Dichotomy extends StreamlitComponentBase<State> {
             const rotationAngle = getRotationAngle(transformValue);
             const rotatedClickPoint = inverseRotatePoint(x, y, rotationAngle);
             // const distanceToBoundary = distanceToRectangleBoundary(rotatedClickPoint.x, rotatedClickPoint.y, absoluteWidth, absoluteHeight);
-            const _offset = 15;
+            const _offset = 0;
             const _value = (rotatedClickPoint.x-_offset-absoluteX)/absoluteWidth;
-            console.log("relative value:", _value);
 
             const elementId = clickedElement.id;
             const customDataValue = _value.toFixed(2);
       
-            console.log("Clicked element ID: " + elementId);
             Streamlit.setComponentValue(customDataValue);
 
+            // console.log("");
             // console.log("Absolute Width:", absoluteWidth);
             // console.log("Absolute Height:", absoluteHeight);
             // console.log(clickedElement)
@@ -106,6 +102,11 @@ class Dichotomy extends StreamlitComponentBase<State> {
             // console.log("projectedClickPoint:", rotatedClickPoint.x-absoluteX);
             // console.log("relative projectedClickPoint:", (rotatedClickPoint.x-_offset-absoluteX)/absoluteWidth);
             // console.log("Distance to boundary:", distanceToBoundary);
+            // console.log("Clicked element coordinates:", x, y);
+            // console.log("clickedElement:", clickedElement);
+            // console.log("relative value:", _value);
+            // console.log("Clicked element ID: " + elementId);
+
 
         }
 
@@ -113,13 +114,13 @@ class Dichotomy extends StreamlitComponentBase<State> {
             const clickedElement = event.target as SVGElement;
             const x = event.nativeEvent.offsetX;
             const y = event.nativeEvent.offsetY;
-            console.log("Clicked limit element:", x, y);
             const elementId = clickedElement.id;
             const customDataValue = clickedElement.getAttribute('data-value');
       
-            console.log("Clicked element ID: " + elementId);
             Streamlit.setComponentValue(customDataValue);
-            console.log("Clicked element value: " + customDataValue)
+            // console.log("Clicked limit element:", x, y);
+            // console.log("Clicked element ID: " + elementId);
+            // console.log("Clicked element value: " + customDataValue)
         }
         
         return (
@@ -129,11 +130,11 @@ class Dichotomy extends StreamlitComponentBase<State> {
                     <br />
                     <p>{question}</p>
                 </span>
-                <svg className="col-md-12 col-sm-12" height="200" >
+                <svg className="col-md-12 col-sm-12" height="200" style={{ border: '1px solid #000', paddingLeft: 0 }}>
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{ stopColor: '#000' }} />
-                            <stop offset="100%" style={{ stopColor: '#eee' }} />
+                            <stop offset="100%" style={{ stopColor: '#fff' }} />
                         </linearGradient>
                     </defs>
                     
@@ -142,7 +143,7 @@ class Dichotomy extends StreamlitComponentBase<State> {
                         height="200%"
                         fill="#000" // Solid color for the first rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the first rectangle
-                        y="-200"  // Adjusted y position for the third rectangle
+                        y="-100"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='0'
                     />
@@ -159,9 +160,9 @@ class Dichotomy extends StreamlitComponentBase<State> {
                         width="40%"
                         height="300%"
                         x="59.8%" // Shift the third rectangle by 60% of the width
-                        fill="#eee" // Solid color for the second rectangle
+                        fill="#fff" // Solid color for the second rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
-                        y="-400"  // Adjusted y position for the third rectangle
+                        y="-200"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='1'
                     />

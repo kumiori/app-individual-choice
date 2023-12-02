@@ -10,21 +10,24 @@ rows = conn.query("*", table="address_book", ttl="10m").execute()
 
 st.text("Hello")
 
-_my_component = components.declare_component(
+_qualitative_selector = components.declare_component(
     "qualitative",
     url='http://localhost:3001'
 )
 
 
-def my_component(name, greeting="Hello", key=None):
-    return _my_component(name=name, greeting=greeting, default=0, key=key)
-
+def dichotomy(name, question, key=None):
+    return _qualitative_selector(component = "dichotomy",
+    name = name,
+    key=key,
+    question = question)
 
 # Print results.
 for row in rows.data:
     st.markdown(f"{row['name']} has a :{row['animal']}: id {row['id']}")
 
-return_value = my_component(name = "Mai", key = "Ahoi")
+
+return_value = dichotomy(name = "Spirit", question = "Boundaries matter, see below...", key = "boundaries")
 st.write('You picked me:', return_value)
 
 confirmation = st.button("Confirm and Store in Database")
