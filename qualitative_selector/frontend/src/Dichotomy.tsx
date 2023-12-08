@@ -16,7 +16,10 @@ class Dichotomy extends StreamlitComponentBase<State> {
     public render = (): ReactNode => {
         const name = this.props.args["name"]
         const question = this.props.args["question"]
-        const rotationAngle = 0; // Specify the desired rotation angle in degrees
+        const rotationAngle = this.props.args["rotationAngle"]; // Specify the desired rotation angle in degrees
+        const gradientWidth = this.props.args["gradientWidth"]; // Specify the desired rotation angle in degrees
+        // const rotationAngle = 30; // Specify the desired rotation angle in degrees
+        // const gradientWidth = 40; // Specify the desired rotation angle in degrees
 
         function inverseRotatePoint(x: number, y: number, rotationAngle: number): { x: number; y: number } {
             // Convert rotation angle to radians
@@ -140,29 +143,32 @@ class Dichotomy extends StreamlitComponentBase<State> {
                     
                     <rect
                         width="40%"
-                        height="200%"
+                        height="300%"
                         fill="#000" // Solid color for the first rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the first rectangle
-                        y="-100"  // Adjusted y position for the third rectangle
+                        y="-200"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='0'
                     />
                     <rect
-                        width="20%"
+                        // width="20%"
+                        width={gradientWidth ? `${gradientWidth/2}%` : '0'}
                         height="300%"
-                        x="39.9%" // Shift the second rectangle by 30% of the width
+                        // x="40%" // Shift the second rectangle by 30% of the width
+                        x={gradientWidth ? `${gradientWidth}%` : '0'}  // Adjusted x position based on the width
                         fill="url(#gradient)" // Gradient background for the third rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the second rectangle
                         y="-300"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickTransition(e)}
                     />
                     <rect
-                        width="40%"
+                        width="100%"
                         height="300%"
-                        x="59.8%" // Shift the third rectangle by 60% of the width
+                        // x="60%" // Shift the third rectangle by 60% of the width
+                        x={gradientWidth ? `${gradientWidth * 3/2-.01}%` : '0'}  // Adjusted x position based on the width
                         fill="#fff" // Solid color for the second rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
-                        y="-200"  // Adjusted y position for the third rectangle
+                        y="-600"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='1'
                     />
