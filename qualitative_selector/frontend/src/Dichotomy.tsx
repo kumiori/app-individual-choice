@@ -18,8 +18,12 @@ class Dichotomy extends StreamlitComponentBase<State> {
         const question = this.props.args["question"]
         const rotationAngle = this.props.args["rotationAngle"]; // Specify the desired rotation angle in degrees
         const gradientWidth = this.props.args["gradientWidth"]; // Specify the desired rotation angle in degrees
-        // const rotationAngle = 30; // Specify the desired rotation angle in degrees
-        // const gradientWidth = 40; // Specify the desired rotation angle in degrees
+        // const shift = this.props.args["shift"]; // Specify the desired rotation angle in degrees
+        const invertColors = this.props.args["invert"] ?? false;
+        const shift = this.props.args["shift"] ?? false;
+        // const shift = 40;
+        const color1 = invertColors ? '#fff' : '#000';
+        const color2 = invertColors ? '#000' : '#fff';
 
         function inverseRotatePoint(x: number, y: number, rotationAngle: number): { x: number; y: number } {
             // Convert rotation angle to radians
@@ -136,39 +140,39 @@ class Dichotomy extends StreamlitComponentBase<State> {
                 <svg className="col-md-12 col-sm-12" height="200" style={{ border: '1px solid #000', paddingLeft: 0 }}>
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style={{ stopColor: '#000' }} />
-                            <stop offset="100%" style={{ stopColor: '#fff' }} />
+                            <stop offset="0%" style={{ stopColor: color1 }} />
+                            <stop offset="100%" style={{ stopColor: color2 }} />
                         </linearGradient>
                     </defs>
                     
                     <rect
-                        width="40%"
-                        height="300%"
-                        fill="#000" // Solid color for the first rectangle
+                        width="100%"
+                        height="400%"
+                        fill={color1}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the first rectangle
-                        y="-200"  // Adjusted y position for the third rectangle
+                        y="-300"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='0'
                     />
                     <rect
                         // width="20%"
                         width={gradientWidth ? `${gradientWidth/2}%` : '0'}
-                        height="300%"
+                        height="500%"
                         // x="40%" // Shift the second rectangle by 30% of the width
-                        x={gradientWidth ? `${gradientWidth}%` : '0'}  // Adjusted x position based on the width
+                        x={gradientWidth ? `${gradientWidth - shift}%` : '0'}  // Adjusted x position based on the width
                         fill="url(#gradient)" // Gradient background for the third rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the second rectangle
-                        y="-300"  // Adjusted y position for the third rectangle
+                        y="-600"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickTransition(e)}
                     />
                     <rect
                         width="100%"
-                        height="300%"
+                        height="500%"
                         // x="60%" // Shift the third rectangle by 60% of the width
-                        x={gradientWidth ? `${gradientWidth * 3/2-.01}%` : '0'}  // Adjusted x position based on the width
-                        fill="#fff" // Solid color for the second rectangle
+                        x={gradientWidth ? `${gradientWidth * 3/2-.1}%` : '0'}  // Adjusted x position based on the width
+                        fill={color2}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
-                        y="-600"  // Adjusted y position for the third rectangle
+                        y="-500"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='1'
                     />

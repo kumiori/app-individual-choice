@@ -9,11 +9,16 @@ _qualitative_selector = components.declare_component(
 )
 
 
-def dichotomy(name, question, key=None):
+def dichotomy(name, question, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
     return _qualitative_selector(component = "dichotomy",
     name = name,
     key=key,
-    question = question)
+    question = question,
+    rotationAngle = rotationAngle,
+    gradientWidth = gradientWidth,
+    invert = invert,
+    shift = shift
+    )
 
 
 def qualitative(name, question, data_values, key=None):
@@ -28,20 +33,45 @@ def qualitative_parametric(name, question, areas, key=None):
     name = name,
     key=key,
     areas = areas,
-    data_values  = [1, 2, 10],
+    data_values  = [1, 3, 10],
     question = question)
 
 return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "boundaries")
-st.write('You picked me:', return_value)
+st.write('You picked', return_value)
+
+# return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "thickness",
+#                          gradientWidth=10)
+# st.write('You picked', return_value)
+
+return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "perspective",
+                         rotationAngle=60,
+                         gradientWidth=10)
+
+st.write('You picked', return_value)
+
+return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "invert",
+                         gradientWidth=50,
+                         rotationAngle=30,
+                         invert=True,
+                        #  invert=False,
+                         )
+st.write('You picked', return_value)
 
 
-return_value = qualitative(name = "Spirit", question = "How tricky is Quantity?", data_values = [1, 2, 10, 11, 25], key = "qualitative")
-st.write('You picked me:', return_value)
+return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "nuances",
+                         gradientWidth=100,
+                         shift = 100)
+st.write('You picked', return_value)
 
 
 return_value = qualitative_parametric(name = "Spirit",
      question = "Boundaries matter, see below...",
      areas = 3,
      key = "parametric")
-st.write('You picked me:', return_value)
+st.write('You picked', return_value)
+
+
+
+return_value = qualitative(name = "Spirit", question = "How tricky is Quantity?", data_values = [1, 10, 100, 0.1], key = "qualitative")
+st.write('You picked', return_value)
 

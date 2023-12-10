@@ -22,7 +22,7 @@ _my_component = components.declare_component(
 
 # Initialize a session state object to store responses
 if "session_state" not in st.session_state:
-    st.session_state.session_state = {
+    st.session_state = {
         "pizza_response": None,
         "ice_cream_response": None,
         "component_response": None,
@@ -45,7 +45,7 @@ with st.expander("Some questions:", expanded=True):
         if pages.current == 0:
             st.write("Do you like pizza?")
             pizza_response = st.radio("Pizza?", options=["Yes", "No"])
-            st.session_state.session_state["pizza_response"] = pizza_response
+            st.session_state["pizza_response"] = pizza_response
 
         elif pages.current == 1:
             st.write("How do you feel about ice cream?")
@@ -53,18 +53,18 @@ with st.expander("Some questions:", expanded=True):
                 "Ice Cream?",
                 options=["Love it!", "It's alright", "Not a fan"]
             )
-            st.session_state.session_state["ice_cream_response"] = ice_cream_response
+            st.session_state["ice_cream_response"] = ice_cream_response
 
         elif pages.current == 2:
             st.write("How do you feel about numbers?")
             component_value = my_component(name = "Mai", key = "Ahoi")
-            st.session_state.session_state["component_response"] = component_value
+            st.session_state["component_response"] = component_value
 
 # Display the collected responses
 responses = {
-    "pizza_response": st.session_state.session_state.get("pizza_response"),
-    "ice_cream_response": st.session_state.session_state.get("ice_cream_response"),
-    "component_response": st.session_state.session_state.get("component_response")
+    "pizza_response": st.session_state.get("pizza_response"),
+    "ice_cream_response": st.session_state.get("ice_cream_response"),
+    "component_response": st.session_state.get("component_response")
 }
 st.write("Collected Responses:")
 st.json(responses)

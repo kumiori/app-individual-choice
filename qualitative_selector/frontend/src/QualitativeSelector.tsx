@@ -48,7 +48,7 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
       const hoveredElement = event.target as SVGElement;
       // Example: Add a subtle shadow to the element on hover
       const customDataValue = hoveredElement.getAttribute('data-value');
-      const blurRadius = customDataValue ? 50 / Number(customDataValue) : 0; // You can adjust this formula as needed
+      const blurRadius = customDataValue ? 200 / Number(customDataValue) : 0; // You can adjust this formula as needed
 
       hoveredElement.style.filter = `blur(${blurRadius}px)`;
     }
@@ -57,16 +57,17 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
       const elementId = clickedElement.id;
       const customDataValue = clickedElement.getAttribute('data-value');
 
-      console.log("Clicked element ID: " + elementId);
       Streamlit.setComponentValue(customDataValue);
     }
-
     return (
       <div id="happy">
         <span>
           Hello, {name},
           <br />
-          <p>{question}, {lastIndex}</p>
+
+          <p>{question} Let's find {lastIndex+1} tiers</p>
+          <p>Data Values: {dataValues.map((value, index) => index === lastIndex ? value : `${value}, `)}</p>
+
         </span>
         <svg className="col-md-12 col-sm-12" height="200">
           {dataValues.map((value, index) => (
@@ -110,9 +111,9 @@ class QualitativeSelector extends StreamlitComponentBase<State> {
                   onClick={handleElementEvent}
                 ></circle>
               )}
-              <text x={index * 90 + 5} y={index * 11 + 15} fill="darkGrey">
-                {value}, {index}
-              </text>
+              {/* <text x={index * 90 + 5} y={index * 11 + 15} fill="darkGrey"> */}
+                {/* {value}, {index} */}
+              {/* </text> */}
             </React.Fragment>
           ))}
 

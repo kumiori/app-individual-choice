@@ -1,8 +1,25 @@
 import streamlit as st
 import streamlit_survey as ss
 
-st.set_page_config(page_title="Home", page_icon="🍊")
+# st.set_page_config(page_title="Home", page_icon="🍊")
 
+st.set_page_config(
+    # page_title="Collective Governance",
+    # page_icon="👀",
+    initial_sidebar_state="collapsed"
+)
+
+
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
 st.header("Home 😉")
 
 st.markdown('''
