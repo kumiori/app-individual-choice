@@ -22,6 +22,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     const question = this.props.args["question"]
     const areas = this.props.args["areas"]
     const dataValues: number[] = this.props.args['data_values'];
+    const lastIndex = dataValues.length-1;
 
     // const { theme } = this.props
     // const style: React.CSSProperties = {}
@@ -33,7 +34,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     function handleElementHover(event: React.MouseEvent<SVGElement>): void {
       const hoveredElement = event.target as SVGElement;
       const customDataValue = hoveredElement.getAttribute('data-value');
-      const blurRadius = customDataValue ? 100 / Number(customDataValue) : 0; // You can adjust this formula as needed
+      const blurRadius = customDataValue ? 40 / Number(customDataValue) : 0; // You can adjust this formula as needed
       hoveredElement.style.filter = `blur(${blurRadius}px)`;
     }
     function handleElementEvent(event: React.MouseEvent<SVGElement>): void {
@@ -134,7 +135,7 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
         <span>
           For you to decide, {name}!
           <p>Beware: boundaries always fade...</p>
-          <p>Make a choice, below</p>
+          <p>Make a move, pick your choice among: {dataValues.map((value, index) => index === lastIndex ? value : `${value}, `)}</p>
         </span>
         <svg className="col-md-12 col-sm-12" height="200">
           {/* {renderActiveAreas(areas, dataValues)} */}

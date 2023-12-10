@@ -15,7 +15,7 @@ def get_coordinates(api_key, city):
 # Replace 'your_api_key' with your actual OpenCage API key
 city_name = 'New York'  # Replace with the desired city name
 
-coordinates = get_coordinates(st.secrets("OPENCAGE_KEY"), city_name)
+coordinates = get_coordinates(st.secrets.connections.supabase["OPENCAGE_KEY"], city_name)
 st.write(coordinates)
 
 if coordinates:

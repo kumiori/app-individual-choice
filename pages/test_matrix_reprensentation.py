@@ -98,3 +98,128 @@ fig = px.scatter(x=np.arange(matrix_size).repeat(matrix_size),
 
 _scatter_layout(fig)
 st.plotly_chart(fig)
+
+
+
+
+matrix_size = 15  # Adjust the matrix size as needed
+
+# Define the probabilities for each outcome
+probabilities = [0.6, 0.3, 0.1]
+
+# Generate a random matrix using the specified probabilities
+matrix_data = np.random.choice([0, 1, np.random.uniform(0, 1)], size=(matrix_size, matrix_size), p=probabilities)
+
+# Flatten the matrix for plotting
+flatten_matrix_data = matrix_data.flatten()
+
+# Plot the scatter plot
+fig = px.scatter(
+    x=np.arange(matrix_size).repeat(matrix_size),
+    y=np.tile(np.arange(matrix_size), matrix_size),
+    size=np.full_like(flatten_matrix_data, 10),
+    size_max=30,
+    color=flatten_matrix_data,
+    color_continuous_scale="blackbody",
+    title="Matrix Visualization",
+    hover_name=[f"({i + 1}, {j + 1})" for i in range(matrix_size) for j in range(matrix_size)]
+)
+
+# Show the plot
+# fig.show()
+
+_scatter_layout(fig)
+st.plotly_chart(fig)
+
+
+sorted_matrix_data = sort_matrix(matrix_data)
+
+fig = px.scatter(x=np.arange(matrix_size).repeat(matrix_size),
+                 y=np.tile(np.arange(matrix_size), matrix_size),
+                 size=np.array([[10. for j in range(matrix_size)] for i in range(matrix_size) ]).flatten(),
+                #  size=matrix_data.flatten(),
+                #  size=30,
+                 size_max=30,
+                 color=sorted_matrix_data.flatten(),
+                 color_continuous_scale="blackbody",
+                 title="Matrix Visualization",
+                 hover_name=[f"({i + 1}, {j + 1})" for i in range(matrix_size) for j in range(matrix_size)])
+
+_scatter_layout(fig)
+st.plotly_chart(fig)
+
+
+
+# Set a common random seed for reproducibility
+np.random.seed(42)
+
+# Function to plot histograms
+# def plot_distribution(data, title):
+#     plt.figure(figsize=(8, 6))
+#     sns.histplot(data, kde=True)
+#     plt.title(title)
+#     plt.xlabel("Value")
+#     plt.ylabel("Probability Density")
+#     st.pyplot(plt)
+
+
+# Function to plot histograms
+def plot_distribution(data, title, distribution_formula):
+    fig = px.histogram(data, nbins=50, title=title)
+    st.plotly_chart(fig)
+    st.latex(f'''f(x) = {distribution_formula}''')
+
+# Streamlit App
+st.title("Distribution Plots")
+
+# Number of distributions
+num_distributions = 5
+st.latex(r'''
+    a + ar + a r^2 + a r^3 + \cdots + a r^{n-1} =
+    \sum_{k=0}^{n-1} ar^k =
+    a \left(\frac{1-r^{n}}{1-r}\right)
+    ''')
+
+# Loop through distributions
+for i in range(num_distributions):
+    col1, col2 = st.columns(2)  # Create two columns
+
+    # 1. Normal Distribution
+    if i == 0:
+        st.header("Normal Distribution")
+        mu, sigma = st.slider("Select parameters for Normal Distribution", 0.1, 10.0, (0.0, 1.0))
+        st.write("mu =", mu, "sigma =", sigma)
+        normal_data = np.random.normal(mu, sigma, 1000)
+        plot_distribution(normal_data, "Normal Distribution", f"\\frac{1}{{\sqrt{{2\pi \sigma^2}}}} e^{{-\\frac{{(x - \mu)^2}}{{2\sigma^2}}}}")
+
+    # 2. Exponential Distribution
+    elif i == 1:
+        st.header("Exponential Distribution")
+        scale = st.slider("Select scale for Exponential Distribution", 0.1, 10.0, 1.0)
+        st.write("scale =", scale)
+        exponential_data = np.random.exponential(scale, 1000)
+        plot_distribution(exponential_data, "Exponential Distribution", "\\lambda e^{-\lambda x}")
+
+    # 3. Uniform Distribution
+    elif i == 2:
+        st.header("Uniform Distribution")
+        a, b = st.slider("Select parameters for Uniform Distribution", 0.0, 5.0, (0.0, 1.0))
+        st.write("a =", a, "b =", b)
+        uniform_data = np.random.uniform(a, b, 1000)
+        plot_distribution(uniform_data, "Uniform Distribution", "\\frac{1}{{b-a}}")
+
+    # 4. Poisson Distribution
+    elif i == 3:
+        st.header("Poisson Distribution")
+        lam = st.slider("Select lambda for Poisson Distribution", 1, 10, 3)
+        st.write("lambda =", lam)
+        poisson_data = np.random.poisson(lam, 1000)
+        plot_distribution(poisson_data, "Poisson Distribution", "\\frac{e^{-\lambda} \lambda^x}{x!}")
+
+    # 5. Beta Distribution
+    elif i == 4:
+        st.header("Beta Distribution")
+        alpha, beta = st.slider("Select parameters for Beta Distribution", 0.1, 10.0, (2.0, 5.0))
+        st.write("alpha =", alpha, "beta =", beta)
+        beta_data = np.random.beta(alpha, beta, 1000)
+        plot_distribution(beta_data, "Beta Distribution", "\\frac{x^{\\alpha-1}(1-x)^{\\beta-1}}{B(\\alpha, \\beta)}")
