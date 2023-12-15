@@ -12,13 +12,18 @@ def get_coordinates(api_key, city):
     else:
         return None
 
-# Replace 'your_api_key' with your actual OpenCage API key
-city_name = 'New York'  # Replace with the desired city name
+def main():
+    # Replace 'your_api_key' with your actual OpenCage API key
+    city_name = 'New York'  # Replace with the desired city name
 
-coordinates = get_coordinates(st.secrets.connections.supabase["OPENCAGE_KEY"], city_name)
-st.write(coordinates)
+    coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], city_name)
+    st.write(coordinates)
 
-if coordinates:
-    st.write(f"Coordinates for {city_name}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
-else:
-    st.write(f"Coordinates not found for {city_name}")
+    if coordinates:
+        st.write(f"Coordinates for {city_name}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+    else:
+        st.write(f"Coordinates not found for {city_name}")
+        
+    
+if __name__ == "__main__":
+    main()

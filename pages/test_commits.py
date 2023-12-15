@@ -5,6 +5,7 @@ import random
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 def fetch_xml_data(url):
     try:
@@ -90,8 +91,29 @@ if xml_data:
     })
 
     # Create the plot
+    # fig = px.line(df, x='Time', y='Signal', labels={'Signal': 'Amplitude'})
+    # fig.update_layout(title_text='Heartbeat or Brain Signal', xaxis_title='Time', yaxis_title='Amplitude')
+
+    # Create the plot
     fig = px.line(df, x='Time', y='Signal', labels={'Signal': 'Amplitude'})
-    fig.update_layout(title_text='Heartbeat or Brain Signal', xaxis_title='Time', yaxis_title='Amplitude')
+    
+    # Get the timestamps of the commits
+    commit_timestamps = [pd.to_datetime(commit['updated']).timestamp() for commit in commits]
+
+    # Rescale the commit dates by the length of a year
+    year_length = 365 * 24 * 60 * 60  # seconds in a year
+    rescaled_commit_times = [(timestamp - min(commit_timestamps)) / year_length for timestamp in commit_timestamps]
+
+    # Draw red dots at the rescaled commit times
+    for rescaled_time in rescaled_commit_times:
+        fig.add_trace(go.Scatter(x=[rescaled_time], y=[0], mode='markers', marker=dict(color='red')))
+
+    # Update layout to remove axis numbers and labels
+    fig.update_layout(
+        showlegend=False,
+        xaxis=dict(showline=False, showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showline=False, showgrid=False, zeroline=False, showticklabels=False),
+    )
 
     # Display the plot
     st.plotly_chart(fig)
