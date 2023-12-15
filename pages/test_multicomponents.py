@@ -36,42 +36,48 @@ def qualitative_parametric(name, question, areas, key=None):
     data_values  = [1, 3, 10],
     question = question)
 
-return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "boundaries")
-st.write('You picked', return_value)
+def main():
 
-# return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "thickness",
-#                          gradientWidth=10)
-# st.write('You picked', return_value)
+    return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "boundaries")
+    st.write('You picked', return_value)
 
-return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "perspective",
-                         rotationAngle=60,
-                         gradientWidth=10)
+    # return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "thickness",
+    #                          gradientWidth=10)
+    # st.write('You picked', return_value)
 
-st.write('You picked', return_value)
+    return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "perspective",
+                            rotationAngle=60,
+                            gradientWidth=10)
 
-return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "invert",
-                         gradientWidth=50,
-                         rotationAngle=30,
-                         invert=True,
-                        #  invert=False,
-                         )
-st.write('You picked', return_value)
+    st.write('You picked', return_value)
 
-
-return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "nuances",
-                         gradientWidth=100,
-                         shift = 100)
-st.write('You picked', return_value)
+    return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "invert",
+                            gradientWidth=50,
+                            rotationAngle=30,
+                            invert=True,
+                            #  invert=False,
+                            )
+    st.write('You picked', return_value)
 
 
-return_value = qualitative_parametric(name = "Spirit",
-     question = "Boundaries matter, see below...",
-     areas = 3,
-     key = "parametric")
-st.write('You picked', return_value)
+    return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "nuances",
+                            gradientWidth=100,
+                            shift = 100)
+    st.write('You picked', return_value)
+
+
+    return_value = qualitative_parametric(name = "Spirit",
+        question = "Boundaries matter, see below...",
+        areas = 3,
+        key = "parametric")
+    st.write('You picked', return_value)
 
 
 
-return_value = qualitative(name = "Spirit", question = "How tricky is Quantity?", data_values = [1, 10, 100, 0.1], key = "qualitative")
-st.write('You picked', return_value)
+    return_value = qualitative(name = "Spirit", question = "How tricky is Quantity?", data_values = [1, 10, 100, 0.1], key = "qualitative")
+    st.write('You picked', return_value)
 
+
+# Run the cosmic app
+if __name__ == "__main__":
+    main()
