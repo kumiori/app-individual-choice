@@ -49,9 +49,11 @@ st.title("GitHub Commit Feed Viewer")
 
 # Example GitHub repository XML feed URL
 github_repo_url = "https://github.com/kumiori/mec647/commits/main.atom"
+choice_repo_url = "https://github.com/kumiori/app-individual-choice/commits/main.atom"
 
 # Fetch XML data
 xml_data = fetch_xml_data(github_repo_url)
+xml_choice = fetch_xml_data(choice_repo_url)
 
 # If XML data is successfully fetched, display the commits
 if xml_data:

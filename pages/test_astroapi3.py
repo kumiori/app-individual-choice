@@ -2,6 +2,9 @@ import datetime
 from datetime import date
 from typing import Union
 import streamlit as st
+import pytz
+from datetime import datetime, timedelta
+from timezonefinder import TimezoneFinder
 import sys
 sys.path.append('lib/')
 if 'timezone_offset' not in st.session_state:
@@ -62,3 +65,39 @@ formatted_datetime = combined_datetime_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 # Display the formatted datetime
 st.write("Formatted Datetime:", formatted_datetime)
+
+coordinates = (40.7127281, -74.0060152)
+city_name = 'New York'
+if coordinates:
+    st.write(f"Coordinates for {city_name}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+
+    timezone_finder = TimezoneFinder()
+    timezone_str = timezone_finder.timezone_at(lat=coordinates[0], lng=coordinates[1])
+    
+    st.write(f"Time Zone: {timezone_str}")
+
+    if timezone_str:
+        tz = pytz.timezone(timezone_str)
+        utc_offset = tz.utcoffset(datetime.now())
+        st.write(f"UTC Offset: {utc_offset}")
+else:
+    st.warning("Coordinates not available.")
+    
+if timezone_str:
+    tz = pytz.timezone(timezone_str)
+    utc_offset = tz.utcoffset(datetime.now())
+    offset_hours = utc_offset.seconds // 3600
+    offset_minutes = (utc_offset.seconds % 3600) // 60
+    current_time = datetime.now(tz)
+    st.write(f"Current Time in {city_name}: {current_time.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+    utc_offset = tz.utcoffset(current_time)
+    st.write(f"UTC Offset: {utc_offset}")
+    # Manually format the timezone offset
+    offset_sign = '+' if offset_hours >= 0 else '-'
+    offset_str = f'{offset_sign}{abs(offset_hours):02d}:{abs(offset_minutes):02d}'
+
+    # Format the datetime object
+    formatted_datetime = combined_datetime_utc.strftime(f'%Y-%m-%dT%H:%M:%S{offset_str}')
+
+    st.write(f"Timezone Offset: {offset_str}")
+    st.write("Formatted Datetime:", formatted_datetime)
