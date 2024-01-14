@@ -139,35 +139,240 @@ col1, col2 = st.columns(2)
 with col1:
     st.components.v1.html(html_code, height=700, width=700)
     
-    
-    
-    javascript_code = f"""
-// Gen city data
-const cityData = {cities};
+
+javascript_code = """
+    const VELOCITY = 9; // minutes per frame
+
+    const sunPosAt = dt => {
+      const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
+      const t = solar.century(dt);
+      const longitude = (day - dt) / 864e5 * 360 - 180;
+      return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
+    };
+
+    let dt = +new Date();
+    const solarTile = { pos: sunPosAt(dt) };
+    const timeEl = document.getElementById('time');
+
+    const world = Globe()
+      (document.getElementById('globeViz'))
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+      .backgroundColor('rgb(14, 17, 23)')
+      .tilesData([solarTile])
+      .tileLng(d => d.pos[0])
+      .tileLat(d => d.pos[1])
+      .tileAltitude(0.01)
+      .tileWidth(180)
+      .tileHeight(180)
+      .tileUseGlobeProjection(false)
+      .tileMaterial(() => new THREE.MeshLambertMaterial({ color: '#ffff00', opacity: 0.3, transparent: true }))
+      .tilesTransitionDuration(0);
+
+    // animate time of day
+    requestAnimationFrame(() =>
+      (function animate() {
+        dt += VELOCITY * 60 * 1000;
+        solarTile.pos = sunPosAt(dt);
+        world.tilesData([solarTile]);
+        timeEl.textContent = new Date(dt).toLocaleString();
+        requestAnimationFrame(animate);
+      })()
+    );
+
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 10.6;
+"""
+
+html_code = f"""
+<head>
+<style> body {{ margin: 0em; }} </style>
+<script src="//unpkg.com/three"></script>
+<script src="//unpkg.com/globe.gl"></script>
+<script src="//unpkg.com/solar-calculator"></script>
+
+</head>
+
+<body>
+<div id="globeViz"></div>
+<div id="time"></div>
+
+<script>
+    { javascript_code }
+</script>
+</body>
+"""
+
+# Display the HTML code in Streamlit app
+col1, col2 = st.columns(2)
+with col1:
+    st.components.v1.html(html_code, height=700, width=700)
+
+
+javascript_code = f"""
+const VELOCITY = 9; // minutes per frame
+
+const sunPosAt = dt => {{
+    const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
+    const t = solar.century(dt);
+    const longitude = (day - dt) / 864e5 * 360 - 180;
+    return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
+}};
+
+let dt = +new Date();
+const solarTile = {{ pos: sunPosAt(dt) }};
+const timeEl = document.getElementById('time');
+
+const cityData = { cities };
 const N = 10;
 
-// Gen random data
-const gData = [...Array(N).keys()].map(() => ({{
-  lat: (Math.random() - 0.5) * 180,
-  lng: (Math.random() - 0.5) * 360,
-  size: Math.random() / 3,
-  color: ['red', 'white'][Math.round(Math.random() * 2)]
-}}));
+const world = Globe()
+    (document.getElementById('globeViz'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+    .backgroundColor('rgb(14, 17, 23)')
+    .tilesData([solarTile])
+    .tileLng(d => d.pos[0])
+    .tileLat(d => d.pos[1])
+    .tileAltitude(0.01)
+    .tileWidth(180)
+    .tileHeight(180)
+    .tileUseGlobeProjection(false)
+    .tileMaterial(() => new THREE.MeshLambertMaterial({{ color: '#ffff00', opacity: 0.3, transparent: true }}))
+    .tilesTransitionDuration(0)
+    .pointsData(cityData)
+    .backgroundColor('rgb(14, 17, 23)')
+    .pointAltitude('size');
 
-// Combine city data with random data
-const combinedData = [...cityData, ...gData];
+// animate time of day
+requestAnimationFrame(() =>
+    (function animate() {{
+    dt += VELOCITY * 60 * 1000;
+    solarTile.pos = sunPosAt(dt);
+    world.tilesData([solarTile]);
+    timeEl.textContent = new Date(dt).toLocaleString();
+    requestAnimationFrame(animate);
+    }})()
+);
 
-console.log(combinedData);
-
-const map = Globe()
-(document.getElementById('globeViz'))
-  .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-  .pointsData(combinedData)
-  .backgroundColor('rgb(14, 17, 23)')
-  .pointAltitude('size')
-  .pointColor('color')
-
-// Add auto-rotation
-map.controls().autoRotate = true;
-map.controls().autoRotateSpeed = 10.6;
+world.controls().autoRotate = true;
+world.controls().autoRotateSpeed = 10.6;
 """
+
+html_code = f"""
+<head>
+<style> body {{ margin: 0em; }} </style>
+<script src="//unpkg.com/three"></script>
+<script src="//unpkg.com/globe.gl"></script>
+<script src="//unpkg.com/solar-calculator"></script>
+
+</head>
+
+<body>
+<div id="globeViz"></div>
+<div id="time"></div>
+
+<script>
+    { javascript_code }
+</script>
+</body>
+"""
+
+# Display the HTML code in Streamlit app
+col1, col2 = st.columns(2)
+with col1:
+    st.components.v1.html(html_code, height=700, width=700)
+
+
+resonant_cities = [
+    {**city, "maxR": random.random()*20+3, "propagationSpeed": (random.random()+.1)*10, "repeatPeriod": random.random()*3000 + 200}
+    for city in cities
+]
+
+javascript_code = f"""const N = 10;
+    const gData = [...Array(N).keys()].map(() => ({{
+      lat: (Math.random() - 0.5) * 180,
+      lng: (Math.random() - 0.5) * 360,
+      maxR: Math.random() * 20 + 3,
+      propagationSpeed: (Math.random() - 0.5) * 20 + 1,
+      repeatPeriod: Math.random() * 2000 + 200
+    }}));
+    const data = { resonant_cities }
+    const colorInterpolator = t => `rgba(255,100,50,${{Math.sqrt(1-t)}})`;
+
+    const globe = Globe()
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .ringsData(data)
+      .ringColor(() => colorInterpolator)
+      .ringMaxRadius('maxR')
+      .ringPropagationSpeed('propagationSpeed')
+      .ringRepeatPeriod('repeatPeriod')
+      (document.getElementById('globeViz'));
+"""
+
+html_code = f"""
+<head>
+<style> body {{ margin: 0em; }} </style>
+<script src="//unpkg.com/globe.gl"></script>
+
+</head>
+
+<body>
+<div id="globeViz"></div>
+<script>
+    { javascript_code }
+</script>
+</body>
+"""
+
+# Display the HTML code in Streamlit app
+col1, col2 = st.columns(2)
+with col1:
+    st.components.v1.html(html_code, height=700, width=700)
+
+
+
+javascript_code = f"""const N = 10;
+    const gData = [...Array(N).keys()].map(() => ({{
+      lat: (Math.random() - 0.5) * 180,
+      lng: (Math.random() - 0.5) * 360,
+      maxR: Math.random() * 20 + 3,
+      propagationSpeed: (Math.random() - 0.5) * 20 + 1,
+      repeatPeriod: Math.random() * 2000 + 200
+    }}));
+    const data = { resonant_cities }
+    const colorInterpolator = t => `rgba(255,100,50,${{Math.sqrt(1-t)}})`;
+
+    const globe = Globe()
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .ringsData(data)
+      .ringColor(() => colorInterpolator)
+      .ringMaxRadius('maxR')
+      .ringPropagationSpeed('propagationSpeed')
+      .ringRepeatPeriod('repeatPeriod')
+      .pointsData(data)
+      .backgroundColor('rgb(14, 17, 23)')
+      .pointAltitude('size')
+      .pointRadius(.3)
+      .pointColor(() => 'red')
+      
+      (document.getElementById('globeViz'));
+"""
+
+html_code = f"""
+<head>
+<style> body {{ margin: 0em; }} </style>
+<script src="//unpkg.com/globe.gl"></script>
+
+</head>
+
+<body>
+<div id="globeViz"></div>
+<script>
+    { javascript_code }
+</script>
+</body>
+"""
+
+# Display the HTML code in Streamlit app
+col1, col2 = st.columns(2)
+with col1:
+    st.components.v1.html(html_code, height=700, width=700)
