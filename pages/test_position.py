@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_survey as ss
-from test_location import insert_data, conn
+from test_location import conn
 from test_geocage import get_coordinates
 from test_1d import _stream_example
 from streamlit_extras.streaming_write import write as streamwrite 
@@ -85,7 +85,7 @@ def insert_or_update_data(conn, data):
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
 
-st.title("A solid proof? The moon is full. From pitch black. \n ### a.k.a. from scratch.")
+st.title("A solid proof? Ask the moon. If-Then is full, overflow. \n ## We ask where from. \n ## If-Not, it's just pitch black..")
 
 def main():
     # params = st.query_params
@@ -101,7 +101,7 @@ def main():
     survey = ss.StreamlitSurvey("The Where?")
 
     with col2:
-        st.markdown("## What is your")
+        st.markdown("## ¿ What is your")
         location = survey.text_input("location", help="Our location will appear shortly...", value=st.session_state.location)
     
     if location is not None:
