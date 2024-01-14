@@ -4,7 +4,6 @@ from st_supabase_connection import SupabaseConnection
 from streamlit_extras.streaming_write import write as streamwrite 
 import json
 
-
 def insert_data(conn, location, response_data):
     # Insert the response_data into the PostgreSQL table
     api = conn.table("gathering")
