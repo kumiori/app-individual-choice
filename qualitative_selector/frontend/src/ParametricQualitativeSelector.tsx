@@ -133,8 +133,8 @@ class QualitativeParametricSelector extends StreamlitComponentBase<State> {
     return (
       <div id="happy">
         <span>
-          For you to decide, {name}!
-          <p>Beware: boundaries always fade...</p>
+          For you to decide, {name}
+          <p>{ question }</p>
           <p>Make a move, pick your choice among: {dataValues.map((value, index) => index === lastIndex ? value : `${value}, `)}</p>
         </span>
         <svg className="col-md-12 col-sm-12" height="200">
