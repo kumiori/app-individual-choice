@@ -68,7 +68,7 @@ def insert_or_update_data(conn, data):
 st.title("A solid proof? The moon is full. From pitch black. \n ### a.k.a. from scratch.")
 
 def main():
-    params = st.query_params
+    # params = st.query_params
 
     if 'location' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter
