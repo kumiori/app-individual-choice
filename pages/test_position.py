@@ -7,6 +7,26 @@ from streamlit_extras.streaming_write import write as streamwrite
 
 import json
 import hashlib
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Positioning Portal",
+        page_icon="✨",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+st.write(st.secrets["runtime"]["STATUS"])
 
 
 def check_existence(conn, signature):
