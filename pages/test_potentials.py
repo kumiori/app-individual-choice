@@ -5,7 +5,7 @@ import random
 import string
 import streamlit_survey as ss
 
-from test_geocage import get_coordinates
+from pages.test_geocage import get_coordinates
 # Function to initialize or get the session state
 
 
@@ -340,12 +340,12 @@ def main():
     if 'coordinates' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter
 
-    st.write(f'page_number {st.session_state.page_number}')
+    # st.write(f'page_number {st.session_state.page_number}')
 
     last_page = len(texts) - 1
     prev, _ ,next = st.columns([1, 10, 1])
 
-    st.write(f"Damage Parameter: {st.session_state.damage_parameter:.2f}")
+    st.write(f"Damage Parameter: {st.session_state['damage_parameter']:.2f}")
     if st.session_state.damage_parameter > 0:
         st.info("There is no way back in this game. Go back and corrupt the strings.")
     if next.button("\>"):
@@ -367,7 +367,7 @@ def main():
 
     if st.session_state.page_number == 4:
         if st.session_state.location:
-            st.write(f"Location: {st.session_state.location}")
+            st.write(f"Location: {st.session_state['location']}")
             st.write(corrupted_text)
         else:
             streamwrite(_stream_example(corrupted_text, st.session_state.damage_parameter), unsafe_allow_html=True)
