@@ -388,7 +388,7 @@ def main():
             st.session_state.page_number -= 1
 
     # streamwrite(_stream_example(texts[st.session_state.page_number]), unsafe_allow_html=True)
-    corrupted_text = corrupt_string(texts[st.session_state.page_number], st.session_state.damage_parameter)
+    corrupted_text, replaced_chars = corrupt_string(texts[st.session_state.page_number], st.session_state.damage_parameter)
 
     if st.session_state.page_number == 4:
         if st.session_state.location:
