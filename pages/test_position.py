@@ -1,8 +1,8 @@
 import streamlit as st
 import streamlit_survey as ss
-from test_location import conn
-from test_geocage import get_coordinates
-from test_1d import _stream_example
+from pages.test_location import conn
+from pages.test_geocage import get_coordinates
+from pages.test_1d import _stream_example
 from streamlit_extras.streaming_write import write as streamwrite 
 
 import json
