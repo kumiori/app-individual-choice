@@ -1,14 +1,7 @@
 import streamlit as st
 import streamlit_survey as ss
-from pages.test_location import conn
 
-from pages.test_1d import _stream_example, corrupt_string
-from pages.test_geocage import get_coordinates
-from streamlit_extras.streaming_write import write as streamwrite 
-import time
 
-import json
-import hashlib
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
         page_title="Positioning Portal",
@@ -27,6 +20,17 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     """,
         unsafe_allow_html=True,
     )
+
+
+from pages.test_location import conn
+
+from pages.test_1d import _stream_example, corrupt_string
+from pages.test_geocage import get_coordinates
+from streamlit_extras.streaming_write import write as streamwrite 
+import time
+
+import json
+import hashlib
 
 st.write(st.secrets["runtime"]["STATUS"])
 
