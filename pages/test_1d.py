@@ -5,7 +5,7 @@ import random
 import string
 import streamlit_survey as ss
 
-from test_geocage import get_coordinates
+from pages.test_geocage import get_coordinates
 # Function to initialize or get the session state
 
 
@@ -24,7 +24,7 @@ def corrupt_string(input_str, damage_parameter):
     for index in indices_to_replace:
         corrupted_list[index] = random.choice(symbols)
 
-    return ''.join(corrupted_list)
+    return ''.join(corrupted_list), num_chars_to_replace
 
 
 summary0 = """## 
@@ -324,7 +324,7 @@ texts = [summary0, summary1, summary2, summary3, part_0, part_1, part_2, solve, 
 
 def _stream_example(text, damage):
     # Define sleep lengths for different punctuation symbols
-    sleep_lengths = {'.': 1., ',': 0.3, '!': 0.7, '?': 1.5, ';': 0.4, ':': 0.4}
+    sleep_lengths = {'.': 1., ',': 0.3, '!': 1.7, '?': 1.5, ';': 0.4, ':': 0.4}
     sleep_lengths = {key: value * (1. + damage) for key, value in sleep_lengths.items()}
     # st.json(sleep_lengths)
 
@@ -335,7 +335,7 @@ def _stream_example(text, damage):
         last_char = word[-1] if word[-1] in string.punctuation else None
 
         # Yield the word with appropriate sleep length
-        if last_char == '.' or last_char == '?':
+        if last_char == '.' or last_char == '?' or last_char == '^':
             yield word + " \n "
         else:
             yield word + " "

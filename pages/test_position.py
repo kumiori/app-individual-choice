@@ -1,9 +1,11 @@
 import streamlit as st
 import streamlit_survey as ss
 from pages.test_location import conn
+
+from pages.test_1d import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
-from pages.test_1d import _stream_example
 from streamlit_extras.streaming_write import write as streamwrite 
+import time
 
 import json
 import hashlib
@@ -85,11 +87,26 @@ def insert_or_update_data(conn, data):
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
 
-st.title("A solid proof? Ask the moon. If-Then is full, overflow. \n ## We ask where from. \n ## If-Not, it's just pitch black..")
+# st.title("Welcome to the Singular Mapping. A solid proof? Forget, and Ask the moon: If If-Then is full, is still Luck a useful tool? \n ## We divide by zero. \n ## and it's just fuck*ng pitch black..")
+title = """
+## This is the Singular Mapping. 
+# A solid proof? 
+### Forget, and ask the Moon: ... 
+
+# &quot; If If-Then is full, is still Luck afoot just...as a tool?&quot; 0/0. 
+## (what if) We divide by zero... \n ## and it's just fuck*ng pitch black..
+
+"""
+stream = st.empty()
+with stream:
+    _stream, errors = corrupt_string(title, damage_parameter=0.01)
+    st.title(f"System errors number {errors}")
+    streamwrite(_stream_example(_stream, damage=0.5), unsafe_allow_html=True)
+    with st.spinner('...'):
+        time.sleep(3)
+    streamwrite(_stream_example("## The Moon will still be able to see you...", damage=0.), unsafe_allow_html=True)
 
 def main():
-    # params = st.query_params
-
     if 'location' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter
     
@@ -119,7 +136,7 @@ def main():
 
 
         # Send Data Button
-        if col1.button("Are you happy to sign?"):
+        if col1.button("Claim your place/Check in"):
             data = {
                 "location": survey.data["location"]["value"],
                 "latitude": coordinates[0],
@@ -148,7 +165,7 @@ def main():
                        
         if hasattr(st.session_state, 'signature'):
 
-            if col2.button("Display our Potentials"):
+            if col2.button("Display our Map"):
                 data = fetch_and_display_data()
                 
                 potentials = """## 
