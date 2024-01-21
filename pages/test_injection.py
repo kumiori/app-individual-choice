@@ -1,6 +1,8 @@
 import streamlit_survey as ss
 import streamlit.components.v1 as components
 import streamlit as st
+from  streamlit_vertical_slider import vertical_slider 
+import random
 
 _qualitative_selector = components.declare_component(
     "qualitative",
@@ -20,24 +22,17 @@ def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, inv
     )
 
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
-
+VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
-    # def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
-    #     return _qualitative_selector(
-    #         component="dichotomy",
-    #         name=kwargs["name"],
-    #         key=kwargs["key"],
-    #         question=kwargs["question"],
-    #         rotationAngle=kwargs.get("rotationAngle", 0),
-    #         gradientWidth=kwargs.get("gradientWidth", 40),
-    #         invert=kwargs.get("invert", False),
-    #         shift=kwargs.get("shift", 0)
-    #     )
+    shape_types = ["circle", "square", "pill"]
 
     def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
         return Dichotomy(self, label, id, **kwargs).display()
     
+    def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
+        return VerticalSlider(self, label, id, **kwargs).display()
+
 # Usage example
 survey = CustomStreamlitSurvey()
 
@@ -60,6 +55,42 @@ with pages:
                                         key="boundaries")
         st.write('You picked', return_value)
 
+        return_value = survey.equaliser(label="Equaliser Dim 1",
+            height=200,
+            key="test_1",
+            default_value=55,
+            step=1,
+            min_value=0,
+            max_value=100,
+            value_always_visible=True,)
+        
+
+        return_value = survey.equaliser(label="Equaliser Dim 2",
+            height=200,
+            key="test_3",
+            default_value=55,
+            step=1,
+            min_value=0,
+            max_value=100,
+            value_always_visible=True,)
+        
+
+
+        bottom_cols = st.columns(3)
+        
+        for i, column in enumerate(bottom_cols):
+            with column:
+                survey.equaliser(
+                    label=f"Eq{i}",
+                    height=200,
+                    key=f"cat_{i}",
+                    default_value=random.random() * 100,
+                    step=1,
+                    min_value=0,
+                    max_value=100,
+                    value_always_visible=True,
+                )
+        
 # Retrieve survey data and display
 survey_data = survey.data
 st.write("Survey Data:", survey_data)
@@ -68,7 +99,6 @@ from streamlit_survey.survey_component import (
     SelectSlider,
     SurveyComponent,
 )
-
 st.markdown("## AZIZ")
 st.write(survey._components)
 survey._add_component(SelectSlider)
