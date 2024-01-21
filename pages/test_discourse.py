@@ -1,7 +1,10 @@
 import streamlit as st
+import streamlit.components.v1 as components
+from  streamlit_vertical_slider import vertical_slider 
 import hashlib
 from pages.test_1d import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
+from pages.test_injection import CustomStreamlitSurvey
 from streamlit_extras.streaming_write import write as streamwrite 
 import time
 import string
@@ -31,6 +34,39 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     )
 
 st.write(st.secrets["runtime"]["STATUS"])
+
+
+_qualitative_selector = components.declare_component(
+    "qualitative",
+    url='http://localhost:3000'
+)
+
+def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
+    return _qualitative_selector(component = "dichotomy",
+    name = name,
+    label = label,
+    key=key,
+    question = question,
+    rotationAngle = rotationAngle,
+    gradientWidth = gradientWidth,
+    invert = invert,
+    shift = shift
+    )
+
+Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
+VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
+
+class CustomStreamlitSurvey(ss.StreamlitSurvey):
+    shape_types = ["circle", "square", "pill"]
+
+    def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
+        return Dichotomy(self, label, id, **kwargs).display()
+    
+    def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
+        return VerticalSlider(self, label, id, **kwargs).display()
+
+# Usage example
+
 
 # Initialize read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
@@ -80,10 +116,6 @@ def create_streamed_columns(panel):
         col_idx = 0  if i % 2 == 0 else 1
         with cols[col_idx]:
             streamwrite(_stream_once(panel[i], 0))
-
-# Usage
-
-
 
 def match_input(input_text, translation_dict):
     if not input_text:
@@ -213,8 +245,9 @@ def main():
     st.markdown("## Would you like to participate?")
     # Session State also supports attribute based syntax
 
-    survey = ss.StreamlitSurvey("Home")
+    # survey = ss.StreamlitSurvey("Home")
     col1, col2, col3 = st.columns(3)
+    survey = CustomStreamlitSurvey()
 
     if 'page_number' not in st.session_state:
         st.session_state.page_number = 0
@@ -228,11 +261,15 @@ def main():
     if 'coordinates' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter
 
-    survey = ss.StreamlitSurvey("Home")
 
     # once usage:
     # streamwrite(_stream_once(intro_text, 0))
     st.markdown(intro_text)
+    return_value = survey.dichotomy(name="Spirit", 
+                                label="Confidence",
+                                question="Dychotomies, including time...", 
+                                key="boundaries")
+
     [st.markdown(p) for p in panel]
     st.write(st.session_state.read_texts)
     
@@ -253,6 +290,8 @@ def main():
     elif result is None:
         st.info('All other non-intelligible input is considered as a \'no\'.')
 
+    return survey
+
 def display_category_description(category, description):
     """
     Function to display category and its description.
@@ -272,9 +311,8 @@ def print_languages(languages):
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
 if __name__ == "__main__":
-    main()
+    survey = main()
     # add_vertical_space(1)
-    from  streamlit_vertical_slider import vertical_slider 
 
     st.markdown("## Panel contributions so far...")
     
@@ -351,7 +389,7 @@ if __name__ == "__main__":
         with st.container():
             for i, column in enumerate(bottom_cols):
                 with column:
-                    vertical_slider(
+                    survey.equaliser(
                         label=challenges[i + j*split_len][0],
                         height=200,
                         key=f"cat_{i}_{j}",
@@ -371,3 +409,4 @@ if __name__ == "__main__":
     
 
     st.markdown("## References")
+    st.write("Survey Data:", survey.data)
