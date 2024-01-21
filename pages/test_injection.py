@@ -55,7 +55,7 @@ with pages:
         st.write("How confident are you in Decentralised Science?")
 
         return_value = survey.dichotomy(name="Spirit", 
-                                        
+                                        label="Confidence",
                                         question="Dychotomies, including time...", 
                                         key="boundaries")
         st.write('You picked', return_value)
