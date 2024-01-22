@@ -1,14 +1,5 @@
-import streamlit.components.v1 as components
 import streamlit as st
 
-import streamlit as st
-import pandas as pd
-
-import sys
-sys.path.append('pages/')
-
-from test_multicomponents import dichotomy
-# qualitative, qualitative_parametric
 
 st.set_page_config(
     page_title="Celestial Verse Portal",
@@ -17,6 +8,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+import streamlit.components.v1 as components
+import pandas as pd
+
+import sys
+sys.path.append('pages/')
+from test_multicomponents import dichotomy
+
+
 tabs = ["Celestial Portal", "Cosmic Odyssey", "Cosmic Revelations"]
 
 _qualitative_selector = components.declare_component(
@@ -24,11 +34,6 @@ _qualitative_selector = components.declare_component(
     url='http://localhost:3000'
 )
 
-# def dichotomy(name, question, key=None):
-#     return _qualitative_selector(component = "dichotomy",
-#     name = name,
-#     key=key,
-#     question = question)
 
 
 def qualitative(name, question, data_values, key=None):

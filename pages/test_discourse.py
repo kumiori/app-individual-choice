@@ -171,11 +171,13 @@ panel_7 = """
 
 panel_8 = """
 ## We are constructing a versatile coordination tool, and we need your help.
+## We'll tell you all about it in a moment...
 
 ## Are you happy to engage?
 ## Are you ready to participate? 
+## Where are you located? 
+## Does this sound like a _good idea_? 
 
-## We'll tell you more about all in a moment...
 
 ## Our simple platform is multi-purpose and inclusive by design, 
 
@@ -183,7 +185,6 @@ panel_8 = """
 
 ## As we invite your free and conscious participation, just a reminder:
  our platform is 'free software' in the sense that has a lot to do with freedom, and nothing with price.
- 
 
 """
 

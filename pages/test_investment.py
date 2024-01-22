@@ -16,12 +16,12 @@ inverse_choice = lambda x: 'OK 🥲' if x == 0 else 'junk food' if x == 1 else '
 inverse_support = lambda x: 'support 🥲' if x == 1 else 'donate' if x == 2 else 'invest ✨' if x == 10 else 'in-between ✨'
 dual_support = lambda x: 'connect 🥲' if x == 1 else 'receive' if x == 2 else 'propose ✨' if x == 10 else 'in-between ✨'
 
-st.set_page_config(
-    page_title="Data gathering: investment plans",
-    page_icon="✨",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# st.set_page_config(
+#     page_title="Data gathering: investment plans",
+#     page_icon="✨",
+#     layout="wide",
+#     initial_sidebar_state="collapsed"
+# )
 
 tabs = ["Questions Portal", "Business Plan", "Cosmic Revelations", "Minimal Gather"]
 
@@ -319,7 +319,7 @@ def visualisation():
         "Journey through the profiles of cosmic poets, delve into their verses, and witness the dawn of new astronomical revelations."
     )
 
-    col1, col2, col3 = st.columns([2, 1, 2])
+    col1, col2, col3 = st.columns([4, 1, 2])
     with col1:
         support_value = qualitative_parametric(name = "## may be our lucky number",
             question = "Support, Donate, or Invest?",

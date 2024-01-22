@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit_survey as ss
+import streamlit.components.v1 as components
 
 
 if st.secrets["runtime"]["STATUS"] == "Production":
@@ -33,6 +34,10 @@ import json
 import hashlib
 
 st.write(st.secrets["runtime"]["STATUS"])
+_qualitative_selector = components.declare_component(
+    "qualitative",
+    url='http://localhost:3000'
+)
 
 # Initialize read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
@@ -94,25 +99,80 @@ def insert_or_update_data(conn, data):
         st.error(f"Error inserting or updating data in the database: {str(e)}")
 
 
+def qualitative_parametric(name, question, areas, key=None):
+    return _qualitative_selector(component = "parametric",
+    name = name,
+    key=key,
+    areas = areas,
+    data_values  = [1, 2, 10],
+    question = question)
+
+# 2 bedrooms sabatical house, rent income:
+# interested in the other apt: 7-12d rental = 1500EUR+50
+
 def main():
     # st.title("Welcome to the Singular Mapping. A solid proof? Forget, and Ask the moon: If If-Then is full, is still Luck a useful tool? \n ## We divide by zero. \n ## and it's just fuck*ng pitch black..")
     title = """
-    ## This is the Singular Mapping. 
-    # A solid proof? 
-    ### Forget, and ask the Moon: ... 
+    ## This is the Settimia
+        Dynamic information gathering platform
+    # Artists/Collaborators/Investors
+    
+    Landing page with various options of explorations
+    You're here because ....
+    
+    ## -\ we (the fellowship) ..self.
+    ## We (we+you)
+    ## ...
+    ## ...
+    ## Products (anything):
+    # Q: where are you loc? 
+    ## { globeViz }
 
-    # &quot; If If-Then is full, is still Luck afoot just...as a tool?&quot; 0/0. 
-    ## (what if) We divide by zero... \n ## and it's just fuck*ng pitch black..
+    Importantly...
+    { ourCoordinates } Astral Chart
 
+    [for residence periods: dynamic group 3bd always
+        - chef
+        - painter/sculptor (inArt)
+        - musician/dancer/writer (inXXX)]
+
+    ## Collect applications (information)
+        Your preferences, profiling.
+        
+    ## Receiving money
+        "Paywall": QR codes (exec) or (diversion)
+        Payment system test.
+    ## (Internal Governance)
+    
+    
+If collab:
+...
+If Apply:
+...
+If Invest:
+	- financial product
+	- business plan
+
+11=EUR 
+
+--------------------------
+
+paywall
+
+--------------------------
+
+pdf
     """
+    st.markdown(title)
     stream = st.empty()
-    with stream:
-        _stream, errors = corrupt_string(title, damage_parameter=0.0)
-        st.title(f"System errors number {errors}")
-        streamwrite(_stream_once(_stream, damage=0.5), unsafe_allow_html=True)
-        with st.spinner('...'):
-            time.sleep(3)
-        streamwrite(_stream_once("## The Moon will still be able to see you...", damage=0.), unsafe_allow_html=True)
+    
+    # with stream:
+    #     _stream, errors = corrupt_string(title, damage_parameter=0.0)
+    #     st.title(f"System errors number {errors}")
+    #     streamwrite(_stream_once(_stream, damage=0.5), unsafe_allow_html=True)
+    #     with st.spinner('...'):
+    #         time.sleep(3)
+    #     streamwrite(_stream_once("## The Moon will still be able to see you...", damage=0.), unsafe_allow_html=True)
 
     if 'location' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter

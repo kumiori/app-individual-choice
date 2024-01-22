@@ -35,13 +35,10 @@ def main():
     col1, _, col2 = st.columns([2, .1, 2])
     with col2:
         if st.button("Next"):
-            st.write((paged_container.current_page + 1, paged_container.get_total_pages() - 1))
             st.session_state["current_page"] = min(st.session_state.current_page + 1, paged_container.get_total_pages() - 1)
-            # paged_container.current_page = min(paged_container.current_page + 1, paged_container.get_total_pages() - 1)
     with col1:
         if st.button("Prev"):
             st.session_state["current_page"] = max(st.session_state.current_page - 1, 0)
-            # paged_container.current_page = max(paged_container.current_page - 1, 0)
 
     paged_container.display_page(st.session_state.current_page)
 
