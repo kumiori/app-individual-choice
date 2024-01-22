@@ -60,7 +60,7 @@ with st.expander("Let's share wishes for a dinner...", expanded=False):
         if pages.current == 0:
             st.write("Are you happy to dine?")
             dine_together = survey.radio(
-                "dine_together", options=["nan", "Yes", "No"], index=0,
+                "dine_together", options=["Neither Yes nor No", "Yes", "No"], index=0,
                 label_visibility="collapsed", horizontal=True
             )
 

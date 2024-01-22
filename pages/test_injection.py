@@ -33,77 +33,82 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
     def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
         return VerticalSlider(self, label, id, **kwargs).display()
 
-# Usage example
-survey = CustomStreamlitSurvey()
+def main():
 
-pages = survey.pages(2, on_submit=lambda: st.success("Your preferences are recorded. Thank you!"))
+    # Usage example
+    survey = CustomStreamlitSurvey()
 
-with pages:
-    if pages.current == 0:
-        st.write("Experiments or Theory?")
-        love_together = survey.radio(
-            "love_together", options=["nan", "Experiments", "Theory"], index=0,
-            label_visibility="collapsed", horizontal=True
-        )
+    pages = survey.pages(2, on_submit=lambda: st.success("Your preferences are recorded. Thank you!"))
 
-    elif pages.current == 1:
-        st.write("How confident are you in Decentralised Science?")
+    with pages:
+        if pages.current == 0:
+            st.write("Experiments or Theory?")
+            love_together = survey.radio(
+                "love_together", options=["nan", "Experiments", "Theory"], index=0,
+                label_visibility="collapsed", horizontal=True
+            )
 
-        return_value = survey.dichotomy(name="Spirit", 
-                                        label="Confidence",
-                                        question="Dychotomies, including time...", 
-                                        key="boundaries")
-        st.write('You picked', return_value)
+        elif pages.current == 1:
+            st.write("How confident are you in Decentralised Science?")
 
-        return_value = survey.equaliser(label="Equaliser Dim 1",
-            height=200,
-            key="test_1",
-            default_value=55,
-            step=1,
-            min_value=0,
-            max_value=100,
-            value_always_visible=True,)
-        
+            return_value = survey.dichotomy(name="Spirit", 
+                                            label="Confidence",
+                                            question="Dychotomies, including time...", 
+                                            key="boundaries")
+            st.write('You picked', return_value)
 
-        return_value = survey.equaliser(label="Equaliser Dim 2",
-            height=200,
-            key="test_3",
-            default_value=55,
-            step=1,
-            min_value=0,
-            max_value=100,
-            value_always_visible=True,)
-        
+            return_value = survey.equaliser(label="Equaliser Dim 1",
+                height=200,
+                key="test_1",
+                default_value=55,
+                step=1,
+                min_value=0,
+                max_value=100,
+                value_always_visible=True,)
+            
+
+            return_value = survey.equaliser(label="Equaliser Dim 2",
+                height=200,
+                key="test_3",
+                default_value=55,
+                step=1,
+                min_value=0,
+                max_value=100,
+                value_always_visible=True,)
+            
 
 
-        bottom_cols = st.columns(3)
-        
-        for i, column in enumerate(bottom_cols):
-            with column:
-                survey.equaliser(
-                    label=f"Eq{i}",
-                    height=200,
-                    key=f"cat_{i}",
-                    default_value=random.random() * 100,
-                    step=1,
-                    min_value=0,
-                    max_value=100,
-                    value_always_visible=True,
-                )
-        
-# Retrieve survey data and display
-survey_data = survey.data
-st.write("Survey Data:", survey_data)
+            bottom_cols = st.columns(3)
+            
+            for i, column in enumerate(bottom_cols):
+                with column:
+                    survey.equaliser(
+                        label=f"Eq{i}",
+                        height=200,
+                        key=f"cat_{i}",
+                        default_value=random.random() * 100,
+                        step=1,
+                        min_value=0,
+                        max_value=100,
+                        value_always_visible=True,
+                    )
+            
+    # Retrieve survey data and display
+    survey_data = survey.data
+    st.write("Survey Data:", survey_data)
 
-from streamlit_survey.survey_component import (
-    SelectSlider,
-    SurveyComponent,
-)
-st.markdown("## AZIZ")
-st.write(survey._components)
-survey._add_component(SelectSlider)
-st.markdown("## after injection")
-st.write(survey._components)
-st.markdown("## after double injection")
-survey._add_component(_qualitative_selector)
-st.write(survey._components)
+    from streamlit_survey.survey_component import (
+        SelectSlider,
+        SurveyComponent,
+    )
+    st.markdown("## AZIZ")
+    st.write(survey._components)
+    survey._add_component(SelectSlider)
+    st.markdown("## after injection")
+    st.write(survey._components)
+    st.markdown("## after double injection")
+    survey._add_component(_qualitative_selector)
+    st.write(survey._components)
+
+if __name__ == "__main__":
+    main()
