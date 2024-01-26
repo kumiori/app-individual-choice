@@ -1,6 +1,8 @@
 import streamlit as st
 from streamlit.components.v1 import components as stc
 from streamlit_extras.row import row
+from pages.test_injection import CustomStreamlitSurvey
+from streamlit_extras.mandatory_date_range import date_range_picker 
 import hashlib
 superpowers_dict = {
     'Time-Bending Vision': {
@@ -79,10 +81,28 @@ def show_powers():
 
 # Example Usage:
 def main():
+    st.write(st.session_state)
     st.text_input('Access key', key='access key')
+    survey = CustomStreamlitSurvey()
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        current_time = survey.timeinput("Is this the time?", key='time')
+    with col2:
+        current_date = survey.dateinput("Is this today?", key='dateasdasd')
+    with col3:
+        location = survey.text_input("Where are you, if not here...", help="Our location.")
 
     show_powers()
 
-
 if __name__ == '__main__':
     main()
+
+    st.write(
+        """
+        This is an example of a date range picker that *always* returns a start and
+        end date, even if the user has only selected one of the dates. Until the
+        user selects both dates, the app will not run.
+        """
+    )
+    result = date_range_picker("Select a date range")
+    st.write("Result:", result)

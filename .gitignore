@@ -1,3 +1,4 @@
 .streamlit/secrets.toml
 virtual/*
 */frontend/node_modules/
+pages/credentials.yml
