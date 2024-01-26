@@ -400,16 +400,14 @@ def main():
     else:
         streamwrite(_stream_example(corrupted_text, st.session_state.damage_parameter), unsafe_allow_html=True)
 
-
-
     if st.session_state.page_number == 0:
         current_local_time = survey.timeinput("What time is it, on your side? Sorry to ask..")
     
-    # if st.session_state.page_number == 5:
-    #     st.write("```python")
-    #     st.code(code, language="python")
-    #     st.write("```")
-    #     # st.markdown(texts[st.session_state.page_number])
+    if st.session_state.page_number == 5:
+        st.write("```python")
+        st.code(code, language="python")
+        st.write("```")
+        # st.markdown(texts[st.session_state.page_number])
 
     if st.session_state.page_number == 4:
         location = survey.text_input("location", help="Our location.", value=st.session_state.location)

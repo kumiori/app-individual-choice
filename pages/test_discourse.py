@@ -129,48 +129,171 @@ def match_input(input_text, translation_dict):
         return False
 
 intro_text = """
-## Our questions are simple.
+## Our questions are simple: _we don't want a bored audience._ This is why we engage.
+## We elicit participation constructing new narratives and implement ideas based on collective understanding.
+## To broaden and articulate a vision of imminent social transitions...have you been invited yet?
 
-## Have you been invited yet?
+
+#### Details follow, _just_ use the top arrow [>] 
 """
 
-panel_1 = """ ## We face an international landscape characterised by simultaneous and juxtaposed crises often described as '_polycrises'_...
+panel_1 = """ ## We face an international landscape characterised by simultaneous and juxtaposed crises often described as '_polycrises'_.
 
+## These crises are not only juxtaposed but often interconnected as much in their effects as in their causes.
+
+ ## They emerge as facets of a deeper `organic` crisis.
+ 
+## How do you feel? Does this make any sense to you?
+
+[yes, no]
+ 
 """ 
 panel_2 = """
-## These crises are not only juxtaposed but often interconnected as much in their effects as in their causes. 
+
+## We are organising a panel discusion at _Europe in Discourse_ conference in Athens, 2024.
+
+## Our panel springs at the intersection of Human Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
+
+## ..._to bring forward_ an emancipatory vision of change.
+
+## What do you think? Are we on the right path?
+
+[Y/n]
+
 """
-panel_3 = """ ## They emerge as facets of a deeper “organic crisis”."""
+panel_3 = """ 
 
-panel_4 = """## Development Cooperation Review  Vol. 6 - Special Issue - opens to New Hopes...
+## Everything seems to lie upon a notion of change and connection.
 
-## _That issue_ was published at a crucial, _timely_ time...
+## _"these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
-## As a response, we are organising a panel discusion at the next Europe in Discourse conference in Athens, 2024.
+*) From: `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
+## ... Pez ...
+
+## _That issue_ was published at a crucial time. We decide to engage in a conversation in which you participate.
+
+Your opinion counts, right? [y, n] """
+ 
+panel_4 = """
+
+## To integrate a bigger picture, help us make sense of time scales and policy priorities.
+
+## Think (or picture) a _global social transition_: should this be fast or slow, or a mix of both?
+
+# Dicho: [0, <>, 1]
 
 """
 
-panel_5 = """## Our panel springs at the intersection of Human Sciences, Natural Sciences, Philosophy, Performance, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
+panel_5 = """
 
-## To bring forward an emancipatory vision of change...
+## We are constructing a versatile direct coordination tool, an interactive digital platform as a framework to discuss and connect. 
+
+## _To be clear_, the task is difficult: we need your input.
+
+## You can take _this_ as an opportunity to express, we have taken this as a challenge to address.
+
+## Let's play: what is your perception of priority levels? 
 
 """
 
 panel_6 = """
-## we deploy an interactive digital platform as a framework to discuss and connect.
+## The following is a list of `social dimensions` or policy concerns. Match the sliders with your perception of priority levels.
 
-## _To be clear, the task is difficult:_  
-## _..."these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."_
+[mixer]
+
+##### This is a great exercise in making communication effective, actionable, and visual.
+
+
 """
 
 panel_7 = """
-## You can take _this_ as an opportunity,
-## we have taken this as a challenge...
+
+[sanity check: u_0 neq u_rnd]
+
+## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. What's your name?
+
+## We are trying to understand why the world is in a state of fracture on several levels: individual, social and universal.
+
+## Human beings no longer meet in ideas. How do patterns behave?
+
+## This is how we think: _matrix is a map where patterns emerge_
+
+##  Buut maybe you are used to different types of map
+
+this is Paris
+
+what's your city?
 
 """
 
 panel_8 = """
-## We are constructing a versatile coordination tool, and we need your help.
+
+
+## Here and Now, our commitment is towards action.
+
+## As we invite your free and conscious participation, let's treasure this moment of exchange.
+
+## How to visualise a bigger picture? 
+
+## Verify your location and local time. You will receive an access key to join the conversation.
+
+# access key: `[here] x [now]` 
+# [ I {NAME} CONNECT here and now ]
+
+"""
+
+panel_9 = """
+
+## Welcome, _________. 
+## We are happy to have you here. You may have a lot of questions, we have a few too.
+## How to connect, - _where_ do we connect from?
+
+[GLOBE VIZ]
+
+"""
+
+panel_10 = """
+
+We are oraganising...
+Our panel
+free software
+
+Would you like to have agency on decisions that (indirectly) concern you?
+
+Would you like to increase your agency in decisions that concern others?
+
+"""
+
+panel_11 = """
+
+## Your preferences have been checkpointed.
+## Feel free to come again in a few days to test your access key
+
+## In the meantime, we aare reconstructing our links to backend.
+
+## In {city} it's {weather} and {temperature} degrees. Happy to leave us a message or share a feedback?
+
+[y/n]
+
+"""
+
+panel_12 = """
+
+
+
+qualitative
+    - feedback/support/contribute
+
+quantitative (how much: 0-100)
+    - sliders
+
+## Wishing you well, we are happy to share and develop with you,
+## this is our email: [email]. Looking forward.
+
+"""
+
+
+sandbox = """
 ## We'll tell you all about it in a moment...
 
 ## Are you happy to engage?
@@ -185,6 +308,10 @@ panel_8 = """
 
 ## As we invite your free and conscious participation, just a reminder:
  our platform is 'free software' in the sense that has a lot to do with freedom, and nothing with price.
+
+"""
+
+""" `We have accepted explosion of information, are you willing to accept explosion of undertsanding?`
 
 """
 
@@ -235,16 +362,15 @@ yesses = {
     "Yiddish": "יאָ",
 }
 
-panel = [panel_1, panel_2, panel_3, panel_4, panel_5, panel_6, panel_7, panel_8]
+# panel = [panel_1, panel_2, panel_3, panel_4, panel_5, panel_6, panel_7, panel_8]
+panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7,  panel_8,
+         panel_9, panel_10, panel_11, panel_12]
 
 # Main function
 def main():
     # Page title
     # st.title(":circus_tent: Europe in Discourse")
     # st.title(":fountain: Athens Conference, :satellite: 2024")
-    st.markdown("## A panel discussion bringing forward an emancipatory vision of change...")
-    st.markdown("## Would you like to participate?")
-    # Session State also supports attribute based syntax
 
     # survey = ss.StreamlitSurvey("Home")
     col1, col2, col3 = st.columns(3)
@@ -265,13 +391,15 @@ def main():
 
     # once usage:
     # streamwrite(_stream_once(intro_text, 0))
-    st.markdown(intro_text)
-    return_value = survey.dichotomy(name="Spirit", 
-                                label="Confidence",
-                                question="Dychotomies, including time...", 
-                                key="boundaries")
+    # st.markdown()
+    st.divider()
+    
+    st.markdown("# _Today_ {date}...")
 
-    [st.markdown(p) for p in panel]
+    # for p in panel:
+    #     st.markdown(p)
+    #     st.divider()
+        
     st.write(st.session_state.read_texts)
     
     col1, _, col2 = st.columns([3, 0.1, 1.5])
@@ -297,12 +425,12 @@ def display_category_description(category, description):
     """
     Function to display category and its description.
     """
-    col1, col2 = st.columns([2, 4])
+    col1, _, col2 = st.columns([2, .2, 4])
     with col1:
         # st.markdown(f"**{category}**")
         st.markdown(f"{category}")
     with col2:
-        st.write(description)
+        st.markdown(description)
     st.write("---")
 
 def print_languages(languages):
@@ -311,22 +439,65 @@ def print_languages(languages):
     else:
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
-if __name__ == "__main__":
-    survey = main()
-    # add_vertical_space(1)
-
-    st.markdown("## Panel contributions so far...")
+def contributions():
     
     booklet = [
-        ("## (Pop’Ecologie)", "Ariane Ahmadi"),
-        ("## Aftermath Of Political Violence", "Sophie Wahnich"),
-        ("## Engagement with the Sea", "Antonia Taddei"),
+        ("# Le Gai Savoir", "### _Ariane Ahmadi_ \n ## Crises as vectors for emancipation"),
+        ("# The Aftermath Of Political Violence", "### Sophie Wahnich \n ## Fragilité et manque de confiance, en mars 1794..."),
+        ("# Engagement with the Sea", "### Antonia Taddei \n ## Proposals for personhood as a defense strategy"),
         ("## tba", "Gabrielle Dyson"),
-        ("## Pulse", "Giorgio Funaro"),
-        ("## We Are Enough", "Roger Niyigena Karera"),
-        ("## Rethinking Solutions", "Graziano Mazza"),
+        ("# Pulse", "### Giorgio Funaro \n ## An electronic impulse through an immersive voyage"),
+        ("# We Are Enough", "### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"),
+        ("# Rethinking Solutions", "### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"),
+        ("# Je Suis l'Eau", "### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"),
         ("## tba", "Andrés León Baldelli"),
     ]
+    for author, title in booklet:
+        display_category_description(author, title)
+
+    st.divider()
+        
+    return
+
+def glossary():
+
+    for category, description in categories:
+        display_category_description(category, description)
+    
+
+    return
+
+def more():
+    links_row = row(2, vertical_align="center")
+    links_row.button(
+        ":honey_pot: Explore our panel contributions",
+        use_container_width=True,
+    )
+    links_row.link_button(
+        ":ticket:  Visit the conference's website",
+        "https://www.europeindiscourse.eu/",
+        use_container_width=True,
+    )
+
+    return
+    
+def faq():
+    return
+
+def references():
+    with st.expander("Show all the data", expanded=False):
+        st.write("Survey Data:")
+        st.json(survey.data, expanded=False)
+
+    return
+
+if __name__ == "__main__":
+    
+    survey = main()
+    # add_vertical_space(1)
+    st.markdown("# Panel contributions so far (_in fieri_)")
+    # contributions()
+    # more()
     
     categories = [
         ("Environmental Sustainability", "Priorities related to ecological balance, climate action, and sustainable development."),
@@ -355,35 +526,14 @@ if __name__ == "__main__":
         ("Food system concerns", ""),
         ("Endogenous Solutions", "")
     ]
-    
-    for author, title in booklet:
-        display_category_description(author, title)
 
-    st.divider()
-    
-    st.markdown("#### We are happy to share more and connect")
-    links_row = row(2, vertical_align="center")
-    links_row.button(
-        ":honey_pot: Explore our panel contributions",
-        use_container_width=True,
-    )
-    links_row.link_button(
-        ":ticket:  Visit the conference's website",
-        "https://www.europeindiscourse.eu/",
-        use_container_width=True,
-    )
+    st.markdown("## We are happy to share more and connect")
 
     st.markdown("## What are the priorities? Helping timescales appear.")
-    st.markdown("""## Help us gauge the priorities of the community
-
-    ## We start a joint conversation to harmonise time scales, asking your view of priorities from 0 to 100
     
-    ## This is not a random test.
-
-    ## Remark: the initial state is random, but the final state will not be""")
-
-    rows = 3
-    split_len = len(challenges) // rows
+    rows = 1
+    # st.write(len(challenges[0:2]))
+    split_len = len(challenges[0:3]) // rows
     bottom_cols = st.columns(split_len)
 
     for j in range(rows):
@@ -403,11 +553,23 @@ if __name__ == "__main__":
                         value_always_visible=True,
                     )
     
-    st.markdown("## Minimal Dictionary")
-
-    for category, description in categories:
-        display_category_description(category, description)
+    st.markdown("## Minimal Glossary")
+    # glossary()
     
-
     st.markdown("## References")
-    st.write("Survey Data:", survey.data)
+    # references()
+    st.markdown("## Frequently Asked Questions")
+
+    st.markdown("""## A panel discussion bringing forward an emancipatory vision of           change... \n
+                On est dans la merde
+        On est revenus a un etat de chaos dans les 
+    relations geopolitiques internationales...
+                
+                """)
+    st.markdown("## Would you like to participate?")
+
+
+    # return_value = survey.dichotomy(name="", 
+    #                             label="Confidence",
+    #                             question="...", 
+    #                             key="boundaries")
