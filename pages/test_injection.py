@@ -20,9 +20,19 @@ def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, inv
     invert = invert,
     shift = shift
     )
+    
+def _qualitative(name, question, label, areas, key=None):
+    return _qualitative_selector(component = "parametric",
+    name = name,
+    label = label,
+    key=key,
+    areas = areas,
+    data_values  = [1, 2, 10],
+    question = question)
 
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
+ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]

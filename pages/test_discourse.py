@@ -1,8 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-from  streamlit_vertical_slider import vertical_slider 
-import hashlib
+from streamlit_vertical_slider import vertical_slider 
 from pages.test_1d import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
 from pages.test_injection import CustomStreamlitSurvey
@@ -13,7 +12,6 @@ import streamlit_survey as ss
 from streamlit_extras.row import row
 from streamlit_extras.stateful_button import button as stateful_button
 import random
-import numpy as np
 from pages.test_settimia import fetch_and_display_data
 from pages.test_location import conn
 
@@ -37,6 +35,8 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     )
 
 st.write(st.secrets["runtime"]["STATUS"])
+
+
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
 
@@ -81,9 +81,6 @@ def _qualitative(name, question, label, areas, key=None):
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
-
-# Usage example
-
 
 # Initialize read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
@@ -392,7 +389,7 @@ widget_info = [
     {"type": "yesno", "key": "opinion_counts"},
     {"type": "dichotomy", "key": "dichotomy_1"},
     {"type": "button", "key": "Let's..."},
-    {"type": "equaliser", "key": "button_3", "kwargs": {"data": challenges[0:3]}},
+    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:3]}},
     {"type": "textinput", "key": "location"},
     {"type": "button", "key": "`Here` • `Now`"},
     {"type": "globe", "key": "Singular Map"},
@@ -401,6 +398,7 @@ widget_info = [
     {"type": "qualitative", "key": "quali"},
     {"type": None, "key": None}
 ]
+
 placeholders = [{"type": None, "key": None} for _ in range(len(panel)-len(widget_info))]
 
 widget_info = widget_info + placeholders
@@ -410,7 +408,6 @@ widget_dict = {}
 def create_button(key, kwargs = {}):
     return st.button(label=key)
 
-# Function to create dichotomy widget
 def create_dichotomy(key, kwargs = {}):
     return survey.dichotomy(name="Spirit", 
                             label="Confidence",
@@ -421,6 +418,7 @@ def create_qualitative(key, kwargs = {}):
     print(kwargs)
     return survey.qualitative_parametric(name="Spirit",
             question = "Support, Donate, or Invest?",
+            label="Qualitative",
             areas = 3,
             key = "parametric")
     
@@ -537,8 +535,9 @@ def create_equaliser(key, kwargs):
     with st.container():
         for i, column in enumerate(bottom_cols):
             with column:
+                print(dimensions[i + j*split_len][0])
                 survey.equaliser(
-                    label=dimensions[i + j*split_len],
+                    label=dimensions[i + j*split_len][0],
                     height=200,
                     key=f"cat_{i}_{j}",
                     default_value = int(random.random() * 100),
@@ -593,7 +592,7 @@ def main():
     st.markdown("# _Today_ {date}...")
 
 
-    tab1, tab2, tab3 = st.tabs(["Home", "Contributions", "Contact"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting...", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
     
     with tab1:        
 
@@ -632,6 +631,17 @@ def main():
         st.markdown("# Panel contributions so far")
         contributions()
 
+    with tab4:
+        st.markdown("## Minimal Glossary")
+        glossary()
+
+    with tab5:
+        st.markdown("## Frequently Asked Questions")
+
+    with tab6:
+        st.markdown("## References")
+        references()
+
     return survey
 
 def display_category_description(category, description):
@@ -666,14 +676,28 @@ def contributions():
         ("## (_AI: behind the scenes_)", "## Claire Aoi \n ### [einsteigenbitte](https://einsteigenbitte.eu/)"),
         ("## tba", "Andrés León Baldelli"),
     ]
-    for author, title in booklet:
-        display_category_description(author, title)
+    with st.container(height=666):
+        for author, title in booklet:
+            display_category_description(author, title)
 
-    st.divider()
-        
+        st.divider()
+            
     return
 
 def glossary():
+    categories = [
+        ("Environmental Sustainability", "Priorities related to ecological balance, climate action, and sustainable development."),
+        ("Social Equity", "Addressing issues of justice, equality, and inclusivity within society."),
+        ("Technological Innovation", "Exploring the role of technology in societal progress and ethical considerations."),
+        ("Economic Resilience", "Focusing on economic systems, financial stability, and resilience in the face of global challenges."),
+        ("Cultural Identity", "Discussing the dynamics and evolution of cultural identities in a changing world."),
+        ("Health and Well-being", "Prioritising healthcare, mental health, and overall well-being of communities and individuals."),
+        ("Education and Knowledge", "Examining strategies for knowledge dissemination, access to education, and lifelong learning."),
+        ("Governance and Policy", "Addressing the role of governance, policy frameworks, and political systems in societal change."),
+        ("Community Engagement", "Emphasising the importance of community participation and grassroots initiatives."),
+        ("International Collaboration", "Discussing the role of global cooperation and diplomacy in addressing shared challenges.")
+    ]
+
     for category, description in categories:
         display_category_description(category, description)
     
@@ -700,7 +724,7 @@ def faq():
 def references():
     with st.expander("Show all the data", expanded=False):
         st.write("Survey Data:")
-        st.json(survey.data, expanded=False)
+        st.json(survey.data, expanded=True)
 
     return
 
@@ -710,19 +734,6 @@ if __name__ == "__main__":
     # add_vertical_space(1)
     # more()
     
-    categories = [
-        ("Environmental Sustainability", "Priorities related to ecological balance, climate action, and sustainable development."),
-        ("Social Equity", "Addressing issues of justice, equality, and inclusivity within society."),
-        ("Technological Innovation", "Exploring the role of technology in societal progress and ethical considerations."),
-        ("Economic Resilience", "Focusing on economic systems, financial stability, and resilience in the face of global challenges."),
-        ("Cultural Identity", "Discussing the dynamics and evolution of cultural identities in a changing world."),
-        ("Health and Well-being", "Prioritising healthcare, mental health, and overall well-being of communities and individuals."),
-        ("Education and Knowledge", "Examining strategies for knowledge dissemination, access to education, and lifelong learning."),
-        ("Governance and Policy", "Addressing the role of governance, policy frameworks, and political systems in societal change."),
-        ("Community Engagement", "Emphasising the importance of community participation and grassroots initiatives."),
-        ("International Collaboration", "Discussing the role of global cooperation and diplomacy in addressing shared challenges.")
-    ]
-
     challenges = [
         ("Productive transformation and Innovation", ""),
         ("Global Value Chains", ""),
@@ -740,14 +751,7 @@ if __name__ == "__main__":
 
     st.markdown("## We are happy to share more and connect")
 
-
-    st.markdown("## Minimal Glossary")
-    # glossary()
     
-    st.markdown("## References")
-    # references()
-    st.markdown("## Frequently Asked Questions")
-
     st.markdown("""## A panel discussion bringing forward an emancipatory vision of           change... \n
                 On est dans la merde
         On est revenus a un etat de chaos dans les 
