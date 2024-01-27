@@ -369,7 +369,7 @@ panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  pan
          panel_9, panel_10, panel_11, panel_12]
 
 challenges = [
-    ("Productive transformation and Innovation", ""),
+    ("Productive Innovation", ""),
     ("Global Value Chains", ""),
     ("Artificial intelligence", ""),
     ("Farmers and Development", ""),
