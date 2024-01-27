@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import hashlib
 
 from streamlit_vertical_slider import vertical_slider 
 from pages.test_1d import _stream_example, corrupt_string
