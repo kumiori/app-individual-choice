@@ -18,9 +18,9 @@ from pages.test_location import conn
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
-        page_title="Celestial Verse Portal",
+        page_title="Panel Discussion - Athens Conference 2024",
         page_icon="✨",
-        layout="wide",
+        # layout="wide",
         initial_sidebar_state="collapsed"
     )
 
