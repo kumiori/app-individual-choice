@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+
 from  streamlit_vertical_slider import vertical_slider 
 import hashlib
 from pages.test_1d import _stream_example, corrupt_string
@@ -279,8 +280,6 @@ panel_11 = """
 
 panel_12 = """
 
-
-
 qualitative
     - feedback/support/contribute
 
@@ -362,9 +361,50 @@ yesses = {
     "Yiddish": "יאָ",
 }
 
-# panel = [panel_1, panel_2, panel_3, panel_4, panel_5, panel_6, panel_7, panel_8]
 panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7,  panel_8,
          panel_9, panel_10, panel_11, panel_12]
+
+widget_info = [
+    {"type": "button", "key": "button_0"},
+    {"type": "dichotomy", "key": "dichotomy_1"},
+    {"type": "qualitative", "key": "qualitative_2"},
+    {"type": "button", "key": "button_3"},
+]
+placeholders = [{"type": None, "key": None} for _ in range(len(panel)-len(widget_info))]
+
+widget_info = widget_info + placeholders
+
+widget_dict = {}
+
+def create_button(key):
+    return st.button(label=key)
+
+# Function to create dichotomy widget
+def create_dichotomy(key):
+    return st.checkbox("Choose one:", key=key)
+
+# Function to create qualitative widget
+def create_qualitative(key):
+    return st.radio("Select one:", ["Option 1", "Option 2", "Option 3"], key=key)
+
+# Dictionary mapping widget types to creation functions
+widget_creators = {
+    "button": create_button,
+    "dichotomy": create_dichotomy,
+    "qualitative": create_qualitative,
+    None: lambda x: st.write(x)
+}
+
+# Create widgets based on widget_info
+for i, info in enumerate(widget_info):
+    widget_key = info["key"]
+    widget_type = info["type"]
+
+    # # st.write(text_dict[f"text_{i}"])
+    # if widget_type in widget_creators:
+    #     widget_dict[widget_key] = widget_creators[widget_type](widget_key)
+
+# st.write(widget_dict)
 
 # Main function
 def main():
@@ -396,9 +436,15 @@ def main():
     
     st.markdown("# _Today_ {date}...")
 
-    # for p in panel:
-    #     st.markdown(p)
-    #     st.divider()
+    for p, (i, info)  in zip(panel, enumerate(widget_info)):
+        widget_key = info["key"]
+        widget_type = info["type"]
+
+        st.markdown(p)
+        if widget_type in widget_creators:
+            widget_dict[widget_key] = widget_creators[widget_type](widget_key)
+
+        st.divider()
         
     st.write(st.session_state.read_texts)
     
@@ -450,6 +496,7 @@ def contributions():
         ("# We Are Enough", "### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"),
         ("# Rethinking Solutions", "### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"),
         ("# Je Suis l'Eau", "### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"),
+        ("## (_AI: behind the scenes_)", "## Claire Aoi \n ### [einsteigenbitte](https://einsteigenbitte.eu/)"),
         ("## tba", "Andrés León Baldelli"),
     ]
     for author, title in booklet:
@@ -495,8 +542,8 @@ if __name__ == "__main__":
     
     survey = main()
     # add_vertical_space(1)
-    st.markdown("# Panel contributions so far (_in fieri_)")
-    # contributions()
+    st.markdown("# Panel contributions so far")
+    contributions()
     # more()
     
     categories = [
