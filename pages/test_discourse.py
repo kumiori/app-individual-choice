@@ -14,6 +14,8 @@ from streamlit_extras.row import row
 from streamlit_extras.stateful_button import button as stateful_button
 import random
 import numpy as np
+from pages.test_settimia import fetch_and_display_data
+from pages.test_location import conn
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -35,7 +37,20 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     )
 
 st.write(st.secrets["runtime"]["STATUS"])
+class CustomStreamlitSurvey(ss.StreamlitSurvey):
+    shape_types = ["circle", "square", "pill"]
 
+    def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
+        return Dichotomy(self, label, id, **kwargs).display()
+    
+    def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
+        return VerticalSlider(self, label, id, **kwargs).display()
+
+    def qualitative_parametric(self, label: str = "", id: str = None, key=None, **kwargs):
+        return ParametricQualitative(self, label, id, **kwargs).display()
+
+
+survey = CustomStreamlitSurvey()
 
 _qualitative_selector = components.declare_component(
     "qualitative",
@@ -53,18 +68,19 @@ def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, inv
     invert = invert,
     shift = shift
     )
+    
+def _qualitative(name, question, label, areas, key=None):
+    return _qualitative_selector(component = "parametric",
+    name = name,
+    label = label,
+    key=key,
+    areas = areas,
+    data_values  = [1, 2, 10],
+    question = question)
 
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
-
-class CustomStreamlitSurvey(ss.StreamlitSurvey):
-    shape_types = ["circle", "square", "pill"]
-
-    def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
-        return Dichotomy(self, label, id, **kwargs).display()
-    
-    def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
-        return VerticalSlider(self, label, id, **kwargs).display()
+ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 
 # Usage example
 
@@ -146,8 +162,6 @@ panel_1 = """ ## We face an international landscape characterised by simultaneou
  
 ## How do you feel? Does this make any sense to you?
 
-[yes, no]
- 
 """ 
 panel_2 = """
 
@@ -158,8 +172,6 @@ panel_2 = """
 ## ..._to bring forward_ an emancipatory vision of change.
 
 ## What do you think? Are we on the right path?
-
-[Y/n]
 
 """
 panel_3 = """ 
@@ -173,15 +185,13 @@ panel_3 = """
 
 ## _That issue_ was published at a crucial time. We decide to engage in a conversation in which you participate.
 
-Your opinion counts, right? [y, n] """
+### Your opinion counts, `right`?"""
  
 panel_4 = """
 
 ## To integrate a bigger picture, help us make sense of time scales and policy priorities.
 
 ## Think (or picture) a _global social transition_: should this be fast or slow, or a mix of both?
-
-# Dicho: [0, <>, 1]
 
 """
 
@@ -249,8 +259,6 @@ panel_9 = """
 ## We are happy to have you here. You may have a lot of questions, we have a few too.
 ## How to connect, - _where_ do we connect from?
 
-[GLOBE VIZ]
-
 """
 
 panel_10 = """
@@ -273,8 +281,6 @@ panel_11 = """
 ## In the meantime, we aare reconstructing our links to backend.
 
 ## In {city} it's {weather} and {temperature} degrees. Happy to leave us a message or share a feedback?
-
-[y/n]
 
 """
 
@@ -364,11 +370,36 @@ yesses = {
 panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7,  panel_8,
          panel_9, panel_10, panel_11, panel_12]
 
+challenges = [
+    ("Productive transformation and Innovation", ""),
+    ("Global Value Chains", ""),
+    ("Artificial intelligence", ""),
+    ("Farmers and Development", ""),
+    ("Climate Change", ""),
+    ("Adaptation and Finance", ""),
+    ("Social Migration", ""),
+    ("The Social Contract", ""),
+    ("Cooperation Reinvented", ""),
+    ("Values, Inequalities, and Sustainability", ""),
+    ("Food system concerns", ""),
+    ("Endogenous Solutions", "")
+]
+
 widget_info = [
-    {"type": "button", "key": "button_0"},
+    {"type": "next", "key": "next"},
+    {"type": "yesno", "key": "button_0"},
+    {"type": "yesno", "key": "button_1"},
+    {"type": "yesno", "key": "opinion_counts"},
     {"type": "dichotomy", "key": "dichotomy_1"},
-    {"type": "qualitative", "key": "qualitative_2"},
-    {"type": "button", "key": "button_3"},
+    {"type": "button", "key": "Let's..."},
+    {"type": "equaliser", "key": "button_3", "kwargs": {"data": challenges[0:3]}},
+    {"type": "textinput", "key": "location"},
+    {"type": "button", "key": "`Here` • `Now`"},
+    {"type": "globe", "key": "Singular Map"},
+    {"type": "button", "key": "`Here`  `Now`"},
+    {"type": "yesno", "key": "extra_info"},
+    {"type": "qualitative", "key": "quali"},
+    {"type": None, "key": None}
 ]
 placeholders = [{"type": None, "key": None} for _ in range(len(panel)-len(widget_info))]
 
@@ -376,35 +407,162 @@ widget_info = widget_info + placeholders
 
 widget_dict = {}
 
-def create_button(key):
+def create_button(key, kwargs = {}):
     return st.button(label=key)
 
 # Function to create dichotomy widget
-def create_dichotomy(key):
-    return st.checkbox("Choose one:", key=key)
+def create_dichotomy(key, kwargs = {}):
+    return survey.dichotomy(name="Spirit", 
+                            label="Confidence",
+                            question="Dychotomies, including time...", 
+                            key=key)
 
-# Function to create qualitative widget
-def create_qualitative(key):
-    return st.radio("Select one:", ["Option 1", "Option 2", "Option 3"], key=key)
+def create_qualitative(key, kwargs = {}):
+    print(kwargs)
+    return survey.qualitative_parametric(name="Spirit",
+            question = "Support, Donate, or Invest?",
+            areas = 3,
+            key = "parametric")
+    
+def create_yesno(key, kwargs = {}):
+    col1, col2 = st.columns(2)
+    with col1:
+        yes_clicked = st.button("Yes", key=f"{key}_yes")
+    with col2:
+        no_clicked = st.button("No", key=f"{key}_no")
+    
+    return
+
+def create_next(key, kwargs = {}):
+    return st.button("Next", key=f"{key}")
+
+def create_globe(key, kwargs = {}):
+    data = fetch_and_display_data(conn, table_name="gathering")
+    
+    # with stream:
+        # st.write('.........')
+    
+    # Generate JavaScript code with city data
+    javascript_code = f"""
+    // Gen city data
+    const VELOCITY = 9; // minutes per frame
+
+    const sunPosAt = dt => {{
+        const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
+        const t = solar.century(dt);
+        const longitude = (day - dt) / 864e5 * 360 - 180;
+        return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
+    }};
+
+    let dt = +new Date();
+    const solarTile = {{ pos: sunPosAt(dt) }};
+    const timeEl = document.getElementById('time');
+
+    const cityData = { data };
+    const N = 10;
+
+    const world = Globe()
+        (document.getElementById('globeViz'))
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+        .backgroundColor('rgb(14, 17, 23)')
+        .tilesData([solarTile])
+        .tileLng(d => d.pos[0])
+        .tileLat(d => d.pos[1])
+        .tileAltitude(0.01)
+        .tileWidth(180)
+        .tileHeight(180)
+        .tileUseGlobeProjection(false)
+        .tileMaterial(() => new THREE.MeshLambertMaterial({{ color: '#ffff00', opacity: 0.3, transparent: true }}))
+        .tilesTransitionDuration(0)
+        .pointsData(cityData)
+        .pointAltitude('luckynumber');
+
+    // animate time of day
+    requestAnimationFrame(() =>
+        (function animate() {{
+        dt += VELOCITY * 60 * 1000;
+        solarTile.pos = sunPosAt(dt);
+        world.tilesData([solarTile]);
+        timeEl.textContent = new Date(dt).toLocaleString();
+        requestAnimationFrame(animate);
+        }})()
+    );
+
+    // Add auto-rotation
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 3.6;
+    """
+
+    # HTML code with embedded JavaScript
+    html_code = f"""
+    <head>
+    <style> body {{ margin: 0em; }} </style>
+    <script src="//unpkg.com/three"></script>
+    <script src="//unpkg.com/globe.gl"></script>
+    <script src="//unpkg.com/solar-calculator"></script>
+    </head>
+
+    <body>
+    <div id="globeViz"></div>
+    <div id="time"></div>
+    <script>
+        { javascript_code }
+    </script>
+    </body>
+    """
+
+    # Display the HTML code in Streamlit app
+    col1, col2 = st.columns(2)
+    with col1:
+        st.components.v1.html(html_code, height=700, width=700)
+    
+    st.write("Globe")
+    return 
+
+def create_textinput(key, kwargs = {}):
+    text = survey.text_input(key, help="")
+    return 
+
+def create_checkbox(key, kwargs = {}):
+    return survey.checkbox("Choose one:", key=key)
+
+def create_equaliser(key, kwargs):
+    rows = 1
+    dimensions = kwargs["data"]
+    split_len = len(dimensions) // rows
+    bottom_cols = st.columns(split_len)
+
+    # for j in range(rows):
+    j = 0
+    with st.container():
+        for i, column in enumerate(bottom_cols):
+            with column:
+                survey.equaliser(
+                    label=dimensions[i + j*split_len],
+                    height=200,
+                    key=f"cat_{i}_{j}",
+                    default_value = int(random.random() * 100),
+                    step=1,
+                    min_value=0,
+                    slider_color=('red','white'),
+                    thumb_shape="circle",
+                    max_value=100,
+                    value_always_visible=True,
+                )
+    
 
 # Dictionary mapping widget types to creation functions
 widget_creators = {
     "button": create_button,
+    "next": create_next,
     "dichotomy": create_dichotomy,
+    "yesno": create_yesno,
     "qualitative": create_qualitative,
-    None: lambda x: st.write(x)
+    "equaliser": create_equaliser,
+    "textinput": create_textinput,
+    "globe": create_globe,
+    None: lambda x, kwargs: st.write(x)
 }
-
-# Create widgets based on widget_info
-for i, info in enumerate(widget_info):
-    widget_key = info["key"]
-    widget_type = info["type"]
-
-    # # st.write(text_dict[f"text_{i}"])
-    # if widget_type in widget_creators:
-    #     widget_dict[widget_key] = widget_creators[widget_type](widget_key)
-
-# st.write(widget_dict)
 
 # Main function
 def main():
@@ -414,7 +572,6 @@ def main():
 
     # survey = ss.StreamlitSurvey("Home")
     col1, col2, col3 = st.columns(3)
-    survey = CustomStreamlitSurvey()
 
     if 'page_number' not in st.session_state:
         st.session_state.page_number = 0
@@ -433,37 +590,47 @@ def main():
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
     st.divider()
-    
     st.markdown("# _Today_ {date}...")
 
-    for p, (i, info)  in zip(panel, enumerate(widget_info)):
-        widget_key = info["key"]
-        widget_type = info["type"]
 
-        st.markdown(p)
-        if widget_type in widget_creators:
-            widget_dict[widget_key] = widget_creators[widget_type](widget_key)
-
-        st.divider()
-        
-    st.write(st.session_state.read_texts)
+    tab1, tab2, tab3 = st.tabs(["Home", "Contributions", "Contact"])
     
-    col1, _, col2 = st.columns([3, 0.1, 1.5])
+    with tab1:        
 
-    with col1:
-        st.markdown("## Are you happy...to interact?")
-    with col2:
-        response = survey.text_input("Try to respond in your natural language...", help="Our location will appear shortly...", value="")
-        result = match_input(response, yesses)
-    st.write(result)
-    if result:
-        st.write(f"Wonderful! We are happy to chime ✨")
-        st.write(f"Your response is: {print_languages(result)}")
-        st.success(f"Your response is: {result[0]}")
-    elif result is False:
-        st.error("We are always here...")
-    elif result is None:
-        st.info('All other non-intelligible input is considered as a \'no\'.')
+        for p, (i, info)  in zip(panel, enumerate(widget_info)):
+            widget_key = info["key"]
+            widget_type = info["type"]
+            widget_kwargs = info["kwargs"] if "kwargs" in info else {}
+
+            st.markdown(p)
+            if widget_type in widget_creators:
+                widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
+
+            st.divider()
+            
+    st.write(st.session_state.read_texts)
+
+    with tab3:        
+        col1, _, col2 = st.columns([3, 0.1, 1.5])
+
+        with col1:
+            st.markdown("## Are you happy...to interact?")
+        with col2:
+            response = survey.text_input("Try to respond in your natural language...", help="Our location will appear shortly...", value="")
+            result = match_input(response, yesses)
+        st.write(result)
+        if result:
+            st.write(f"Wonderful! We are happy to chime ✨")
+            st.write(f"Your response is: {print_languages(result)}")
+            st.success(f"Your response is: {result[0]}")
+        elif result is False:
+            st.error("We are always here...")
+        elif result is None:
+            st.info('All other non-intelligible input is considered as a \'no\'.')
+
+    with tab2:
+        st.markdown("# Panel contributions so far")
+        contributions()
 
     return survey
 
@@ -507,7 +674,6 @@ def contributions():
     return
 
 def glossary():
-
     for category, description in categories:
         display_category_description(category, description)
     
@@ -542,8 +708,6 @@ if __name__ == "__main__":
     
     survey = main()
     # add_vertical_space(1)
-    st.markdown("# Panel contributions so far")
-    contributions()
     # more()
     
     categories = [
@@ -576,30 +740,7 @@ if __name__ == "__main__":
 
     st.markdown("## We are happy to share more and connect")
 
-    st.markdown("## What are the priorities? Helping timescales appear.")
-    
-    rows = 1
-    # st.write(len(challenges[0:2]))
-    split_len = len(challenges[0:3]) // rows
-    bottom_cols = st.columns(split_len)
 
-    for j in range(rows):
-        with st.container():
-            for i, column in enumerate(bottom_cols):
-                with column:
-                    survey.equaliser(
-                        label=challenges[i + j*split_len][0],
-                        height=200,
-                        key=f"cat_{i}_{j}",
-                        default_value = int(random.random() * 100),
-                        step=1,
-                        min_value=0,
-                        slider_color=('red','white'),
-                        thumb_shape="circle",
-                        max_value=100,
-                        value_always_visible=True,
-                    )
-    
     st.markdown("## Minimal Glossary")
     # glossary()
     

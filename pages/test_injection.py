@@ -33,6 +33,7 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
     def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
         return VerticalSlider(self, label, id, **kwargs).display()
 
+
 def main():
 
     # Usage example
