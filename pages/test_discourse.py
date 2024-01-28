@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import hashlib
 import datetime
+import time
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -25,7 +26,7 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 st.write(st.secrets["runtime"]["STATUS"])
 
 from streamlit_vertical_slider import vertical_slider 
-from pages.test_1d import _stream_example, corrupt_string
+from lib.texts import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
 from pages.test_injection import CustomStreamlitSurvey
 from streamlit_extras.streaming_write import write as streamwrite 
@@ -40,6 +41,10 @@ from pages.test_location import conn
 from pages.test_paged import PagedContainer
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
+
+from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
+
+update_frequency = 500  # in milliseconds
 
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -153,7 +158,6 @@ Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 
-# Initiali   read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
@@ -238,7 +242,7 @@ panel_2 = """
 
 ## We are organising a panel discusion at _Europe in Discourse_ conference in Athens, 2024.
 
-## Our panel springs at the intersection of Human Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
+## Our panel springs at the intersection of Social Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
 
 ## ..._to bring forward_ an emancipatory vision of change.
 
@@ -252,7 +256,7 @@ panel_3 = """
 
 ## _"these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
-*) From: `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
+\* `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
 ## ... Pez ...
 
 ## _That issue_ was published at a crucial time. We decide to engage in a conversation in which you participate.
@@ -680,7 +684,36 @@ def main():
     now = datetime.datetime.now()
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
+    st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
+    st.markdown('', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    with col2:
+        matrix_size = 5
+        matrix_placeholder = st.empty()
+        seconds = 60
+
+        start_time = time.time()
+        while True:
+            time.sleep(update_frequency / 1000.0)  # Convert to seconds
+            matrix = generate_random_matrix(matrix_size)
+            encoded_matrix = encode_matrix(matrix)
+            # norm_value = frobenius_norm(encoded_matrix)/_scale
+            # norm_values.append(norm_value)
+            
+            # with col1:
+            #     st.write(norm_value)
+            
+            with col2:
+                matrix_placeholder.empty()
+                with matrix_placeholder:
+                    display_matrix(matrix)
+                    
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= seconds:
+                break
     st.divider()
+
+    
     st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
 
 
