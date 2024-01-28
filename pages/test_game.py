@@ -151,7 +151,7 @@ class _PagedContainer(PagedContainer):
         # page_items = self.items[start_idx:end_idx]
         page_items = [start_idx, end_idx]
         # print(page_items)
-        display_patriarchy_dimensions_by_indices(self.items, indices=page_items)
+        display_dictionary_by_indices(self.items, indices=page_items)
         # for item in page_items:
             # st.write(item)
         
@@ -364,11 +364,11 @@ def display_patriarchy_dimensions(patriarchy_dimensions):
         for sub_category, description in details.items():
             display_category_description(category, sub_category, description)
 
-def display_patriarchy_dimensions_by_indices(patriarchy_dimensions, indices=None):
+def display_dictionary_by_indices(dictionary, indices=None):
     """
-    Function to display the data contained in patriarchy_dimensions for a specified subset using indices.
+    Function to display the data contained in dictionary for a specified subset using indices.
     """
-    categories = list(patriarchy_dimensions.keys())
+    categories = list(dictionary.keys())
     if indices is None:
         indices = range(len(categories))
     else:
@@ -377,7 +377,7 @@ def display_patriarchy_dimensions_by_indices(patriarchy_dimensions, indices=None
     for idx in range(indices[0], indices[1]):
         if 0 <= idx < len(categories):
             category = categories[idx]
-            details = patriarchy_dimensions.get(category, {})
+            details = dictionary.get(category, {})
             display_details_description(category, details)
             # for sub_category, description in details.items():
                 # display_category_description(category, sub_category, description)

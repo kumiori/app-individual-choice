@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import hashlib
+import datetime
 
 from streamlit_vertical_slider import vertical_slider 
 from pages.test_1d import _stream_example, corrupt_string
@@ -15,6 +16,76 @@ from streamlit_extras.stateful_button import button as stateful_button
 import random
 from pages.test_settimia import fetch_and_display_data
 from pages.test_location import conn
+from pages.test_paged import PagedContainer
+# from pages.test_game import display_dictionary_by_indices
+# from pages.test_pleasure import display_dictionary
+
+with open("pages/discourse.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    st.write(f.read())
+    
+class _PagedContainer(PagedContainer):
+
+    def display_page(self, page):
+        start_idx = page * self.items_per_page
+        end_idx = start_idx + self.items_per_page
+        page_items = [start_idx, end_idx]
+
+        display_dictionary_by_indices(self.items, indices=page_items)
+    
+        if self.show_pagination:
+            st.write(f"Page {page + 1}/{self.get_total_pages()}")
+
+def display_dictionary(dictionary):
+    """
+    Function to display dictionary keys and content.
+    """
+
+    for key, content in dictionary.items():
+        col1, _, col2 = st.columns([2, .1, 2])
+        with col1:
+            st.markdown(f"{key}")
+        with col2:
+            st.markdown(f"{list(content)[0]}")
+        st.divider()
+
+
+
+def display_dictionary_by_indices(dictionary, indices=None):
+    """
+    Function to display the data contained in dictionary for a specified subset using indices.
+    """
+    categories = list(dictionary.keys())
+    if indices is None:
+        indices = range(len(categories))
+    else:
+        indices = sorted(set(indices))  # Ensure uniqueness and sort the indices
+
+    sliced_items = list(dictionary.items())[indices[0]:indices[1]]
+
+    # Convert the sliced items back to a dictionary
+    sliced_dict = dict(sliced_items)
+
+    for category, content in sliced_dict.items():
+        col1, _, col2 = st.columns([3, .3, 4])
+    
+        with col1:
+            st.markdown(f"{category}")
+        with col2:
+            st.markdown(list(content)[0])
+        st.divider()
+            
+def display_details_description(category, details):
+    """
+    Function to display category and its description.
+    """
+    col1, _, col2 = st.columns([2, .1, 2])
+    with col1:
+        st.markdown(f"{category}")
+    # for sub_category, description in details.items():
+    with col2:
+        st.markdown(f" {details}")
+    st.write("---")
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -37,7 +108,6 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 
 st.write(st.secrets["runtime"]["STATUS"])
 
-
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
 
@@ -49,7 +119,6 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
 
     def qualitative_parametric(self, label: str = "", id: str = None, key=None, **kwargs):
         return ParametricQualitative(self, label, id, **kwargs).display()
-
 
 survey = CustomStreamlitSurvey()
 
@@ -83,10 +152,13 @@ Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 
-# Initialize read_texts set in session state if not present
+# Initiali   read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
+if "current_booklet_page" not in st.session_state:
+    st.session_state["current_booklet_page"] = 0
+    
 def hash_text(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
@@ -172,6 +244,7 @@ panel_2 = """
 ## What do you think? Are we on the right path?
 
 """
+
 panel_3 = """ 
 
 ## Everything seems to lie upon a notion of change and connection.
@@ -193,6 +266,15 @@ panel_4 = """
 
 """
 
+panel_4_bis = """
+
+## Thank...
+
+## Think (or picture) a _global social transition_: should this be fast or slow, or a mix of both?
+
+"""
+
+
 panel_5 = """
 
 ## We are constructing a versatile direct coordination tool, an interactive digital platform as a framework to discuss and connect. 
@@ -201,19 +283,20 @@ panel_5 = """
 
 ## You can take _this_ as an opportunity to express, we have taken this as a challenge to address.
 
-## Let's play: what is your perception of priority levels? 
+## Let's play: what is your perception of priority levels?
 
 """
 
 panel_6 = """
 ## The following is a list of `social dimensions` or policy concerns. Match the sliders with your perception of priority levels.
 
-[mixer]
-
 ##### This is a great exercise in making communication effective, actionable, and visual.
+
+### These aspects are core for us: 
 
 
 """
+panel_7_bis = """Matrix viz.."""
 
 panel_7 = """
 
@@ -227,11 +310,15 @@ panel_7 = """
 
 ## This is how we think: _matrix is a map where patterns emerge_
 
-##  Buut maybe you are used to different types of map
+[MATRIX]
+
+##  But maybe you are used to different types of map...
+
+![Two dimensional bounded projection](https://ontheworldmap.com/france/city/paris/paris-travel-map-with-tourist-attractions-and-arrondissements.jpg =300x)
 
 this is Paris
 
-what's your city?
+## Where are you, at the moment? Where do you live now? mainly host you in the next two years? X Where are you now?
 
 """
 
@@ -248,6 +335,9 @@ panel_8 = """
 
 # access key: `[here] x [now]` 
 # [ I {NAME} CONNECT here and now ]
+
+`st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
+
 
 """
 
@@ -276,9 +366,9 @@ panel_11 = """
 ## Your preferences have been checkpointed.
 ## Feel free to come again in a few days to test your access key
 
-## In the meantime, we aare reconstructing our links to backend.
+## In the meantime, we are reconstructing our links to backend.
 
-## In {city} it's {weather} and {temperature} degrees. Happy to leave us a message or share a feedback?
+## In {city} it's {weather} and {temperature} degrees. Happy to leave us a message or share a feedback? //`prematuro?`
 
 """
 
@@ -294,7 +384,6 @@ quantitative (how much: 0-100)
 ## this is our email: [email]. Looking forward.
 
 """
-
 
 sandbox = """
 ## We'll tell you all about it in a moment...
@@ -369,16 +458,17 @@ panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  pan
          panel_9, panel_10, panel_11, panel_12]
 
 challenges = [
-    ("Productive Innovation", ""),
-    ("Global Value Chains", ""),
-    ("Artificial intelligence", ""),
-    ("Farmers and Development", ""),
-    ("Climate Change", ""),
-    ("Adaptation and Finance", ""),
-    ("Social Migration", ""),
     ("The Social Contract", ""),
     ("Cooperation Reinvented", ""),
-    ("Values, Inequalities, and Sustainability", ""),
+    ("Inequalities and Sustainability", ""),
+    ("The next Olympic games", ""),
+    ("Climate Change", ""),
+    ("Global Value Chains", ""),
+    ("Productive Innovation", ""),
+    ("Artificial intelligence", ""),
+    ("Farmers and Development", ""),
+    ("Adaptation and Finance", ""),
+    ("Social Migration", ""),
     ("Food system concerns", ""),
     ("Endogenous Solutions", "")
 ]
@@ -390,7 +480,7 @@ widget_info = [
     {"type": "yesno", "key": "opinion_counts"},
     {"type": "dichotomy", "key": "dichotomy_1"},
     {"type": "button", "key": "Let's..."},
-    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:3]}},
+    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5]}},
     {"type": "textinput", "key": "location"},
     {"type": "button", "key": "`Here` • `Now`"},
     {"type": "globe", "key": "Singular Map"},
@@ -416,7 +506,6 @@ def create_dichotomy(key, kwargs = {}):
                             key=key)
 
 def create_qualitative(key, kwargs = {}):
-    print(kwargs)
     return survey.qualitative_parametric(name="Spirit",
             question = "Support, Donate, or Invest?",
             label="Qualitative",
@@ -536,12 +625,11 @@ def create_equaliser(key, kwargs):
     with st.container():
         for i, column in enumerate(bottom_cols):
             with column:
-                print(dimensions[i + j*split_len][0])
                 survey.equaliser(
                     label=dimensions[i + j*split_len][0],
                     height=200,
                     key=f"cat_{i}_{j}",
-                    default_value = int(random.random() * 100),
+                    default_value = 0,
                     step=1,
                     min_value=0,
                     slider_color=('red','white'),
@@ -549,7 +637,6 @@ def create_equaliser(key, kwargs):
                     max_value=100,
                     value_always_visible=True,
                 )
-    
 
 # Dictionary mapping widget types to creation functions
 widget_creators = {
@@ -585,30 +672,21 @@ def main():
     if 'coordinates' not in st.session_state:
         st.session_state.location = None  # Initial damage parameter
 
-
     # once usage:
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
     st.divider()
-    st.markdown("# _Today_ {date}...")
+    now = datetime.datetime.now()
+    st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
+    st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
+    st.divider()
+    st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
 
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting...", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
     
-    with tab1:        
-
-        for p, (i, info)  in zip(panel, enumerate(widget_info)):
-            widget_key = info["key"]
-            widget_type = info["type"]
-            widget_kwargs = info["kwargs"] if "kwargs" in info else {}
-
-            st.markdown(p)
-            if widget_type in widget_creators:
-                widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
-
-            st.divider()
-            
-    st.write(st.session_state.read_texts)
+    with tab1:
+        connect()
 
     with tab3:        
         col1, _, col2 = st.columns([3, 0.1, 1.5])
@@ -638,9 +716,10 @@ def main():
 
     with tab5:
         st.markdown("## Frequently Asked Questions")
-
+        faq()
+        
     with tab6:
-        st.markdown("## References")
+        st.markdown("## The bounty")
         references()
 
     return survey
@@ -663,6 +742,20 @@ def print_languages(languages):
     else:
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
+def connect():
+    for p, (i, info)  in zip(panel, enumerate(widget_info)):
+        widget_key = info["key"]
+        widget_type = info["type"]
+        widget_kwargs = info["kwargs"] if "kwargs" in info else {}
+
+        st.markdown(p)
+        if widget_type in widget_creators:
+            widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
+
+        st.divider()
+        
+    st.write(st.session_state.read_texts)
+
 def contributions():
     
     booklet = [
@@ -674,14 +767,36 @@ def contributions():
         ("# We Are Enough", "### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"),
         ("# Rethinking Solutions", "### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"),
         ("# Je Suis l'Eau", "### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"),
-        ("## (_AI: behind the scenes_)", "## Claire Aoi \n ### [einsteigenbitte](https://einsteigenbitte.eu/)"),
+        ("## Aligning Automated Decision Making with European Values", "## Claire Aoi \n ### •⁠ a fantasy of Stochastic Moral Guardians'"),
         ("## tba", "Andrés León Baldelli"),
     ]
-    with st.container(height=666):
-        for author, title in booklet:
-            display_category_description(author, title)
 
-        st.divider()
+    booklet_dict = {
+        "# Le Gai Savoir": {"### Ariane Ahmadi \n ## Crises as vectors for emancipation"},
+        "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ## Fragilité et manque de confiance, en mars 1794..."},
+        "# Engagement with the Sea": {"### Antonia Taddei \n ## Proposals for personhood as a defense strategy"},
+        "## tba": {"Gabrielle Dyson"},
+        "# Pulse": {"### Giorgio Funaro \n ## An electronic impulse through an immersive voyage"},
+        "# We Are Enough": {"### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"},
+        "# Rethinking Solutions": {"### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"},
+        "# Je Suis l'Eau": {"### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"},
+        "## Aligning Automated Decision Making with European Values": {"## Claire Aoi \n ### •⁠ a fantasy of Stochastic Moral Guardians"},
+        "## tba": {"### Andrés León Baldelli"},
+    }
+
+    paged_container = _PagedContainer(booklet_dict, items_per_page=2, show_pagination = False)
+
+    with st.container():
+        col1, _, col2 = st.columns([2, 10, 2])
+        with col2:
+            if st.button("Next"):
+                st.session_state["current_booklet_page"] = min(st.session_state.current_booklet_page + 1, paged_container.get_total_pages() - 1)
+        with col1:
+            if st.button("Prev"):
+                st.session_state["current_booklet_page"] = max(st.session_state.current_booklet_page - 1, 0)
+
+        paged_container.display_page(st.session_state.current_booklet_page)
+        
             
     return
 
@@ -720,12 +835,39 @@ def more():
     return
     
 def faq():
+    faq_dictionary = {
+    "### What is the main theme of the conference panel discussion?": {"The panel discussion revolves around the theme of 'Change and Societal Transformation' within the context of Europe."},
+    "### Who are the key participants in the panel discussion?": {"The panel will feature policymakers, scholars, experts, thinkers, artists, and institutional leaders, creating a diverse and dynamic conversation."},
+    "### How can I actively participate in the discussion?": {"We encourage active engagement from the audience through live questions, comments, and feedback during the panel session."},
+    "### What innovative interfaces will be presented during the discussion?": {"We plan to showcase new interfaces that harness data and preferences, offering a unique platform for global discussions on societal transitions."},
+    "### How will the interactive equaliser metaphor be applied in the discussion?": {"Participants will have virtual sliders representing different categories, allowing them to express preferences, sensitivities, and perceptions related to societal changes."},
+    "### What are the initial topics of focus for the discussion categories?": {"Initial topics include but are not limited to environmental sustainability, technological advancements, cultural shifts, economic models, and educational reforms."},
+    "### Will the panel address global challenges or focus specifically on Europe?": {"While the primary focus is on Europe, the discussions will touch on global challenges, recognizing the interconnected nature of societal transformations."},
+    "### How can I stay updated on the preparation and organization of the panel?": {"Regular updates, including framework details and participant information, will be available on our dedicated conference panel webpage."},
+    "### Is there an opportunity for networking and collaboration after the panel discussion?": {"Yes, we encourage participants to connect, share contact information, and explore potential collaborations during and after the conference."},
+    "### Can I access recordings of the panel discussion after the conference?": {"Who knows! Recordings may be made available for those who may have missed the live sessions, allowing for continued engagement and knowledge sharing."}
+    }
+    
+    display_dictionary(faq_dictionary)
+    
     return
 
 def references():
     with st.expander("Show all the data", expanded=False):
         st.write("Survey Data:")
         st.json(survey.data, expanded=True)
+
+    references_dict = {
+        "# Book #1": {"### `growth` \n ## Potentials, determined"},
+        "# Book #2": {"### ..."},
+        "# Docu #0": {"### ..."},
+        "# Event #3": {"### ..."},
+        "# Story #4": {"### ..."},
+    }
+
+    display_dictionary(references_dict)
+
+    st.markdown("## Suggest reference..")
 
     return
 
@@ -739,15 +881,15 @@ if __name__ == "__main__":
         ("Productive transformation and Innovation", ""),
         ("Global Value Chains", ""),
         ("Artificial intelligence", ""),
-        ("Farmers and Development", ""),
-        ("Climate Change", ""),
-        ("Adaptation and Finance", ""),
-        ("Social Migration", ""),
-        ("The Social Contract", ""),
-        ("Cooperation Reinvented", ""),
-        ("Values, Inequalities, and Sustainability", ""),
-        ("Food system concerns", ""),
-        ("Endogenous Solutions", "")
+        # ("Farmers and Development", ""),
+        # ("Climate Change", ""),
+        # ("Adaptation and Finance", ""),
+        # ("Social Migration", ""),
+        # ("The Social Contract", ""),
+        # ("Cooperation Reinvented", ""),
+        # ("Values, Inequalities, and Sustainability", ""),
+        # ("Food system concerns", ""),
+        # ("Endogenous Solutions", "")
     ]
 
     st.markdown("## We are happy to share more and connect")
