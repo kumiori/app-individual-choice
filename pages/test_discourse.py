@@ -3,6 +3,27 @@ import streamlit.components.v1 as components
 import hashlib
 import datetime
 
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Panel Discussion - Athens Conference 2024",
+        page_icon="✨",
+        # layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+st.write(st.secrets["runtime"]["STATUS"])
+
 from streamlit_vertical_slider import vertical_slider 
 from pages.test_1d import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
@@ -87,26 +108,6 @@ def display_details_description(category, details):
         st.markdown(f" {details}")
     st.write("---")
 
-if st.secrets["runtime"]["STATUS"] == "Production":
-    st.set_page_config(
-        page_title="Panel Discussion - Athens Conference 2024",
-        page_icon="✨",
-        # layout="wide",
-        initial_sidebar_state="collapsed"
-    )
-
-    st.markdown(
-        """
-    <style>
-        [data-testid="collapsedControl"] {
-            display: none
-        }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-
-st.write(st.secrets["runtime"]["STATUS"])
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
