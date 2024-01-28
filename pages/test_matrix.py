@@ -90,15 +90,18 @@ def main():
     with col1:
         """### `We have accepted explosion of information, are you willing to accept explosion of undertsanding?`"""
 
-    with col2:
-        # matrix_size = st.slider("Select Matrix Size", min_value=1, max_value=10, value=5)
-        matrix_size = 5
-        matrix_placeholder = st.empty()
     with col3:
         st.button("Reload")
         st.button("Continue")
         st.button("Exit")
         st.button("Play")
+
+
+    col1, col2, col3 = st.columns(3)
+    with col2:
+        # matrix_size = st.slider("Select Matrix Size", min_value=1, max_value=10, value=5)
+        matrix_size = 5
+        matrix_placeholder = st.empty()
     
     chart_plot = st.empty()
         
