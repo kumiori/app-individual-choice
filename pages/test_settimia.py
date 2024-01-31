@@ -32,7 +32,7 @@ import time
 from pages.test_stream import _stream_once
 import json
 import hashlib
-
+from lib.io import fetch_and_display_data
 st.write(st.secrets["runtime"]["STATUS"])
 _qualitative_selector = components.declare_component(
     "qualitative",
@@ -56,25 +56,6 @@ def check_existence(conn, signature):
 
     return len(user_exists[1]) == 1
 
-def fetch_and_display_data(conn, table_name = "gathering"):
-    # Fetch all data from the "questionnaire" table
-    response = conn.table(table_name).select("*").execute()
-    # st.write(response)
-    # Check if there is any data in the response
-    if response and response.data:
-        data = response.data
-        _data = []
-        # Display each row of data
-        for row in data:
-            # st.write(row)
-            # st.write(f"Username: {row['name']} Id: {row['id']} timestamp: {row['created_at']}")
-            # st.json(json.loads(row['response_data']))
-            _data.append({"lat": row["latitude"], "lng": row["longitude"], "luckynumber": row["luckynumber"]+1})
-            # st.write("------------")
-    else:
-        st.write("No data found in the 'questionnaire' table.")
-    return _data
-
 def insert_or_update_data(conn, data):
     try:
         # insert a new record
@@ -97,7 +78,6 @@ def insert_or_update_data(conn, data):
             
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
-
 
 def qualitative_parametric(name, question, areas, key=None):
     return _qualitative_selector(component = "parametric",

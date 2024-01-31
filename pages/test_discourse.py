@@ -1,6 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import hashlib
 import datetime
 import time
 
@@ -25,7 +23,6 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 
 st.write(st.secrets["runtime"]["STATUS"])
 
-from streamlit_vertical_slider import vertical_slider 
 from lib.texts import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
 from pages.test_injection import CustomStreamlitSurvey
@@ -43,8 +40,11 @@ from pages.test_paged import PagedContainer
 # from pages.test_pleasure import display_dictionary
 
 from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
-
+from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
+from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
+from lib.texts import match_input
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox,create_equaliser
 
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -62,163 +62,13 @@ class _PagedContainer(PagedContainer):
         if self.show_pagination:
             st.write(f"Page {page + 1}/{self.get_total_pages()}")
 
-def display_dictionary(dictionary):
-    """
-    Function to display dictionary keys and content.
-    """
-
-    for key, content in dictionary.items():
-        col1, _, col2 = st.columns([2, .1, 2])
-        with col1:
-            st.markdown(f"{key}")
-        with col2:
-            st.markdown(f"{list(content)[0]}")
-        st.divider()
-
-
-
-def display_dictionary_by_indices(dictionary, indices=None):
-    """
-    Function to display the data contained in dictionary for a specified subset using indices.
-    """
-    categories = list(dictionary.keys())
-    if indices is None:
-        indices = range(len(categories))
-    else:
-        indices = sorted(set(indices))  # Ensure uniqueness and sort the indices
-
-    sliced_items = list(dictionary.items())[indices[0]:indices[1]]
-
-    # Convert the sliced items back to a dictionary
-    sliced_dict = dict(sliced_items)
-
-    for category, content in sliced_dict.items():
-        col1, _, col2 = st.columns([3, .3, 4])
-    
-        with col1:
-            st.markdown(f"{category}")
-        with col2:
-            st.markdown(list(content)[0])
-        st.divider()
-            
-def display_details_description(category, details):
-    """
-    Function to display category and its description.
-    """
-    col1, _, col2 = st.columns([2, .1, 2])
-    with col1:
-        st.markdown(f"{category}")
-    # for sub_category, description in details.items():
-    with col2:
-        st.markdown(f" {details}")
-    st.write("---")
-
-
-class CustomStreamlitSurvey(ss.StreamlitSurvey):
-    shape_types = ["circle", "square", "pill"]
-
-    def dichotomy(self, label: str = "", id: str = None, **kwargs) -> str:
-        return Dichotomy(self, label, id, **kwargs).display()
-    
-    def equaliser(self, label: str = "", id: str = None, **kwargs) -> str:
-        return VerticalSlider(self, label, id, **kwargs).display()
-
-    def qualitative_parametric(self, label: str = "", id: str = None, key=None, **kwargs):
-        return ParametricQualitative(self, label, id, **kwargs).display()
-
 survey = CustomStreamlitSurvey()
-
-_qualitative_selector = components.declare_component(
-    "qualitative",
-    url='http://localhost:3000'
-)
-
-def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
-    return _qualitative_selector(component = "dichotomy",
-    name = name,
-    label = label,
-    key=key,
-    question = question,
-    rotationAngle = rotationAngle,
-    gradientWidth = gradientWidth,
-    invert = invert,
-    shift = shift
-    )
-    
-def _qualitative(name, question, label, areas, key=None):
-    return _qualitative_selector(component = "parametric",
-    name = name,
-    label = label,
-    key=key,
-    areas = areas,
-    data_values  = [1, 2, 10],
-    question = question)
-
-Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
-VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
-ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
 if "current_booklet_page" not in st.session_state:
     st.session_state["current_booklet_page"] = 0
-    
-def hash_text(text):
-    return hashlib.sha256(text.encode()).hexdigest()
-
-def _stream_once(text, damage):
-    text_hash = hash_text(text)
-
-    # Define sleep lengths for different punctuation symbols
-    sleep_lengths = {'.': 1., ',': 0.3, '!': 1.7, '?': 1.5, ';': 0.4, ':': 0.4}
-    sleep_lengths = {key: value * (1. + damage) for key, value in sleep_lengths.items()}
-    # st.json(sleep_lengths)
-
-    # st.write(sleep_lengths.values() * (1+damage))
-
-    # Check if the text has already been read
-    if text_hash not in st.session_state.read_texts:
-        # st.write(text)
-    
-        for i, word in enumerate(text.split()):
-            # Check if the last character is a punctuation symbol
-            last_char = word[-1] if word[-1] in string.punctuation else None
-
-            # Yield the word with appropriate sleep length
-            if last_char == '.' or last_char == '?' or last_char == '^':
-                yield word + " \n "
-            else:
-                yield word + " "
-            
-            if last_char and last_char in sleep_lengths:
-                time.sleep(sleep_lengths[last_char])
-            else:
-                time.sleep(0.3)
-            
-        st.session_state.read_texts.add(text_hash)  # Marking text as read
-
-def create_streamed_columns(panel):
-    num_panels = len(panel)
-    
-    for i in range(num_panels):
-        width_pattern = [2, 1] if i % 2 == 0 else [1, 2]
-        cols = st.columns(width_pattern)
-
-        col_idx = 0  if i % 2 == 0 else 1
-        with cols[col_idx]:
-            streamwrite(_stream_once(panel[i], 0))
-
-def match_input(input_text, translation_dict):
-    if not input_text:
-        return None
-    
-    matching_keys = [key for key, value in translation_dict.items() if value.lower() == input_text.lower()]
-
-    if matching_keys:
-        return matching_keys
-    else:
-        return False
 
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
@@ -279,7 +129,6 @@ panel_4_bis = """
 
 """
 
-
 panel_5 = """
 
 ## We are constructing a versatile direct coordination tool, an interactive digital platform as a framework to discuss and connect. 
@@ -301,6 +150,7 @@ panel_6 = """
 
 
 """
+
 panel_7_bis = """Matrix viz.."""
 
 panel_7 = """
@@ -500,148 +350,6 @@ placeholders = [{"type": None, "key": None} for _ in range(len(panel)-len(widget
 widget_info = widget_info + placeholders
 
 widget_dict = {}
-
-def create_button(key, kwargs = {}):
-    return st.button(label=key)
-
-def create_dichotomy(key, kwargs = {}):
-    return survey.dichotomy(name="Spirit", 
-                            label="Confidence",
-                            question="Dychotomies, including time...", 
-                            key=key)
-
-def create_qualitative(key, kwargs = {}):
-    return survey.qualitative_parametric(name="Spirit",
-            question = "Support, Donate, or Invest?",
-            label="Qualitative",
-            areas = 3,
-            key = "parametric")
-    
-def create_yesno(key, kwargs = {}):
-    col1, col2 = st.columns(2)
-    with col1:
-        yes_clicked = st.button("Yes", key=f"{key}_yes")
-    with col2:
-        no_clicked = st.button("No", key=f"{key}_no")
-    
-    return
-
-def create_next(key, kwargs = {}):
-    return st.button("Next", key=f"{key}")
-
-def create_globe(key, kwargs = {}):
-    data = fetch_and_display_data(conn, table_name="gathering")
-    
-    # with stream:
-        # st.write('.........')
-    
-    # Generate JavaScript code with city data
-    javascript_code = f"""
-    // Gen city data
-    const VELOCITY = 9; // minutes per frame
-
-    const sunPosAt = dt => {{
-        const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
-        const t = solar.century(dt);
-        const longitude = (day - dt) / 864e5 * 360 - 180;
-        return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
-    }};
-
-    let dt = +new Date();
-    const solarTile = {{ pos: sunPosAt(dt) }};
-    const timeEl = document.getElementById('time');
-
-    const cityData = { data };
-    const N = 10;
-
-    const world = Globe()
-        (document.getElementById('globeViz'))
-        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-        .backgroundColor('rgb(14, 17, 23)')
-        .tilesData([solarTile])
-        .tileLng(d => d.pos[0])
-        .tileLat(d => d.pos[1])
-        .tileAltitude(0.01)
-        .tileWidth(180)
-        .tileHeight(180)
-        .tileUseGlobeProjection(false)
-        .tileMaterial(() => new THREE.MeshLambertMaterial({{ color: '#ffff00', opacity: 0.3, transparent: true }}))
-        .tilesTransitionDuration(0)
-        .pointsData(cityData)
-        .pointAltitude('luckynumber');
-
-    // animate time of day
-    requestAnimationFrame(() =>
-        (function animate() {{
-        dt += VELOCITY * 60 * 1000;
-        solarTile.pos = sunPosAt(dt);
-        world.tilesData([solarTile]);
-        timeEl.textContent = new Date(dt).toLocaleString();
-        requestAnimationFrame(animate);
-        }})()
-    );
-
-    // Add auto-rotation
-    world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 3.6;
-    """
-
-    # HTML code with embedded JavaScript
-    html_code = f"""
-    <head>
-    <style> body {{ margin: 0em; }} </style>
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/globe.gl"></script>
-    <script src="//unpkg.com/solar-calculator"></script>
-    </head>
-
-    <body>
-    <div id="globeViz"></div>
-    <div id="time"></div>
-    <script>
-        { javascript_code }
-    </script>
-    </body>
-    """
-
-    # Display the HTML code in Streamlit app
-    col1, col2 = st.columns(2)
-    with col1:
-        st.components.v1.html(html_code, height=700, width=700)
-    
-    st.write("Globe")
-    return 
-
-def create_textinput(key, kwargs = {}):
-    text = survey.text_input(key, help="")
-    return 
-
-def create_checkbox(key, kwargs = {}):
-    return survey.checkbox("Choose one:", key=key)
-
-def create_equaliser(key, kwargs):
-    rows = 1
-    dimensions = kwargs["data"]
-    split_len = len(dimensions) // rows
-    bottom_cols = st.columns(split_len)
-
-    # for j in range(rows):
-    j = 0
-    with st.container():
-        for i, column in enumerate(bottom_cols):
-            with column:
-                survey.equaliser(
-                    label=dimensions[i + j*split_len][0],
-                    height=200,
-                    key=f"cat_{i}_{j}",
-                    default_value = 0,
-                    step=1,
-                    min_value=0,
-                    slider_color=('red','white'),
-                    thumb_shape="circle",
-                    max_value=100,
-                    value_always_visible=True,
-                )
 
 # Dictionary mapping widget types to creation functions
 widget_creators = {
