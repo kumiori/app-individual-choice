@@ -44,3 +44,58 @@ def _stream_example(text, damage):
         else:
             time.sleep(0.3)
  
+def hash_text(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+def _stream_once(text, damage):
+    text_hash = hash_text(text)
+
+    # Define sleep lengths for different punctuation symbols
+    sleep_lengths = {'.': 1., ',': 0.3, '!': 1.7, '?': 1.5, ';': 0.4, ':': 0.4}
+    sleep_lengths = {key: value * (1. + damage) for key, value in sleep_lengths.items()}
+    # st.json(sleep_lengths)
+
+    # st.write(sleep_lengths.values() * (1+damage))
+
+    # Check if the text has already been read
+    if text_hash not in st.session_state.read_texts:
+        # st.write(text)
+    
+        for i, word in enumerate(text.split()):
+            # Check if the last character is a punctuation symbol
+            last_char = word[-1] if word[-1] in string.punctuation else None
+
+            # Yield the word with appropriate sleep length
+            if last_char == '.' or last_char == '?' or last_char == '^':
+                yield word + " \n "
+            else:
+                yield word + " "
+            
+            if last_char and last_char in sleep_lengths:
+                time.sleep(sleep_lengths[last_char])
+            else:
+                time.sleep(0.3)
+            
+        st.session_state.read_texts.add(text_hash)  # Marking text as read
+
+def create_streamed_columns(panel):
+    num_panels = len(panel)
+    
+    for i in range(num_panels):
+        width_pattern = [2, 1] if i % 2 == 0 else [1, 2]
+        cols = st.columns(width_pattern)
+
+        col_idx = 0  if i % 2 == 0 else 1
+        with cols[col_idx]:
+            streamwrite(_stream_once(panel[i], 0))
+
+def match_input(input_text, translation_dict):
+    if not input_text:
+        return None
+    
+    matching_keys = [key for key, value in translation_dict.items() if value.lower() == input_text.lower()]
+
+    if matching_keys:
+        return matching_keys
+    else:
+        return False
