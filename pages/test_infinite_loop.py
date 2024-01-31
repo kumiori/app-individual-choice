@@ -85,6 +85,7 @@ def main():
     st.markdown("### <center>Let's meet, Settimia...</center>", unsafe_allow_html=True)
     st.markdown("### <center> > &quot;Hello Fellow _______, this is the House of Mystery&quot;</center>", unsafe_allow_html=True)
     st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
+    st.markdown('`Do we have any data?`', unsafe_allow_html=True)
     st.markdown('', unsafe_allow_html=True)
     
     
@@ -93,4 +94,4 @@ if __name__ == "__main__":
     survey = main()
     # add_vertical_space(1)
     # more()
-    create_globe("Settimia")
+    create_globe("Settimia", kwargs={'database': 'settimia'})

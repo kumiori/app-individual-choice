@@ -32,8 +32,9 @@ def create_yesno(key, kwargs = {}):
 def create_next(key, kwargs = {}):
     return st.button("Next", key=f"{key}")
 
-def create_globe(key, kwargs = {}):
-    data = fetch_and_display_data(conn, table_name="gathering")
+def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
+
+    data = fetch_and_display_data(conn, table_name=kwargs.get('database'))
     
     # with stream:
         # st.write('.........')
@@ -148,7 +149,7 @@ def create_equaliser(key, kwargs):
 def fetch_and_display_data(conn, table_name = "gathering"):
     # Fetch all data from the "questionnaire" table
     response = conn.table(table_name).select("*").execute()
-    # st.write(response)
+    st.write(response)
     # Check if there is any data in the response
     if response and response.data:
         data = response.data
@@ -161,6 +162,6 @@ def fetch_and_display_data(conn, table_name = "gathering"):
             _data.append({"lat": row["latitude"], "lng": row["longitude"], "luckynumber": row["luckynumber"]+1})
             # st.write("------------")
     else:
-        st.write("No data found in the 'questionnaire' table.")
+        st.write(f"No data found in the {table_name} table.")
     return _data
 
