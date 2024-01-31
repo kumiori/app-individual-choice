@@ -112,7 +112,6 @@ def create_globe(key, kwargs = {}):
     with col1:
         st.components.v1.html(html_code, height=700, width=700)
     
-    st.write("Globe")
     return 
 
 def create_textinput(key, kwargs = {}):
