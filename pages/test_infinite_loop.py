@@ -83,6 +83,7 @@ def main():
     now = datetime.datetime.now()
     st.markdown("# <center>The Fellowship of the Infinite Potential</center>", unsafe_allow_html=True)
     st.markdown("### <center>Let's meet, Settimia...</center>", unsafe_allow_html=True)
+    st.markdown("### <center> > &quot;Hello Fellow _______, this is the House of Mystery&quot;</center>", unsafe_allow_html=True)
     st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
     st.markdown('', unsafe_allow_html=True)
     
