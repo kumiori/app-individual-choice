@@ -3,6 +3,27 @@ import sympy as sp
 import numpy as np
 import plotly.express as px
 
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Celestial Verse Portal",
+        page_icon="✨",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+st.write(st.secrets["runtime"]["STATUS"])
+
 if 'parameters' not in st.session_state:
     st.session_state.parameters = {}
 
@@ -135,11 +156,16 @@ def book_of_the_numbers():
 
 def main():
     st.title("Eigenspace Explorer")
-
+    st.markdown("Consider this: We solve a difficult problem and we do it for ________. (Fill the blank)")
     # Parameters
-    a = st.slider("Enter a", 0.0, 10.0, 1.0)
-    b = st.slider("Enter b", 0.0, 10.0, 1.0)
-    c = st.slider("Enter c", -10.0, 10.0, 1.0)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        a = st.slider("a", 0.0, 10.0, 1.0)
+    with col2:
+        b = st.slider("b", 0.0, 10.0, 1.0)
+    with col3:
+        c = st.slider("c", -10.0, 10.0, 1.0)
     parameters = {"a": a, "b": b, "c": c}
 
     # Button to generate random numbers
@@ -147,14 +173,21 @@ def main():
         parameters = book_of_the_numbers()
         st.session_state.parameters = parameters
         st.write(f"Generated Parameters: {parameters}")
+        st.write('`Remark: Parameters are generated from the book of the numbers. You should have received a copy...`')
     else:
         st.write(f"Custom Parameters: {parameters}")
-        st.session_state.parameters = {"a": a, "b": b, "c": c}
+        st.session_state.parameters = parameters
     
+    st.write(f'This is the competition:')
+
+    if 'a' in st.session_state.parameters:
+        a, b, c = st.session_state.parameters["a"], st.session_state.parameters["b"], st.session_state.parameters["c"]
+    st.markdown(f'# <center>$bc^2$ `{np.around(b*c**2, 1)}` vs. $\pi a^2$ `{np.around(np.pi**2 * a, 1)}`</center>', unsafe_allow_html=True)
+    st.markdown(f'# <center>|supp| = $(\pi^2 a / (bc^2))^{{1 / 3}}$ `{np.around((np.pi**2 * a / (b * c**2))**(1/3), 1)}` or $0$</center>', unsafe_allow_html=True)
     st.write(st.session_state.parameters)
 
-    space_choice = st.radio("Choose Space", ["Vector Space", "Convex Set"])
-
+    
+    space_choice = st.radio("Choose Space", ["Vector Space", "Convex Set"], horizontal=True)
     if st.button("Compute Eigenspace"):
         st.markdown(f"$bc^2$ = {np.around(b*c**2, 2)}, \
                     $\pi^2  a$ = {np.around(np.pi**2 * a, 2)}")
@@ -169,8 +202,6 @@ def main():
             v, β = eigenspace["v"], eigenspace["β"]
             D = eigenspace["D"]
             
-        st.markdown(space_choice)
-
         # st.write(f"v = {v}")
         # st.write(f"β = {β}")
         # Sample points for visualization
