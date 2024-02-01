@@ -33,8 +33,6 @@ import streamlit_survey as ss
 from streamlit_extras.row import row
 from streamlit_extras.stateful_button import button as stateful_button
 import random
-from pages.test_settimia import fetch_and_display_data
-from pages.test_location import conn
 from pages.test_paged import PagedContainer
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
@@ -44,7 +42,7 @@ from lib.dictionary_manip import display_dictionary, display_dictionary_by_indic
 from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
 from lib.texts import match_input
-from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox,create_equaliser
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
 
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -329,19 +327,19 @@ challenges = [
 ]
 
 widget_info = [
-    {"type": "next", "key": "next"},
-    {"type": "yesno", "key": "button_0"},
-    {"type": "yesno", "key": "button_1"},
-    {"type": "yesno", "key": "opinion_counts"},
-    {"type": "dichotomy", "key": "dichotomy_1"},
-    {"type": "button", "key": "Let's..."},
-    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5]}},
-    {"type": "textinput", "key": "location"},
-    {"type": "button", "key": "`Here` • `Now`"},
-    {"type": "globe", "key": "Singular Map"},
-    {"type": "button", "key": "`Here`  `Now`"},
-    {"type": "yesno", "key": "extra_info"},
-    {"type": "qualitative", "key": "quali"},
+    {"type": "next", "key": "next", "kwargs": {"survey": survey}},
+    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey}},
+    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey}},
+    {"type": "yesno", "key": "opinion_counts", "kwargs": {"survey": survey}},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"survey": survey}},
+    {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
+    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
+    {"type": "textinput", "key": "location", "kwargs": {"survey": survey}},
+    {"type": "button", "key": "`Here` • `Now`", "kwargs": {"survey": survey}},
+    {"type": "globe", "key": "Singular Map", "kwargs": {"survey": survey, "database": "gathering"}},
+    {"type": "button", "key": "`Here`  `Now`", "kwargs": {"survey": survey}},
+    {"type": "yesno", "key": "extra_info", "kwargs": {"survey": survey}},
+    {"type": "qualitative", "key": "quali", "kwargs": {"survey": survey}},
     {"type": None, "key": None}
 ]
 
@@ -398,7 +396,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 60
+        seconds = 1
 
         start_time = time.time()
         while True:
