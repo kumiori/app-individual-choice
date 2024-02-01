@@ -15,7 +15,7 @@ def create_dichotomy(key, kwargs = {}):
                             key=key)
 
 def create_qualitative(key, kwargs = {}):
-    survey = kwargs
+    survey = kwargs.get('survey')
     return survey.qualitative_parametric(name="Spirit",
             question = "Support, Donate, or Invest?",
             label="Qualitative",

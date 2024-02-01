@@ -94,4 +94,4 @@ if __name__ == "__main__":
     survey = main()
     # add_vertical_space(1)
     # more()
-    create_globe("Settimia", kwargs={'database': 'settimia'})
+    create_globe("Settimia", kwargs={'database': 'gathering'})
