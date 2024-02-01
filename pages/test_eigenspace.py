@@ -215,7 +215,7 @@ def main():
         # Plotting
         _D = float(sp.N(D))
         fig = px.line(x=x_values, y=[v_values, β_values, _β_values],
-                    labels={'value': 'Function Value', 'x': 'x'},
+                    labels={'v_values': 'v', 'β_values': 'β'},
                     title=f'Eigenspace Functions in {space_choice} with D={np.around(_D, 2)}')
 
         _layout = dict(xaxis=dict(title='x',

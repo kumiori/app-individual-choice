@@ -8,12 +8,14 @@ def create_button(key, kwargs = {}):
     return st.button(label=key)
 
 def create_dichotomy(key, kwargs = {}):
+    survey = kwargs.get('survey')
     return survey.dichotomy(name="Spirit", 
                             label="Confidence",
                             question="Dychotomies, including time...", 
                             key=key)
 
 def create_qualitative(key, kwargs = {}):
+    survey = kwargs
     return survey.qualitative_parametric(name="Spirit",
             question = "Support, Donate, or Invest?",
             label="Qualitative",
@@ -21,6 +23,7 @@ def create_qualitative(key, kwargs = {}):
             key = "parametric")
 
 def create_yesno(key, kwargs = {}):
+    survey = kwargs
     col1, col2 = st.columns(2)
     with col1:
         yes_clicked = st.button("Yes", key=f"{key}_yes")
@@ -30,11 +33,12 @@ def create_yesno(key, kwargs = {}):
     return
 
 def create_next(key, kwargs = {}):
+    survey = kwargs
     return st.button("Next", key=f"{key}")
 
 def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
 
-    data = fetch_and_display_data(conn, table_name=kwargs.get('database'))
+    data = fetch_and_display_data(conn, kwargs)
     
     # with stream:
         # st.write('.........')
@@ -116,13 +120,16 @@ def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
     return 
 
 def create_textinput(key, kwargs = {}):
+    survey = kwargs.get('survey')
     text = survey.text_input(key, help="")
     return 
 
 def create_checkbox(key, kwargs = {}):
+    survey = kwargs.get('survey')
     return survey.checkbox("Choose one:", key=key)
 
-def create_equaliser(key, kwargs):
+def create_equaliser(key, kwargs={}):
+    survey = kwargs.get('survey')
     rows = 1
     dimensions = kwargs["data"]
     split_len = len(dimensions) // rows
@@ -146,10 +153,12 @@ def create_equaliser(key, kwargs):
                     value_always_visible=True,
                 )
 
-def fetch_and_display_data(conn, table_name = "gathering"):
+def fetch_and_display_data(conn, kwargs):
     # Fetch all data from the "questionnaire" table
+    table_name = kwargs.get('database')
+    st.write(f"Fetching data from the {table_name} table.")
     response = conn.table(table_name).select("*").execute()
-    st.write(response)
+    # st.write(response)
     # Check if there is any data in the response
     if response and response.data:
         data = response.data
