@@ -25,7 +25,7 @@ st.write(st.secrets["runtime"]["STATUS"])
 
 from lib.texts import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
-from pages.test_injection import CustomStreamlitSurvey
+from lib.survey import CustomStreamlitSurvey
 from streamlit_extras.streaming_write import write as streamwrite 
 import time
 import string
@@ -33,7 +33,7 @@ import streamlit_survey as ss
 from streamlit_extras.row import row
 from streamlit_extras.stateful_button import button as stateful_button
 import random
-from pages.test_paged import PagedContainer
+from lib.presentation import PagedContainer
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
 
@@ -60,8 +60,30 @@ class _PagedContainer(PagedContainer):
         if self.show_pagination:
             st.write(f"Page {page + 1}/{self.get_total_pages()}")
 
+
+class ConnectingContainer(PagedContainer):
+    def display_page(self, page):
+        
+        st.write(self.items)
+        
+        # for p, (i, info)  in zip(panel, enumerate(widget_info)):
+        #     widget_key = info["key"]
+        #     widget_type = info["type"]
+        #     widget_kwargs = info["kwargs"] if "kwargs" in info else {}
+
+        #     st.markdown(p)
+        #     if widget_type in widget_creators:
+        #         widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
+
+        #     st.divider()
+            
+
+        pass
+        # return super().display_page(page)
+
 survey = CustomStreamlitSurvey()
 
+print(dir(survey))
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
@@ -483,6 +505,11 @@ def print_languages(languages):
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
 def connect():
+    
+    
+    
+    paginator = ConnectingContainer(items = zip(panel, enumerate(widget_info)))
+    
     for p, (i, info)  in zip(panel, enumerate(widget_info)):
         widget_key = info["key"]
         widget_type = info["type"]

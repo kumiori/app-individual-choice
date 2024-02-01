@@ -3,6 +3,7 @@
 import streamlit as st
 from streamlit_timeline import timeline
 import json
+import datetime
 
 # use full page width
 st.set_page_config(page_title="Timeline Example", layout="wide")
@@ -71,7 +72,10 @@ data = {
     ]
 }
 
-import datetime
+# load data
+
+# with open('pages/timeline_example.json', "r") as f:
+#     data = f.read()
 
 current_year = datetime.datetime.now().year
 
@@ -83,8 +87,8 @@ data = {
             "credit": ""
         },
         "text": {
-            "headline": "A Year's Timeline",
-            "text": "<p>An example timeline with major events, workshops, and an auction.</p>"
+            "headline": "Settimia's Timeline",
+            "text": "<p>A timeline with major events, workshops, and an auction.</p>"
         }
     },
     "events": [
