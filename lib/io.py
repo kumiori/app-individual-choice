@@ -9,10 +9,30 @@ def create_button(key, kwargs = {}):
 
 def create_dichotomy(key, kwargs = {}):
     survey = kwargs.get('survey')
-    return survey.dichotomy(name="Spirit", 
-                            label="Confidence",
-                            question="Dychotomies, including time...", 
-                            key=key)
+    name = kwargs.get('name', 'Spirit')
+    question = kwargs.get('question', 'Dychotomies, including time...')
+    messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
+    inverse_choice = kwargs.get('inverse_choice', lambda x: x)
+    col1, col2, col3 = st.columns([3, .1, 1])
+    with col1:    
+        response = survey.dichotomy(name=name, 
+                                label="Confidence",
+                                question=question, 
+                                key=key)
+    with col3:
+        if response:
+            st.markdown('\n')            
+            st.markdown(f'## Your choice:', unsafe_allow_html=True)
+            st.markdown(f'## {inverse_choice(float(response))}')
+
+            if float(response) < 0.1:
+                st.success(messages[0])
+            if float(response) > 0.9:
+                st.info(messages[1])
+            elif 0.1 < float(response) < 0.9:
+                st.success(messages[2])
+
+    return
 
 def create_qualitative(key, kwargs = {}):
     survey = kwargs.get('survey')

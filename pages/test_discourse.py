@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
 import time
+from streamlit_extras.add_vertical_space import add_vertical_space 
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -43,7 +44,7 @@ from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
 from lib.texts import match_input
 from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
-
+from pages.test_footer import footer
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     st.write(f.read())
@@ -63,17 +64,18 @@ class _PagedContainer(PagedContainer):
 
 class ConnectingContainer(PagedContainer):
     def display_page(self, page):
-        
-        st.write(self.items)
-        
-        # for p, (i, info)  in zip(panel, enumerate(widget_info)):
-        #     widget_key = info["key"]
-        #     widget_type = info["type"]
-        #     widget_kwargs = info["kwargs"] if "kwargs" in info else {}
+        page_item = list(self.items)[page]
+        (panel, widget_info) = page_item
+        st.markdown(panel)
+        widget_key = widget_info["key"]
+        widget_type = widget_info["type"]
+        widget_kwargs = widget_info["kwargs"] if "kwargs" in widget_info else {}
+        if widget_type in widget_creators:
+            widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
 
-        #     st.markdown(p)
-        #     if widget_type in widget_creators:
-        #         widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
+        # for item in self.items:
+        #     (panel, widget_info) = item
+        #     st.markdown(panel)
 
         #     st.divider()
             
@@ -89,6 +91,9 @@ if 'read_texts' not in st.session_state:
 
 if "current_booklet_page" not in st.session_state:
     st.session_state["current_booklet_page"] = 0
+
+if "current_discourse_page" not in st.session_state:
+    st.session_state["current_discourse_page"] = 0
 
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
@@ -175,8 +180,6 @@ panel_7_bis = """Matrix viz.."""
 
 panel_7 = """
 
-[sanity check: u_0 neq u_rnd]
-
 ## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. What's your name?
 
 ## We are trying to understand why the world is in a state of fracture on several levels: individual, social and universal.
@@ -189,7 +192,7 @@ panel_7 = """
 
 ##  But maybe you are used to different types of map...
 
-![Two dimensional bounded projection](https://ontheworldmap.com/france/city/paris/paris-travel-map-with-tourist-attractions-and-arrondissements.jpg =300x)
+![Two dimensional bounded projection](https://i.imgur.com/XlMGG76.png)
 
 this is Paris
 
@@ -353,7 +356,7 @@ widget_info = [
     {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey}},
     {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey}},
     {"type": "yesno", "key": "opinion_counts", "kwargs": {"survey": survey}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"survey": survey}},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": '', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
     {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
     {"type": "textinput", "key": "location", "kwargs": {"survey": survey}},
@@ -434,6 +437,7 @@ def main():
             with col2:
                 matrix_placeholder.empty()
                 with matrix_placeholder:
+                    
                     display_matrix(matrix)
                     
             elapsed_time = time.time() - start_time
@@ -505,22 +509,47 @@ def print_languages(languages):
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
 def connect():
+    paginator = ConnectingContainer(items = list(zip(panel, widget_info)), items_per_page=1)
     
-    
-    
-    paginator = ConnectingContainer(items = zip(panel, enumerate(widget_info)))
-    
-    for p, (i, info)  in zip(panel, enumerate(widget_info)):
-        widget_key = info["key"]
-        widget_type = info["type"]
-        widget_kwargs = info["kwargs"] if "kwargs" in info else {}
-
-        st.markdown(p)
-        if widget_type in widget_creators:
-            widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
-
-        st.divider()
+    with st.container():
+        col1, _, col2 = st.columns([2, 10, 2])
+        with col2:
+            if st.button("Next", key="next_discourse_page"):
+                st.session_state["current_discourse_page"] = min(st.session_state.current_discourse_page + 1, paginator.get_total_pages() - 1)
+        with col1:
+            if st.button("Prev", key="prev_discourse_page"):
+                st.session_state["current_discourse_page"] = max(st.session_state.current_discourse_page - 1, 0)
+        with _:
+            st.progress(st.session_state.current_discourse_page / paginator.get_total_pages(), text=None)
+        paginator.display_page(st.session_state.current_discourse_page)
         
+    st.write(f'Current page is {st.session_state.current_discourse_page}')
+    st.divider()
+
+
+    links_row = row(2, vertical_align="center")
+    links_row.button(
+        ":honey_pot: Explore our panel contributions",
+        use_container_width=True,
+    )
+    links_row.link_button(
+        ":ticket:  Visit the conference's website",
+        "https://www.europeindiscourse.eu/",
+        use_container_width=True,
+    )
+
+    # for p, (i, info)  in zip(panel, enumerate(widget_info)):
+    #     widget_key = info["key"]
+    #     widget_type = info["type"]
+    #     widget_kwargs = info["kwargs"] if "kwargs" in info else {}
+
+    #     st.markdown(p)
+    #     if widget_type in widget_creators:
+    #         widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
+
+    #     st.divider()
+        
+    st.write(survey.data)
     st.write(st.session_state.read_texts)
 
 def contributions():
@@ -641,8 +670,9 @@ def references():
 if __name__ == "__main__":
     
     survey = main()
-    # add_vertical_space(1)
+    add_vertical_space(7)
     # more()
+    # footer()
     
     challenges = [
         ("Productive transformation and Innovation", ""),
@@ -659,16 +689,17 @@ if __name__ == "__main__":
         # ("Endogenous Solutions", "")
     ]
 
+    st.divider()
+    
+    st.markdown("## Would you like to participate?")
     st.markdown("## We are happy to share more and connect")
 
-    
-    st.markdown("""## A panel discussion bringing forward an emancipatory vision of           change... \n
+    st.markdown("""##
                 On est dans la merde
         On est revenus a un etat de chaos dans les 
     relations geopolitiques internationales...
                 
                 """)
-    st.markdown("## Would you like to participate?")
 
 
     # return_value = survey.dichotomy(name="", 

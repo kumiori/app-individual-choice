@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_survey as ss
 from streamlit_extras.streaming_write import write as streamwrite 
 from pages.test_1d import _stream_example, corrupt_string
-from pages.test_discourse import _stream_once
+from lib.texts import _stream_once
 import time
 
 if 'read_texts' not in st.session_state:
