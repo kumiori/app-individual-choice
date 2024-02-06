@@ -3,6 +3,7 @@ import time
 from streamlit_extras.streaming_write import write as streamwrite 
 import random
 import string
+import hashlib
 
 def corrupt_string(input_str, damage_parameter):
     # Define the list of symbols

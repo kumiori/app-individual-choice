@@ -46,10 +46,15 @@ def _stream_once(text, damage):
             
         st.session_state.read_texts.add(text_hash)  # Marking text as read
 
-# once usage:
-st.write(st.session_state.read_texts)
-streamwrite(_stream_once("This is some initial text that should only be displayed once.", 0))
-st.write(st.session_state.read_texts)
-streamwrite(_stream_once("Additional text that should only be displayed once.", 0))
-st.write(st.session_state.read_texts)
-st.text_input("Text Input")
+def main():
+    # once usage:
+    st.write(st.session_state.read_texts)
+    streamwrite(_stream_once("This is some initial text that should only be displayed once.", 0))
+    st.write(st.session_state.read_texts)
+    streamwrite(_stream_once("Additional text that should only be displayed once.", 0))
+    st.write(st.session_state.read_texts)
+    st.text_input("Text Input")
+
+
+if __name__ == "__main__":
+    main()

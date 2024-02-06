@@ -137,7 +137,9 @@ class Dichotomy extends StreamlitComponentBase<State> {
                     <br />
                     <p>{question}</p>
                 </span>
-                <svg className="col-md-12 col-sm-12" height="200" style={{ border: '1px solid #000', paddingLeft: 0 }}>
+                <svg className="col-md-12 col-sm-12" height="200" style={{ paddingLeft: 0 }}>
+                    {/* <path d="M100,100 h200 a20,20 0 0 1 20,20 v200 a20,20 0 0 1 -20,20 h-200 a20,20 0 0 1 -20,-20 v-200 a20,20 0 0 1 20,-20 z" fill="none" stroke="black" stroke-width="3" /> */}
+
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{ stopColor: color1 }} />
@@ -146,33 +148,34 @@ class Dichotomy extends StreamlitComponentBase<State> {
                     </defs>
                     
                     <rect
+                        rx="15" ry="15" 
                         width="100%"
-                        height="400%"
+                        height="100%"
                         fill={color1}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the first rectangle
-                        y="-300"  // Adjusted y position for the third rectangle
+                        // y="-300"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='0'
                     />
                     <rect
                         // width="20%"
                         width={gradientWidth ? `${gradientWidth/2}%` : '0'}
-                        height="500%"
+                        height="100%"
                         // x="40%" // Shift the second rectangle by 30% of the width
                         x={gradientWidth ? `${gradientWidth - shift}%` : '0'}  // Adjusted x position based on the width
                         fill="url(#gradient)" // Gradient background for the third rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the second rectangle
-                        y="-600"  // Adjusted y position for the third rectangle
+                        // y="-600"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickTransition(e)}
                     />
                     <rect
                         width="100%"
-                        height="500%"
+                        height="100%"
                         // x="60%" // Shift the third rectangle by 60% of the width
                         x={gradientWidth ? `${gradientWidth * 3/2-.1}%` : '0'}  // Adjusted x position based on the width
                         fill={color2}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
-                        y="-500"  // Adjusted y position for the third rectangle
+                        // y="-500"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='1'
                     />
