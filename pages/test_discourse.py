@@ -44,7 +44,7 @@ from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
 from lib.texts import match_input
 from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
-from pages.test_footer import footer
+# from pages.test_footer import footer
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     st.write(f.read())
