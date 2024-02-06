@@ -50,8 +50,8 @@ import streamlit_survey as ss
 from streamlit_extras.row import row
 from streamlit_extras.stateful_button import button as stateful_button
 import random
-from pages.test_settimia import fetch_and_display_data
-from pages.test_location import conn
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
+
 from pages.test_paged import PagedContainer
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
@@ -131,26 +131,7 @@ def main():
     if tags:
         st.write(f"`Juste le temps de connecter une base de données...`")
         st.write(f"`{tags}`")
-    
-    invited_list = [
-        "Sedhar Chozam, Oxford",
-"Stéphane Perrard, PMMH, Paris",
-"Véronique Dansereau, ..., Grenoble",
-"Jérôme Weiss, ..., Grenoble",
-"Florent Gimbert, ..., Grenoble",
-"Olivier Gagliardini, ..., Grenoble",
-"David Marsan, ..., Grenoble",
-"Benoit Roman, PMMH, Paris",
-"Maurice Rossi, dAlembert, Paris",
-"Flaviana Iurlano, U. Genova",
-"Giuliano Lazzaroni, ..., Pisa",
-"Pierluigi Cesana, Fukuoka University, Kyushu, Japan",
-"Masato Kimura, Kanazawa University, Kyushu, Japan",
-"Garth Wells, , ",
-"Jorgen Dokken, , ",
-"Patrick Farrell, , ",
-"Gui-Qiang Chen, Mathematical Institute, Oxford",
-    ]
+
 if __name__ == "__main__":
     
     survey = main()
@@ -185,7 +166,7 @@ if __name__ == "__main__":
             "Jean-Jacques Marigo, ..., Pyrenées",
             "Maurice Rossi, dAlembert, Paris",
             "Flaviana Iurlano, U. Genova",
-            "Giuliano Lazzaroni, ..., Pisa",
+            "Giuliano Lazzaroni, Dipartimento di Matematica e Informatica, Firenze",
             "Pierluigi Cesana, Fukuoka University, Kyushu-Japan",
             "Masato Kimura, Institute of Science and Engineering, Kanazawa-Japan",
             "Garth Wells, , ",
