@@ -18,12 +18,11 @@ with open('pages/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
     
 hashed_passwords = stauth.Hasher(['abc', 'def']).generate()
+# st.write('hashed_passwords', hashed_passwords)
 
-st.write('hashed_passwords', hashed_passwords)
-
-st.subheader('config')
-st.json(config, expanded=False)
-
+st.subheader('Configuration...')
+st.markdown('`is minimal`')
+# st.json(config, expanded=False)
 
 if 'location' not in st.session_state:
     st.session_state.location = None  # Initial damage parameter
@@ -35,6 +34,7 @@ class _Authenticate(Authenticate):
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, preauthorized: dict):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.supabase = supabase
+        self.credentials['access_key'] = None
     
     def login(self, form_name: str, location: str='main') -> tuple:
         """
@@ -72,10 +72,10 @@ class _Authenticate(Authenticate):
                 st.session_state['access_key'] = self.access_key
                 # self.password = login_form.text_input('Password', type='password')
 
-                if login_form.form_submit_button('Login'):
+                if login_form.form_submit_button('Open with key'):
                     self._check_credentials()
 
-        return st.session_state['name'], st.session_state['authentication_status'], st.session_state['username']
+        return st.session_state['name'], st.session_state['authentication_status'], st.session_state['access_key']
 
     def _check_credentials(self, inplace: bool=True) -> bool:
         """
@@ -91,26 +91,29 @@ class _Authenticate(Authenticate):
         bool
             Validity of entered credentials.
         """
-
-        if self.access_key in self.credentials['access_key']:
-            try:
-                if self._check_pw():
-                    if inplace:
-                        st.session_state['name'] = self.credentials['access_key'][self.username]['name']
-                        self.exp_date = self._set_exp_date()
-                        self.token = self._token_encode()
-                        self.cookie_manager.set(self.cookie_name, self.token,
-                            expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days))
-                        st.session_state['authentication_status'] = True
-                    else:
-                        return True
+        existing_access_key = self.get_existing_access_key(self.access_key)
+        st.write(existing_access_key)
+        
+        if existing_access_key:
+            # try:
+            if existing_access_key:
+                if inplace:
+                    # st.session_state['name'] = self.credentials['access_key'][self.username]['name']
+                    self.exp_date = self._set_exp_date()
+                    self.token = self._token_encode()
+                    self.cookie_manager.set(self.cookie_name, self.token,
+                        expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days))
+                    st.session_state['authentication_status'] = True
+                    st.info('cookie set')
                 else:
-                    if inplace:
-                        st.session_state['authentication_status'] = False
-                    else:
-                        return False
-            except Exception as e:
-                print(e)
+                    return True
+            else:
+                if inplace:
+                    st.session_state['authentication_status'] = False
+                else:
+                    return False
+            # except Exception as e:
+                # print(e)
         else:
             if inplace:
                 st.session_state['authentication_status'] = False
@@ -158,19 +161,22 @@ class _Authenticate(Authenticate):
         new_password_repeat = ''
 
         if register_user_form.form_submit_button('`Here` • `Now`'):
+            now = datetime.now()
+            st.write(now)   
             if len(_location) > 0:
                 coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
                 if coordinates:
                     st.write(f"Coordinates for {_location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
                     st.session_state.location = _location
                     st.session_state.coordinates = coordinates
-                    now = datetime.now()
-                    st.write(now)   
                     # the access key is the hash of the current time (now) and the location
                     access_key_string = f"{now}_{_location}"
-                    access_key_hash = hashlib.sha256(access_key_string.encode()).hexdigest()
-                    st.write(access_key_hash)
-                    self.__register_credentials(access_key_hash, new_name, new_password, new_email, preauthorization)
+                    access_key_hash = hashlib.md5(access_key_string.encode()).hexdigest()
+                    
+                    # access_key_hash = hashlib.sha256(access_key_string.encode()).hexdigest()
+                    # st.write(access_key_hash)
+                    if self.__register_credentials(access_key_hash, new_name, new_password, new_email, preauthorization):
+                        self.credentials['access_key'] = access_key_hash
                 # self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
                 return True
             else:
@@ -204,11 +210,14 @@ class _Authenticate(Authenticate):
         existing_access_key = self.get_existing_access_key(access_key)
         
         if existing_access_key:
-            st.warning("Access key already exists. Choose a different location or try again later.")
+            st.write("Access key already exists. Choose a different location or try again later.")
             return False
-        data = {'access_key': access_key}
-        response = self.supabase.table('access_keys').insert(data)
-        # st.write(response)
+        
+        data = {'key': access_key}
+        response = self.supabase.table('access_keys').insert(data).execute()
+        # st.write(data, response)
+        if response:
+            return True
         
     def get_existing_access_key(self, access_key):
         # Query the 'access_keys' table to check if the access key already exists
@@ -220,6 +229,28 @@ class _Authenticate(Authenticate):
         else:
             return None
 
+    def logout(self, button_name: str, location: str='main', key: str=None):
+        """
+        Creates a logout button.
+
+        Parameters
+        ----------
+        button_name: str
+            The rendered name of the logout button.
+        location: str
+            The location of the logout button i.e. main or sidebar.
+        """
+        if location not in ['main', 'sidebar']:
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
+        if location == 'main':
+            if st.button(button_name, key):
+                self.cookie_manager.delete(self.cookie_name)
+                st.session_state['logout'] = True
+                st.session_state['name'] = None
+                st.session_state['username'] = None
+                st.session_state['authentication_status'] = None
+
+
 authenticator = _Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -229,22 +260,24 @@ authenticator = _Authenticate(
 )
 
 authenticator.login('Connect', 'main')
-
+st.write(st.session_state['authentication_status'])
 if st.session_state["authentication_status"]:
-    authenticator.logout('Disconnect', 'main', key='logout')
-    st.write(f'Welcome *{st.session_state["name"]}*')
+    authenticator.logout('Disconnect', 'main', key='disconnect')
+    st.write(f'Welcome')
     st.title('Some content')
 elif st.session_state["authentication_status"] is False:
-    st.error('Username/password is incorrect')
+    st.error('Aww snap! Did anyone touch the clock? Or something is wrong with the lock...')
 elif st.session_state["authentication_status"] is None:
     st.warning('Do you already have an access key?')
 
+    try:
+        if authenticator.register_user('Open connection', preauthorization=False):
+            st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
+                💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
+                Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
+    except Exception as e:
+        st.error(e)
 
-try:
-    if authenticator.register_user('Open connection', preauthorization=False):
-        st.success('Connection successful!')
-except Exception as e:
-    st.error(e)
     
 # try:
 #     username_of_forgotten_password, email_of_forgotten_password, new_random_password = authenticator.forgot_password('Forgot password')
@@ -257,4 +290,3 @@ except Exception as e:
 # except Exception as e:
 #     st.error(e)
     
-st.json(config)
