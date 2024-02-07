@@ -45,6 +45,7 @@ update_frequency = 500  # in milliseconds
 from lib.texts import match_input
 from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
 # from pages.test_footer import footer
+
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     st.write(f.read())
@@ -72,28 +73,31 @@ class ConnectingContainer(PagedContainer):
         widget_kwargs = widget_info["kwargs"] if "kwargs" in widget_info else {}
         if widget_type in widget_creators:
             widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
-
-        # for item in self.items:
-        #     (panel, widget_info) = item
-        #     st.markdown(panel)
-
-        #     st.divider()
-            
-
+            # st.write(widget_creators[widget_type])
+            # st.write(widget_dict[widget_key])
         pass
-        # return super().display_page(page)
 
+    def check_no_exit(self, session_state, data):
+        if session_state.no_clicked:
+            st.warning("There must have been a misunderstanding on our side...")
+            st.info("We are always here, we can meet back later.")
+            st.write(data)
+            st.write(session_state)
+            st.stop()
+            
 survey = CustomStreamlitSurvey()
 
-print(dir(survey))
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
 if "current_booklet_page" not in st.session_state:
     st.session_state["current_booklet_page"] = 0
 
-if "current_discourse_page" not in st.session_state:
-    st.session_state["current_discourse_page"] = 0
+if 'no_clicked' not in st.session_state:
+    st.session_state["no_clicked"] = False
+
+def no_clicked():
+    st.session_state.no_clicked = True
 
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
@@ -162,7 +166,7 @@ panel_5 = """
 
 ## You can take _this_ as an opportunity to express, we have taken this as a challenge to address.
 
-## Let's play: what is your perception of priority levels?
+## Next game: play with perception of priority levels.
 
 """
 
@@ -352,12 +356,13 @@ challenges = [
 ]
 
 widget_info = [
-    {"type": "next", "key": "next", "kwargs": {"survey": survey}},
-    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey}},
-    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey}},
-    {"type": "yesno", "key": "opinion_counts", "kwargs": {"survey": survey}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": '', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
-    {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
+    {"type": None, "key": None},
+    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey, "callback": no_clicked}},
+    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey, "callback": no_clicked}},
+    {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": '', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
+    # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
+    {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
     {"type": "textinput", "key": "location", "kwargs": {"survey": survey}},
     {"type": "button", "key": "`Here` • `Now`", "kwargs": {"survey": survey}},
@@ -374,12 +379,14 @@ widget_info = widget_info + placeholders
 
 widget_dict = {}
 
+
 # Dictionary mapping widget types to creation functions
 widget_creators = {
     "button": create_button,
     "next": create_next,
     "dichotomy": create_dichotomy,
     "yesno": create_yesno,
+    "checkbox": create_checkbox,
     "qualitative": create_qualitative,
     "equaliser": create_equaliser,
     "textinput": create_textinput,
@@ -403,11 +410,10 @@ def main():
         st.session_state.damage_parameter = 0.0  # Initial damage parameter
     
     if 'location' not in st.session_state:
-        st.session_state.location = None  # Initial damage parameter
+        st.session_state['location'] = None  # Initial damage parameter
     
     if 'coordinates' not in st.session_state:
-        st.session_state.location = None  # Initial damage parameter
-
+        st.session_state['coordinates'] = None  # Initial damage parameter
     # once usage:
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
@@ -421,7 +427,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 60
+        seconds = 1
 
         start_time = time.time()
         while True:
@@ -437,11 +443,11 @@ def main():
             with col2:
                 matrix_placeholder.empty()
                 with matrix_placeholder:
-                    
                     display_matrix(matrix)
                     
             elapsed_time = time.time() - start_time
             if elapsed_time >= seconds:
+                matrix_placeholder.empty()
                 break
     st.divider()
 
@@ -473,7 +479,7 @@ def main():
             st.info('All other non-intelligible input is considered as a \'no\'.')
 
     with tab2:
-        st.markdown("# Panel contributions so far")
+        # st.markdown("# Panel contributions so far")
         contributions()
 
     with tab4:
@@ -509,6 +515,8 @@ def print_languages(languages):
         st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
 def connect():
+    if "current_discourse_page" not in st.session_state:
+        st.session_state["current_discourse_page"] = 0
     paginator = ConnectingContainer(items = list(zip(panel, widget_info)), items_per_page=1)
     
     with st.container():
@@ -521,9 +529,11 @@ def connect():
                 st.session_state["current_discourse_page"] = max(st.session_state.current_discourse_page - 1, 0)
         with _:
             st.progress(st.session_state.current_discourse_page / paginator.get_total_pages(), text=None)
-        paginator.display_page(st.session_state.current_discourse_page)
         
-    st.write(f'Current page is {st.session_state.current_discourse_page}')
+        paginator.check_no_exit(st.session_state, survey.data)
+        paginator.display_page(st.session_state.current_discourse_page)
+    
+    # st.write(f'Current page is {st.session_state.current_discourse_page}')
     st.divider()
 
 
@@ -554,32 +564,26 @@ def connect():
 
 def contributions():
     
-    booklet = [
-        ("# Le Gai Savoir", "### _Ariane Ahmadi_ \n ## Crises as vectors for emancipation"),
-        ("# The Aftermath Of Political Violence", "### Sophie Wahnich \n ## Fragilité et manque de confiance, en mars 1794..."),
-        ("# Engagement with the Sea", "### Antonia Taddei \n ## Proposals for personhood as a defense strategy"),
-        ("## tba", "Gabrielle Dyson"),
-        ("# Pulse", "### Giorgio Funaro \n ## An electronic impulse through an immersive voyage"),
-        ("# We Are Enough", "### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"),
-        ("# Rethinking Solutions", "### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"),
-        ("# Je Suis l'Eau", "### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"),
-        ("## Aligning Automated Decision Making with European Values", "## Claire Aoi \n ### •⁠ a fantasy of Stochastic Moral Guardians'"),
-        ("## tba", "Andrés León Baldelli"),
-    ]
 
     booklet_dict = {
-        "# Le Gai Savoir": {"### Ariane Ahmadi \n ## Crises as vectors for emancipation"},
-        "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ## Fragilité et manque de confiance, en mars 1794..."},
-        "# Engagement with the Sea": {"### Antonia Taddei \n ## Proposals for personhood as a defense strategy"},
+        "# Le Gai Savoir": {"### Ariane Ahmadi \n ### Crises as vectors for emancipation"},
+        "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ### Fragilité et manque de confiance, en mars 1794..."},
+        "# Engagement with the Sea": {"### Antonia Taddei \n ### Proposals for personhood as a defense strategy"},
         "## tba": {"Gabrielle Dyson"},
-        "# Pulse": {"### Giorgio Funaro \n ## An electronic impulse through an immersive voyage"},
-        "# We Are Enough": {"### Roger Niyigena Karera \n ## Arts and introspection of contemporary society"},
-        "# Rethinking Solutions": {"### Graziano Mazza \n ## Polysemic nature of religion as the ancestor of economics"},
-        "# Je Suis l'Eau": {"### Alessandra Carosi \n ## Emotional landscapes that lie beneath the surface of our world"},
-        "## Aligning Automated Decision Making with European Values": {"## Claire Aoi \n ### •⁠ a fantasy of Stochastic Moral Guardians"},
+        "# Âmes de Paname": {"### Bianca Apollonio \n ### The city as a living organism"},
+        "# Pulse": {"### Giorgio Funaro \n ### An electronic impulse through an immersive voyage"},
+        "# We Are Enough": {"### Roger Niyigena Karera \n ### Arts and introspection of contemporary society"},
+        "# Rethinking Solutions": {"### Graziano Mazza \n ### Polysemic nature of religion as the ancestor of economics"},
+        "# Je Suis l'Eau": {"### Alessandra Carosi \n ### Emotional landscapes that lie beneath the surface of our world"},
+        "## A Fantasy Of Stochastic Moral Guardians ": {"## Claire Glanois \n ### Aligning Automated Decision Making with European Values⁠ "},
         "## tba": {"### Andrés León Baldelli"},
     }
+    sorted_items = sorted(booklet_dict.items(), key=lambda x: list(x[1])[0])
+    st.markdown(f"# Contributions are {len(booklet_dict)} so far...")
 
+    # Create a new dictionary from the sorted list
+    booklet_dict = dict(sorted_items)
+    
     paged_container = _PagedContainer(booklet_dict, items_per_page=2, show_pagination = False)
 
     with st.container():
@@ -654,8 +658,8 @@ def references():
         st.json(survey.data, expanded=True)
 
     references_dict = {
-        "# Book #1": {"### `growth` \n ## Potentials, determined"},
-        "# Book #2": {"### ..."},
+        "# Book #1 \n ## Pluriverse: A Post-Development Dictionary": {"### `Ashish Kothari, Ariel Salleh, Arturo Escobar, Federico Demaria, Alberto Acosta`"},
+        "# Magazine  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue New Hopes, New Horizons and G20 \n ### [Link to 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
         "# Docu #0": {"### ..."},
         "# Event #3": {"### ..."},
         "# Story #4": {"### ..."},
@@ -701,8 +705,3 @@ if __name__ == "__main__":
                 
                 """)
 
-
-    # return_value = survey.dichotomy(name="", 
-    #                             label="Confidence",
-    #                             question="...", 
-    #                             key="boundaries")
