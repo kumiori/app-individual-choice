@@ -45,6 +45,13 @@ update_frequency = 500  # in milliseconds
 from lib.texts import match_input
 from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
 # from pages.test_footer import footer
+import pandas as pd
+import numpy as np
+from lib.geo import get_coordinates
+
+df = pd.DataFrame(
+    np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
+    columns=['lat', 'lon'])
 
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -74,7 +81,7 @@ class ConnectingContainer(PagedContainer):
         if widget_type in widget_creators:
             widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
             # st.write(widget_creators[widget_type])
-            # st.write(widget_dict[widget_key])
+            st.write(widget_dict)
         pass
 
     def check_no_exit(self, session_state, data):
@@ -99,6 +106,45 @@ if 'no_clicked' not in st.session_state:
 def no_clicked():
     st.session_state.no_clicked = True
 
+def create_map(key, kwargs = {}):
+
+    # df = pd.DataFrame(
+    #     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
+    #     columns=['lat', 'lon'])
+
+    # st.map(df)
+    print(st.session_state.coordinates)
+    _c = st.session_state.coordinates
+    df = pd.DataFrame({
+        "col1": np.random.randn(1000) / 50 + _c[0],
+        "col2": np.random.randn(1000) / 50 + _c[1],
+        "col3": np.random.randn(1000) * 100,
+        "col4": np.random.rand(1000, 4).tolist(),
+    })
+
+    st.map(df,
+        latitude='col1',
+        longitude='col2',
+        size='col3',
+        color='col4')
+    st.markdown('### Do you see new patterns _known_?')
+
+def enter_location(label):
+    if survey.data.get(label):
+        location = survey.data.get(label)["value"]
+    else:
+        return
+    coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
+    if coordinates:
+        st.info(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+        st.session_state.location = location
+        st.session_state.coordinates = coordinates
+
+    # survey = kwargs.get('survey')
+    # location = 
+    
+    
+    
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
 ## We elicit participation constructing new narratives and implement ideas based on collective understanding.
@@ -180,7 +226,14 @@ panel_6 = """
 
 """
 
-panel_7_bis = """Matrix viz.."""
+panel_7_bis = """
+## This is how we think: _matrix is a map where patterns emerge_...
+
+##  Some are used to different types of map:
+
+
+"""
+
 
 panel_7 = """
 
@@ -190,19 +243,9 @@ panel_7 = """
 
 ## Human beings no longer meet in ideas. How do patterns behave?
 
-## This is how we think: _matrix is a map where patterns emerge_
-
-[MATRIX]
-
-##  But maybe you are used to different types of map...
-
-![Two dimensional bounded projection](https://i.imgur.com/XlMGG76.png)
-
-this is Paris
-
-## Where are you, at the moment? Where do you live now? mainly host you in the next two years? X Where are you now?
-
+### What is your...
 """
+
 
 panel_8 = """
 
@@ -216,7 +259,7 @@ panel_8 = """
 ## Verify your location and local time. You will receive an access key to join the conversation.
 
 # access key: `[here] x [now]` 
-# [ I {NAME} CONNECT here and now ]
+#### [ I am in {location}, would like to CONNECT now ]
 
 `st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
 
@@ -336,7 +379,7 @@ yesses = {
     "Yiddish": "יאָ",
 }
 
-panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7,  panel_8,
+panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7, panel_7_bis, panel_8,
          panel_9, panel_10, panel_11, panel_12]
 
 challenges = [
@@ -364,7 +407,8 @@ widget_info = [
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
-    {"type": "textinput", "key": "location", "kwargs": {"survey": survey}},
+    {"type": "textinput", "key": "location?", "kwargs": {"survey": survey}, "callback": enter_location("location?")},
+    {"type": "projectionmap", "key": "map", "kwargs": {"survey": survey}},
     {"type": "button", "key": "`Here` • `Now`", "kwargs": {"survey": survey}},
     {"type": "globe", "key": "Singular Map", "kwargs": {"survey": survey, "database": "gathering"}},
     {"type": "button", "key": "`Here`  `Now`", "kwargs": {"survey": survey}},
@@ -386,6 +430,7 @@ widget_creators = {
     "next": create_next,
     "dichotomy": create_dichotomy,
     "yesno": create_yesno,
+    "projectionmap": create_map,
     "checkbox": create_checkbox,
     "qualitative": create_qualitative,
     "equaliser": create_equaliser,
@@ -528,7 +573,7 @@ def connect():
             if st.button("Prev", key="prev_discourse_page"):
                 st.session_state["current_discourse_page"] = max(st.session_state.current_discourse_page - 1, 0)
         with _:
-            st.progress(st.session_state.current_discourse_page / paginator.get_total_pages(), text=None)
+            st.progress((st.session_state.current_discourse_page+1) / paginator.get_total_pages(), text=None)
         
         paginator.check_no_exit(st.session_state, survey.data)
         paginator.display_page(st.session_state.current_discourse_page)
