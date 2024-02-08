@@ -9,6 +9,7 @@ def create_button(key, kwargs = {}):
 
 def create_dichotomy(key, kwargs = {}):
     survey = kwargs.get('survey')
+    label = kwargs.get('label', 'Confidence')
     name = kwargs.get('name', 'Spirit')
     question = kwargs.get('question', 'Dychotomies, including time...')
     messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
@@ -16,7 +17,7 @@ def create_dichotomy(key, kwargs = {}):
     col1, col2, col3 = st.columns([3, .1, 1])
     with col1:    
         response = survey.dichotomy(name=name, 
-                                label="Confidence",
+                                label=label,
                                 question=question, 
                                 key=key)
     with col3:
@@ -44,11 +45,12 @@ def create_qualitative(key, kwargs = {}):
 
 def create_yesno(key, kwargs = {}):
     survey = kwargs
+    callback = kwargs.get('callback')
     col1, col2 = st.columns(2)
     with col1:
         yes_clicked = st.button("Yes", key=f"{key}_yes")
     with col2:
-        no_clicked = st.button("No", key=f"{key}_no")
+        no_clicked = st.button("No", key=f"{key}_no", on_click=callback)
     
     return
 
@@ -144,9 +146,9 @@ def create_textinput(key, kwargs = {}):
     text = survey.text_input(key, help="")
     return 
 
-def create_checkbox(key, kwargs = {}):
+def create_checkbox(key, kwargs = {'label': 'Choose'}):
     survey = kwargs.get('survey')
-    return survey.checkbox("Choose one:", key=key)
+    return survey.checkbox(kwargs.get('label', ''), key=key)
 
 def create_equaliser(key, kwargs={}):
     survey = kwargs.get('survey')

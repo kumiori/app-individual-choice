@@ -168,12 +168,20 @@ if __name__ == "__main__":
             "Garth Wells, , ",
             "Jorgen Dokken, , ",
             "Patrick Farrell, , ",
+            "Lev Truskinovsky, ESPCI, Paris",
             "Gui-Qiang Chen, Mathematical Institute, Oxford",
         ]
 
+        # st.markdown(f"# Contributions are {len(invited_list)} so far...")
+
+        # Create a new dictionary from the sorted list
         # Splitting data into name, affiliation, and location
         data = [entry.split(', ') for entry in invited_list]
         headers = ["name", "affiliation", "location"]
+        # print(data)
+        # sorted_items = sorted(invited_list.items(), key=lambda x: x.split(', ')[0])
+        # sorted_items = sorted(data.items(), key=lambda x: list(x[0])[0])
+        # booklet_dict = dict(sorted_items)
 
         # Create a Pandas DataFrame
         df = pd.DataFrame(data)
