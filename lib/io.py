@@ -46,29 +46,30 @@ def create_qualitative(key, kwargs = {}):
 
 def create_yesno(key, kwargs = {}):
     survey = kwargs
-    callback = kwargs.get('callback')
+    callback_yes, callback_no = kwargs.get('callback')
     col1, col2 = st.columns(2)
     with col1:
-        yes_clicked = st.button("Yes", key=f"{key}_yes")
+        yes_clicked = st.button("Yes", key=f"{key}_yes", on_click=callback_yes)
     with col2:
-        no_clicked = st.button("No", key=f"{key}_no", on_click=callback)
+        no_clicked = st.button("No", key=f"{key}_no", on_click=callback_no)
     
     return
 
 def create_yesno_row(key, kwargs = {}):
     survey = kwargs
-    callback = kwargs.get('callback')
+    callback_yes, callback_no = kwargs.get('callback')
     links_row = row(2, vertical_align="center")
     links_row.button(
         ":ticket: No, thank you.",
         use_container_width=True,
-        on_click = callback,
+        on_click = callback_no,
         key=f"{key}_no",
     )
 
     links_row.button(
         ":honey_pot: Yes, please!",
         use_container_width=True,
+        on_click = callback_yes,
         key=f"{key}_yes",
     )
 

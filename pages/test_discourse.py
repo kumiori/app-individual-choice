@@ -100,11 +100,17 @@ if 'read_texts' not in st.session_state:
 if "current_booklet_page" not in st.session_state:
     st.session_state["current_booklet_page"] = 0
 
+if "total_discourse_page" not in st.session_state:
+    st.session_state["total_discourse_page"] = 1
+
 if 'no_clicked' not in st.session_state:
     st.session_state["no_clicked"] = False
 
 def no_clicked():
     st.session_state.no_clicked = True
+
+def yes_forward():
+    st.session_state["current_discourse_page"] = min(st.session_state.current_discourse_page + 1, st.session_state.total_discourse_page - 1)
 
 def create_map(key, kwargs = {}):
 
@@ -116,8 +122,8 @@ def create_map(key, kwargs = {}):
     print(st.session_state.coordinates)
     _c = st.session_state.coordinates
     df = pd.DataFrame({
-        "col1": np.random.randn(1000) / 50 + _c[0],
-        "col2": np.random.randn(1000) / 50 + _c[1],
+        "col1": np.random.randn(1000) / 10 + (-_c[0]),
+        "col2": np.random.randn(1000) / 10 + ((_c[1] + 180) % 360),
         "col3": np.random.randn(1000) * 100,
         "col4": np.random.rand(1000, 4).tolist(),
     })
@@ -128,6 +134,7 @@ def create_map(key, kwargs = {}):
         size='col3',
         color='col4')
     st.markdown('### Do you see new patterns _known_?')
+    st.markdown('## This is how we think: a _matrix is a map where patterns emerge_')
 
 def enter_location(label):
     if survey.data.get(label):
@@ -151,8 +158,7 @@ intro_text = """
 ## To broaden and articulate a vision of imminent social transitions.
 
 
-# `This is your invitation.`
-
+# `This is your invitation.` :ticket:
 
 #### Forward, _just_ use the top button. 
 """
@@ -179,16 +185,16 @@ panel_2 = """
 
 ## ..._to bring forward_ an emancipatory vision of change.
 
+## Want to hear more?
+
+"""
+
 ## What do you think? 
 ## Are we on the right path?
 ## Is this a good idea?
 ## Shall .. more details?
 ## Can we .. more details?
-## Want to hear more?
 
-find a question protocol
-
-"""
 
 panel_3 = """ 
 
@@ -196,10 +202,10 @@ panel_3 = """
 
 ## _"these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
-\* `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
-## ... Pez ...
+##### • `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
+## " ... ", MP 
 
-## _That issue_ was published at a crucial time. We decide to engage in a conversation in which you participate.
+### _That issue_ was timely. We decide to engage in a conversation in which you participate.
 
 ### Your opinion counts, `right`?"""
  
@@ -207,7 +213,7 @@ panel_4 = """
 
 ## To integrate a bigger picture, help us make sense of time scales and policy priorities.
 
-## Think (or picture) a _global social transition_: should this be fast or slow, or a mix of both?
+## Picture a _global social transition_: should this be fast or slow or a mix of both?
 
 """
 
@@ -215,7 +221,7 @@ panel_4_bis = """
 
 ## Thank...
 
-## Think (or picture) a _global social transition_: should this be fast or slow, or a mix of both?
+## Picture a _global social transition_: should this be fast or slow, or a mix of both?
 
 """
 
@@ -227,12 +233,12 @@ panel_5 = """
 
 ## You can take _this_ as an opportunity to express, we have taken this as a challenge to address.
 
-## Next game: play with perception of priority levels.
+## Forward, let's play with perception of priority levels.
 
 """
 
 panel_6 = """
-## The following is a list of `social dimensions` or policy concerns. Match the sliders with your perception of priority levels.
+## Is the following a list of `social dimensions` for policy concerns? Match the sliders with your perception of priority levels.
 
 ##### This is a great exercise in making communication effective, actionable, and visual.
 
@@ -242,21 +248,24 @@ panel_6 = """
 """
 
 panel_7_bis = """
-## This is how we think: _matrix is a map where patterns emerge_...
 
-##  Some are used to different types of map:
+##  What's on the other side?
 
 
 """
+# What's your name?
 
 
 panel_7 = """
 
-## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. What's your name?
+## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. 
 
-## We are trying to understand why the world is in a state of fracture on several levels: individual, social and universal.
+
+## We are trying to understand how the world is in a state of fracture on several levels: individual, social, and universal.
 
 ## Human beings no longer meet in ideas. How do patterns behave?
+
+## Let's map this out together.
 
 ### What is your...
 """
@@ -402,7 +411,7 @@ challenges = [
     ("The Social Contract", ""),
     ("Cooperation Reinvented", ""),
     ("Inequalities and Sustainability", ""),
-    ("The next Olympic games", ""),
+    ("Control variable for lower bound", ""),
     ("Climate Change", ""),
     ("Global Value Chains", ""),
     ("Productive Innovation", ""),
@@ -416,10 +425,10 @@ challenges = [
 
 widget_info = [
     {"type": None, "key": None},
-    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey, "callback": no_clicked}},
-    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey, "callback": no_clicked}},
+    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey, "callback": (yes_forward, no_clicked)}},
+    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey, "callback": (yes_forward, no_clicked)}},
     {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": '', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
@@ -579,9 +588,10 @@ def connect():
     if "current_discourse_page" not in st.session_state:
         st.session_state["current_discourse_page"] = 0
     paginator = ConnectingContainer(items = list(zip(panel, widget_info)), items_per_page=1)
-    
+    st.session_state.total_discourse_page = paginator.get_total_pages()
+    # st.write(f'Current page is {st.session_state.current_discourse_page}/{st.session_state.total_discourse_page}')
     with st.container():
-        col1, _, col2 = st.columns([2, 10, 2])
+        col1, _, col2 = st.columns([2, 10, 3])
         with col2:
             if st.button("Forward >", key="next_discourse_page"):
                 st.session_state["current_discourse_page"] = min(st.session_state.current_discourse_page + 1, paginator.get_total_pages() - 1)
