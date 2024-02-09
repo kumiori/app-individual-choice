@@ -357,6 +357,17 @@ sandbox = """
 
 """
 
+
+def update_range(page_number):
+    # Initialize session state
+    if 'range' not in st.session_state:
+        st.session_state.range = 1  # Set the initial value
+
+    # Update range if the current page_number is greater
+    if page_number > st.session_state.range:
+        st.session_state.range = page_number
+
+
 yesses = {
     "Albanian": "po",
     "Basque": "bai",
@@ -603,6 +614,9 @@ def connect():
         
         paginator.check_no_exit(st.session_state, survey.data)
         paginator.display_page(st.session_state.current_discourse_page)
+        update_range(st.session_state.current_discourse_page)
+
+
     
     # st.write(f'Current page is {st.session_state.current_discourse_page}')
     st.divider()
