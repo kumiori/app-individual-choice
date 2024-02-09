@@ -1,6 +1,7 @@
 import streamlit as st
 from st_supabase_connection import SupabaseConnection
 import streamlit_survey as ss
+from streamlit_extras.row import row
 
 conn = st.connection("supabase", type=SupabaseConnection)
 
@@ -53,6 +54,25 @@ def create_yesno(key, kwargs = {}):
         no_clicked = st.button("No", key=f"{key}_no", on_click=callback)
     
     return
+
+def create_yesno_row(key, kwargs = {}):
+    survey = kwargs
+    callback = kwargs.get('callback')
+    links_row = row(2, vertical_align="center")
+    links_row.button(
+        ":ticket: No, thank you.",
+        use_container_width=True,
+        on_click = callback,
+        key=f"{key}_no",
+    )
+
+    links_row.button(
+        ":honey_pot: Yes, please!",
+        use_container_width=True,
+        key=f"{key}_yes",
+    )
+
+
 
 def create_next(key, kwargs = {}):
     survey = kwargs

@@ -43,7 +43,7 @@ from lib.dictionary_manip import display_dictionary, display_dictionary_by_indic
 from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
 from lib.texts import match_input
-from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
 # from pages.test_footer import footer
 import pandas as pd
 import numpy as np
@@ -86,7 +86,7 @@ class ConnectingContainer(PagedContainer):
 
     def check_no_exit(self, session_state, data):
         if session_state.no_clicked:
-            st.warning("There must have been a misunderstanding on our side...")
+            st.warning("Perhaps we misuderstood.")
             st.info("We are always here, we can meet back later.")
             st.write(data)
             st.write(session_state)
@@ -147,31 +147,46 @@ def enter_location(label):
     
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
-## We elicit participation constructing new narratives and implement ideas based on collective understanding.
-## To broaden and articulate a vision of imminent social transitions...have you been invited yet?
+## We invite participation to construct new narratives and implement ideas based on collective understanding.
+## To broaden and articulate a vision of imminent social transitions.
 
 
-#### Details follow, _just_ use the top arrow [>] 
+# `This is your invitation.`
+
+
+#### Forward, _just_ use the top button. 
 """
 
-panel_1 = """ ## We face an international landscape characterised by simultaneous and juxtaposed crises often described as '_polycrises'_.
+panel_1 = """ ## We contemplate an international landscape characterised by simultaneous and juxtaposed crises often described as '_polycrises'_.
 
 ## These crises are not only juxtaposed but often interconnected as much in their effects as in their causes.
 
  ## They emerge as facets of a deeper `organic` crisis.
+
+## Does this resonate with you? `Yes, advances automatically` 
  
-## How do you feel? Does this make any sense to you?
 
 """ 
+
+
+
+
 panel_2 = """
 
-## We are organising a panel discusion at _Europe in Discourse_ conference in Athens, 2024.
+## We are organising a panel discussion at _Europe in Discourse_ conference in Athens, 2024.
 
 ## Our panel springs at the intersection of Social Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
 
 ## ..._to bring forward_ an emancipatory vision of change.
 
-## What do you think? Are we on the right path?
+## What do you think? 
+## Are we on the right path?
+## Is this a good idea?
+## Shall .. more details?
+## Can we .. more details?
+## Want to hear more?
+
+find a question protocol
 
 """
 
@@ -328,7 +343,8 @@ sandbox = """
 
 """
 
-""" `We have accepted explosion of information, are you willing to accept explosion of undertsanding?`
+# """ `We have accepted explosion of information, are you willing to accept explosion of undertsanding?`
+""" `We have accepted explosion of information, will you accept an explosion of undertsanding?`
 
 """
 
@@ -429,7 +445,7 @@ widget_creators = {
     "button": create_button,
     "next": create_next,
     "dichotomy": create_dichotomy,
-    "yesno": create_yesno,
+    "yesno": create_yesno_row,
     "projectionmap": create_map,
     "checkbox": create_checkbox,
     "qualitative": create_qualitative,
@@ -472,7 +488,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 1
+        seconds = .1
 
         start_time = time.time()
         while True:
@@ -500,7 +516,7 @@ def main():
     st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
 
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting...", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
     
     with tab1:
         connect()
@@ -567,10 +583,10 @@ def connect():
     with st.container():
         col1, _, col2 = st.columns([2, 10, 2])
         with col2:
-            if st.button("Next", key="next_discourse_page"):
+            if st.button("Forward >", key="next_discourse_page"):
                 st.session_state["current_discourse_page"] = min(st.session_state.current_discourse_page + 1, paginator.get_total_pages() - 1)
         with col1:
-            if st.button("Prev", key="prev_discourse_page"):
+            if st.button("• Back", key="prev_discourse_page"):
                 st.session_state["current_discourse_page"] = max(st.session_state.current_discourse_page - 1, 0)
         with _:
             st.progress((st.session_state.current_discourse_page+1) / paginator.get_total_pages(), text=None)
