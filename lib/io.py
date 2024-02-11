@@ -33,7 +33,9 @@ def create_dichotomy(key, kwargs = {}):
                 st.info(messages[1])
             elif 0.1 < float(response) < 0.9:
                 st.success(messages[2])
-
+    if response:
+        st.markdown('## Mind your choice, then forward to the next step.')
+    
     return
 
 def create_qualitative(key, kwargs = {}):
@@ -56,24 +58,27 @@ def create_yesno(key, kwargs = {}):
     return
 
 def create_yesno_row(key, kwargs = {}):
-    survey = kwargs
+    survey = kwargs.get('survey')
     callback_yes, callback_no = kwargs.get('callback')
+    callback_yes, callback_no = kwargs.get('callback')
+    label_no, label_yes = kwargs.get('labels', ('Yes', 'No'))
+    
     links_row = row(2, vertical_align="center")
     links_row.button(
-        ":ticket: No, thank you.",
+        label_yes,
         use_container_width=True,
         on_click = callback_no,
         key=f"{key}_no",
     )
 
+# ""
+# ""
     links_row.button(
-        ":honey_pot: Yes, please!",
+        label_no,
         use_container_width=True,
         on_click = callback_yes,
         key=f"{key}_yes",
     )
-
-
 
 def create_next(key, kwargs = {}):
     survey = kwargs
@@ -165,6 +170,9 @@ def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
 def create_textinput(key, kwargs = {}):
     survey = kwargs.get('survey')
     text = survey.text_input(key, help="")
+    
+    if text:
+        st.markdown(f"## Forward, confirming that you connect from `{text}`")
     return 
 
 def create_checkbox(key, kwargs = {'label': 'Choose'}):

@@ -10,7 +10,7 @@ def display_dictionary(dictionary):
         with col1:
             st.markdown(f"{key}")
         with col2:
-            st.markdown(f"{list(content)[0]}")
+            st.markdown(f"{list(content)[0]}", unsafe_allow_html=True)
         st.divider()
 
 def display_dictionary_by_indices(dictionary, indices=None):
