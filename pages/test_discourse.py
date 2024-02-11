@@ -81,7 +81,7 @@ class ConnectingContainer(PagedContainer):
         if widget_type in widget_creators:
             widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
             # st.write(widget_creators[widget_type])
-            st.write(widget_dict)
+            # st.write(widget_dict)
         pass
 
     def check_no_exit(self, session_state, data):
@@ -114,10 +114,6 @@ def yes_forward():
 
 def create_map(key, kwargs = {}):
 
-    # df = pd.DataFrame(
-    #     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
-    #     columns=['lat', 'lon'])
-
     # st.map(df)
     print(st.session_state.coordinates)
     _c = st.session_state.coordinates
@@ -132,7 +128,9 @@ def create_map(key, kwargs = {}):
         latitude='col1',
         longitude='col2',
         size='col3',
-        color='col4')
+        color='col4',
+        zoom=6,
+        use_container_width=True)
     st.markdown('### Do you see new patterns _known_?')
     st.markdown('## This is how we think: a _matrix is a map where patterns emerge_')
 
@@ -146,11 +144,6 @@ def enter_location(label):
         st.info(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
         st.session_state.location = location
         st.session_state.coordinates = coordinates
-
-    # survey = kwargs.get('survey')
-    # location = 
-    
-    
     
 intro_text = """
 ## Our questions are simple: _we don't want a bored audience._ This is why we engage.
@@ -249,7 +242,7 @@ panel_6 = """
 
 panel_7_bis = """
 
-##  What's on the other side?
+##  If we got our coordinates _completely_ wrong: wonder where we land?
 
 
 """
@@ -436,10 +429,14 @@ challenges = [
 
 widget_info = [
     {"type": None, "key": None},
-    {"type": "yesno", "key": "button_0", "kwargs": {"survey": survey, "callback": (yes_forward, no_clicked)}},
-    {"type": "yesno", "key": "button_1", "kwargs": {"survey": survey, "callback": (yes_forward, no_clicked)}},
-    {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "A smooth evolution", "This and *that*"] }},
+    {"type": "yesno", "key": "button_0", "kwargs": 
+        {"survey": survey, "callback": (yes_forward, no_clicked)}},
+    {"type": "yesno", "key": "button_1", "kwargs": 
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":[":honey_pot: Yes, please!", ":ticket: No, thank you."]}},
+    {"type": "yesno", "key": "button_1", "kwargs": 
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, indeed!", "Not really, I'm not sure."]}},
+    # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
@@ -624,7 +621,7 @@ def connect():
 
     links_row = row(2, vertical_align="center")
     links_row.button(
-        ":honey_pot: Explore our panel contributions",
+        ":honey_pot: Download the panel's booklet",
         use_container_width=True,
     )
     links_row.link_button(
@@ -633,19 +630,7 @@ def connect():
         use_container_width=True,
     )
 
-    # for p, (i, info)  in zip(panel, enumerate(widget_info)):
-    #     widget_key = info["key"]
-    #     widget_type = info["type"]
-    #     widget_kwargs = info["kwargs"] if "kwargs" in info else {}
-
-    #     st.markdown(p)
-    #     if widget_type in widget_creators:
-    #         widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
-
-    #     st.divider()
-        
-    st.write(survey.data)
-    st.write(st.session_state.read_texts)
+    # st.write(st.session_state.read_texts)
 
 def contributions():
     
