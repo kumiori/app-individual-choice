@@ -107,3 +107,18 @@ def match_input(input_text, translation_dict):
         return matching_keys
     else:
         return False
+
+
+def friendly_time(timestamp):
+    from datetime import datetime
+
+    human_readable_time = datetime.utcfromtimestamp(timestamp)
+
+    hour = human_readable_time.strftime('%I')
+    minute = human_readable_time.strftime('%M')
+    _period = human_readable_time.strftime('%p').lower()
+    period = 'in the morning' if datetime.utcfromtimestamp(timestamp).strftime('%p').lower() == 'am' else 'in the afternoon'
+
+    friendly_time = f"{minute} minutes past {hour} {period}"
+
+    return friendly_time

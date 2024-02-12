@@ -2,6 +2,9 @@ import streamlit as st
 from st_supabase_connection import SupabaseConnection
 import streamlit_survey as ss
 from streamlit_extras.row import row
+from lib.geo import reverse_lookup
+from datetime import datetime
+from lib.texts import friendly_time
 
 conn = st.connection("supabase", type=SupabaseConnection)
 
@@ -33,6 +36,8 @@ def create_dichotomy(key, kwargs = {}):
                 st.info(messages[1])
             elif 0.1 < float(response) < 0.9:
                 st.success(messages[2])
+        else:
+            st.markdown(f'## Take your time:', unsafe_allow_html=True)
     if response:
         st.markdown('## Mind your choice, then forward to the next step.')
     
@@ -48,7 +53,7 @@ def create_qualitative(key, kwargs = {}):
 
 def create_yesno(key, kwargs = {}):
     survey = kwargs
-    callback_yes, callback_no = kwargs.get('callback')
+    callback_yes, callback_no = kwargs.get('callback', (lambda: None, lambda: None))
     col1, col2 = st.columns(2)
     with col1:
         yes_clicked = st.button("Yes", key=f"{key}_yes", on_click=callback_yes)
@@ -59,8 +64,7 @@ def create_yesno(key, kwargs = {}):
 
 def create_yesno_row(key, kwargs = {}):
     survey = kwargs.get('survey')
-    callback_yes, callback_no = kwargs.get('callback')
-    callback_yes, callback_no = kwargs.get('callback')
+    callback_yes, callback_no = kwargs.get('callback', (lambda: None, lambda: None))
     label_no, label_yes = kwargs.get('labels', ('Yes', 'No'))
     
     links_row = row(2, vertical_align="center")
@@ -169,11 +173,37 @@ def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
 
 def create_textinput(key, kwargs = {}):
     survey = kwargs.get('survey')
-    text = survey.text_input(key, help="")
+    text = survey.text_input(key, help="Location")
     
-    if text:
-        st.markdown(f"## Forward, confirming that you connect from `{text}`")
-    return 
+    location = st.session_state.coordinates
+    
+    # if location:
+    #     with st.spinner():
+    #         _lookup = reverse_lookup(st.secrets.opencage["OPENCAGE_KEY"], location)
+    
+    #     data = _lookup
+    #     # # Access relevant information from the first entry
+    #     first_entry = data[0][0]
+    #     # political_union = first_entry["components"]["political_union"]
+    #     print(first_entry["annotations"]["sun"]["rise"])
+    #     sun_rise = first_entry["annotations"]["sun"]["rise"]["astronomical"]
+    #     sun_set = first_entry["annotations"]["sun"]["set"]["astronomical"]
+    #     print(str(list(first_entry["annotations"]["UN_M49"]["regions"])[-2]).lower())
+    #     geographical_region = str(list(first_entry["annotations"]["UN_M49"]["regions"])[-2]).title()
+    #     confidence = first_entry["confidence"]
+    #     st.markdown(f"### The Sun rises from the east and sets in the west.")
+    # #     st.markdown(f"## The geographical region is {geographical_region} and the political union is {political_union}.")
+    #     st.markdown(f"## Our confidence in  level is {confidence}.")
+    #     sun_rise_readable = datetime.utcfromtimestamp(sun_rise).strftime('%H:%M:%S UTC')
+    #     sun_set_readable = datetime.utcfromtimestamp(sun_set).strftime('%H:%M:%S UTC')
+
+    #     st.markdown(f"In {text}, the sun rises at {friendly_time(sun_rise)} and sets at {friendly_time(sun_set)}.")
+    #     # st.markdown(f"The sun rises at {sun_rise_readable} and sets at {sun_set_readable} in {text}.")
+
+
+    #     st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
+
+    st.markdown(f"## Forward, confirming that you connect from `{text}`")
 
 def create_checkbox(key, kwargs = {'label': 'Choose'}):
     survey = kwargs.get('survey')
