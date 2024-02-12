@@ -275,7 +275,7 @@ panel_8 = """
 
 ## Verify your location and local time. You will receive an access key to join the conversation.
 
-# access key: `[here] x [now]` 
+# access key: `[here] x [now]`
 #### [ I am in {location}, would like to CONNECT now ]
 
 `st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
@@ -505,7 +505,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = .1
+        seconds = 61
 
         start_time = time.time()
         while True:
