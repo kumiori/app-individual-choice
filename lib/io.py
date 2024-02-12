@@ -173,7 +173,7 @@ def create_globe(key, kwargs = {'database': 'gathering', 'table': 'gathering'}):
 
 def create_textinput(key, kwargs = {}):
     survey = kwargs.get('survey')
-    text = survey.text_input(key, help="Location")
+    text = survey.text_input(key, help="Help us best route your current location")
     
     location = st.session_state.coordinates
     
