@@ -651,7 +651,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 3
+        seconds = 60
 
         start_time = time.time()
         # st.write(st.session_state.current_discourse_page)
@@ -691,11 +691,13 @@ def main():
     if st.session_state["authentication_status"]:
         st.write(f'Welcome, your key is `<{st.session_state["access_key"]}>` 💭 keep it safe.')
 
+    
+    # with tab1:
+    st.markdown(f'# A long story short')
+    connect()
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
     
-    with tab1:
-        connect()
 
     with tab3:        
         col1, _, col2 = st.columns([3, 0.1, 1.5])
