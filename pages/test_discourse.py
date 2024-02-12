@@ -1,5 +1,7 @@
 import streamlit as st
-import datetime
+# import datetime
+from datetime import datetime, timedelta
+
 import time
 from streamlit_extras.add_vertical_space import add_vertical_space 
 import yaml
@@ -17,9 +19,10 @@ from streamlit_extras.stateful_button import button as stateful_button
 import random
 from lib.presentation import PagedContainer
 from lib.authentication import _Authenticate
-
+import hashlib
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
+from streamlit_authenticator.exceptions import RegisterError
 
 from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
 from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
@@ -33,7 +36,68 @@ import numpy as np
 from lib.geo import get_coordinates
 
 class Authenticate(_Authenticate):
-    pass
+
+    def register_user(self, form_name: str, location: str='Athens', preauthorization=True) -> bool:
+        """
+        Creates a register new user widget.
+
+        Parameters
+        ----------
+        form_name: str
+            The rendered name of the register new user form.
+        location: str
+            The location of the register new user form i.e. main or sidebar.
+        preauthorization: bool
+            The preauthorization requirement, True: user must be preauthorized to register, 
+            False: any user can register.
+        Returns
+        -------
+        bool
+            The status of registering the new user, True: user registered successfully.
+        """
+        if preauthorization:
+            if not self.preauthorized:
+                raise ValueError("preauthorization argument must not be None")
+        if not location:
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
+
+        register_user_form = st.form('OpenConnection')
+
+        col1, _, col2 = st.columns([2, .1, 2])
+        
+        register_user_form.subheader(form_name)
+        # _location = register_user_form.text_input("location", help="")
+        
+        # _location = st.session_state.
+
+        new_email = ''
+        new_username = ''
+        new_name = ''
+        new_password = ''
+        new_password_repeat = ''
+        # st.write(st.session_state)
+        
+        if register_user_form.form_submit_button('`Here` • `Now`'):
+            now = datetime.now()
+            st.write(now) 
+            if len(location) > 0:
+                coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
+                if coordinates:
+                    st.write(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+                    st.session_state.location = location
+                    st.session_state.coordinates = coordinates
+                    # the access key is the hash of the current time (now) and the location
+                    access_key_string = f"{now}_{location}"
+                    access_key_hash = hashlib.md5(access_key_string.encode()).hexdigest()
+                    
+                    # access_key_hash = hashlib.sha256(access_key_string.encode()).hexdigest()
+                    # st.write(access_key_hash)
+                    if self.__register_credentials(access_key_hash, new_name, new_password, new_email, preauthorization):
+                        self.credentials['access_key'] = access_key_hash
+                # self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
+                return True
+            else:
+                raise RegisterError('We forget the `where`, there...?')
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -103,7 +167,7 @@ class ConnectingContainer(PagedContainer):
             st.write(session_state)
             st.stop()
 
-authenticator = _Authenticate(
+authenticator = Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
@@ -155,27 +219,29 @@ def create_map(key, kwargs = {}):
 
 def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
+    survey = kwargs.get('survey')
+    _location = survey.data['location?']['value']
     # authenticator.login('Connect', 'main')
-    st.write(st.session_state.location)
+    # st.write(st.session_state.location)
     # st.info(f"Authentication status: {st.session_state['authentication_status']}")
     
-    if st.session_state["authentication_status"]:
-        authenticator.logout('Disconnect', 'main', key='disconnect')
-        st.write(f'Welcome')
-        st.title('Some content')
-    elif st.session_state["authentication_status"] is False:
-        st.error('Aww snap! Did anyone touch the clock? Or something is wrong with the lock...')
-    elif st.session_state["authentication_status"] is None:
-        st.warning('Do you already have an access key?')
-
+    # if st.session_state["authentication_status"]:
+    #     authenticator.logout('Disconnect', 'main', key='disconnect')
+    #     st.write(f'Welcome')
+    #     st.title('Some content')
+    # elif st.session_state["authentication_status"] is False:
+    #     st.error('Aww snap! Did anyone touch the clock? Or something is wrong with the lock...')
+    # el
+    
+    if st.session_state["authentication_status"] is None:
+        # st.warning('Do you already have an access key?')
         try:
-            if authenticator.register_user('Open • Connect • Checkpoint • ', preauthorization=False):
+            if authenticator.register_user(' Check • Point ', location = _location,  preauthorization=False):
                 st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
                     💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
                     Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
         except Exception as e:
             st.error(e)
-
 
 def enter_location(label):
     if survey.data.get(label):
@@ -318,7 +384,6 @@ panel_8 = """
 
 ## Verify your location and local time. You will receive an access key to join the conversation.
 
-# access key: `[here] x [now]`
 #### [ I am in {location}, would like to CONNECT now ]
 
 `st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
@@ -486,7 +551,7 @@ widget_info = [
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
     {"type": "textinput", "key": "location?", "kwargs": {"survey": survey}, "callback": enter_location("location?")},
     {"type": "projectionmap", "key": "map", "kwargs": {"survey": survey}},
-    {"type": "button", "key": "`Here` • `Now`", "kwargs": {"survey": survey}},
+    {"type": "openconnection", "key": "`Here` • `Now`", "kwargs": {"survey": survey, "authenticator": authenticator}},
     {"type": "globe", "key": "Singular Map", "kwargs": {"survey": survey, "database": "gathering"}},
     {"type": "button", "key": "`Here`  `Now`", "kwargs": {"survey": survey}},
     {"type": "yesno", "key": "extra_info", "kwargs": {"survey": survey}},
@@ -511,6 +576,7 @@ widget_creators = {
     "checkbox": create_checkbox,
     "qualitative": create_qualitative,
     "equaliser": create_equaliser,
+    "openconnection": create_connection,
     "textinput": create_textinput,
     "globe": create_globe,
     None: lambda x, kwargs: st.write(x)
@@ -540,10 +606,12 @@ def main():
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
     
-    create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
+    # create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
 
     st.divider()
-    now = datetime.datetime.now()
+    now = datetime.now()
+    st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` max is {st.session_state.current_discourse_page if st.session_state.current_discourse_page else ''}")
+    st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` \n # <center>Chapter {st.session_state.range if st.session_state.range else ''}</center> ", unsafe_allow_html=True)
     
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
@@ -553,7 +621,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 61
+        seconds = 1
 
         start_time = time.time()
         while True:
@@ -774,6 +842,8 @@ def references():
     with st.expander("Show all the data", expanded=False):
         st.write("Survey Data:")
         st.json(survey.data, expanded=True)
+
+        st.json(st.session_state, expanded=True)
 
     references_dict = {
         "# Book #1 \n ## Pluriverse: A Post-Development Dictionary": {"### `Ashish Kothari, Ariel Salleh, Arturo Escobar, Federico Demaria, Alberto Acosta`"},
