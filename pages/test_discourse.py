@@ -6,6 +6,8 @@ import time
 from streamlit_extras.add_vertical_space import add_vertical_space 
 import yaml
 from yaml.loader import SafeLoader
+from lib.texts import friendly_time
+from lib.geo import reverse_lookup
 
 from lib.texts import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
@@ -66,16 +68,12 @@ class Authenticate(_Authenticate):
         col1, _, col2 = st.columns([2, .1, 2])
         
         register_user_form.subheader(form_name)
-        # _location = register_user_form.text_input("location", help="")
-        
-        # _location = st.session_state.
 
         new_email = ''
         new_username = ''
         new_name = ''
         new_password = ''
         new_password_repeat = ''
-        # st.write(st.session_state)
         
         if register_user_form.form_submit_button('`Here` • `Now`'):
             now = datetime.now()
@@ -149,14 +147,12 @@ class ConnectingContainer(PagedContainer):
     def display_page(self, page):
         page_item = list(self.items)[page]
         (panel, widget_info) = page_item
-        st.markdown(panel)
+        st.markdown(panel, unsafe_allow_html=True)
         widget_key = widget_info["key"]
         widget_type = widget_info["type"]
         widget_kwargs = widget_info["kwargs"] if "kwargs" in widget_info else {}
         if widget_type in widget_creators:
             widget_dict[widget_key] = widget_creators[widget_type](widget_key, kwargs = widget_kwargs)
-            # st.write(widget_creators[widget_type])
-            # st.write(widget_dict)
         pass
 
     def check_no_exit(self, session_state, data):
@@ -197,9 +193,36 @@ def yes_forward():
 
 def create_map(key, kwargs = {}):
 
-    # st.map(df)
-    print(st.session_state.coordinates)
     _c = st.session_state.coordinates
+    
+    if _c:
+        with st.spinner():
+            _lookup = reverse_lookup(st.secrets.opencage["OPENCAGE_KEY"], _c)
+    
+        data = _lookup
+        # # Access relevant information from the first entry
+        first_entry = data[0][0]
+        # political_union = first_entry["components"]["political_union"]
+        print(first_entry)
+        sun_rise = first_entry["annotations"]["sun"]["rise"]["astronomical"]
+        sun_set = first_entry["annotations"]["sun"]["set"]["astronomical"]
+        print(list(first_entry["annotations"]["UN_M49"]["regions"])[-3])
+        geographical_region = str(list(first_entry["annotations"]["UN_M49"]["regions"])[-3]).title()
+        confidence = first_entry["confidence"]
+        st.markdown(f"### The Sun rises from the east and sets in the west.")
+    #     st.markdown(f"## The geographical region is {geographical_region} and the political union is {political_union}.")
+        st.markdown(f"## Our confidence in  level is {confidence}.")
+        sun_rise_readable = datetime.utcfromtimestamp(sun_rise).strftime('%H:%M:%S UTC')
+        sun_set_readable = datetime.utcfromtimestamp(sun_set).strftime('%H:%M:%S UTC')
+
+        st.markdown(f"At {_c} the sun rises at {friendly_time(sun_rise)} and sets at {friendly_time(sun_set)}.")
+        # st.markdown(f"The sun rises at {sun_rise_readable} and sets at {sun_set_readable} in {text}.")
+
+
+        st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
+
+
+    
     df = pd.DataFrame({
         "col1": np.random.randn(1000) / 10 + (-_c[0]),
         "col2": np.random.randn(1000) / 10 + ((_c[1] + 180) % 360),
@@ -221,20 +244,8 @@ def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
     survey = kwargs.get('survey')
     _location = survey.data['location?']['value']
-    # authenticator.login('Connect', 'main')
-    # st.write(st.session_state.location)
-    # st.info(f"Authentication status: {st.session_state['authentication_status']}")
-    
-    # if st.session_state["authentication_status"]:
-    #     authenticator.logout('Disconnect', 'main', key='disconnect')
-    #     st.write(f'Welcome')
-    #     st.title('Some content')
-    # elif st.session_state["authentication_status"] is False:
-    #     st.error('Aww snap! Did anyone touch the clock? Or something is wrong with the lock...')
-    # el
-    
+
     if st.session_state["authentication_status"] is None:
-        # st.warning('Do you already have an access key?')
         try:
             if authenticator.register_user(' Check • Point ', location = _location,  preauthorization=False):
                 st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
@@ -243,14 +254,24 @@ def create_connection(key, kwargs = {}):
         except Exception as e:
             st.error(e)
 
+def create_access(key, kwargs = {}):
+    
+    MILESTONE_KEY_CHAPTER = 9
+    
+    if st.session_state.range >= MILESTONE_KEY_CHAPTER:
+        authenticator.login('Do you already have a key?')
+
+    pass
+
 def enter_location(label):
+
     if survey.data.get(label):
         location = survey.data.get(label)["value"]
     else:
         return
     coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
     if coordinates:
-        st.info(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+        # st.info(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
         st.session_state.location = location
         st.session_state.coordinates = coordinates
     
@@ -305,7 +326,7 @@ panel_3 = """
 ## _"these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
 ##### • `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
-## " ... ", MP 
+## <center> ...  🧶 </center> 
 
 ### _That issue_ was timely. We decide to engage in a conversation in which you participate.
 
@@ -353,7 +374,6 @@ panel_7_bis = """
 
 ##  If we got our coordinates _completely_ wrong: wonder where we land?
 
-
 """
 # What's your name?
 
@@ -384,16 +404,13 @@ panel_8 = """
 
 ## Verify your location and local time. You will receive an access key to join the conversation.
 
-#### [ I am in {location}, would like to CONNECT now ]
-
-`st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
+`If successfully, ...a signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
 
 
 """
 
 panel_9 = """
 
-## Welcome, _________. 
 ## We are happy to have you here. You may have a lot of questions, we have a few too.
 ## How to connect, - _where_ do we connect from?
 
@@ -424,14 +441,15 @@ panel_11 = """
 
 panel_12 = """
 
+## To take it forward, connect.
+
 qualitative
     - feedback/support/contribute
 
-quantitative (how much: 0-100)
-    - sliders
+## We are happy to share and develop with you,
+## this is our email: [email]. 
 
-## Wishing you well, we are happy to share and develop with you,
-## this is our email: [email]. Looking forward.
+# Looking forward.
 
 """
 
@@ -458,12 +476,13 @@ sandbox = """
 
 """
 
+if 'range' not in st.session_state:
+    st.session_state.range = 0  # Set the initial value
+
 
 
 def update_range(page_number):
     # Initialize session state
-    if 'range' not in st.session_state:
-        st.session_state.range = 1  # Set the initial value
 
     # Update range if the current page_number is greater
     if page_number > st.session_state.range:
@@ -545,11 +564,15 @@ widget_info = [
     {"type": "yesno", "key": "button_1", "kwargs": 
         {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, indeed!", "Not really, I'm not sure."]}},
     # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates: the slower the lighter.','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
-    {"type": "textinput", "key": "location?", "kwargs": {"survey": survey}, "callback": enter_location("location?")},
+    {"type": "textinput", 
+        "key": "location?",
+        "kwargs": {"survey": survey},
+        "callback": enter_location("location?")
+     },
     {"type": "projectionmap", "key": "map", "kwargs": {"survey": survey}},
     {"type": "openconnection", "key": "`Here` • `Now`", "kwargs": {"survey": survey, "authenticator": authenticator}},
     {"type": "globe", "key": "Singular Map", "kwargs": {"survey": survey, "database": "gathering"}},
@@ -594,6 +617,9 @@ def main():
     if 'page_number' not in st.session_state:
         st.session_state.page_number = 0
     
+    if 'current_discourse_page' not in st.session_state:
+        st.session_state.current_discourse_page = 0
+    
     if 'damage_parameter' not in st.session_state:
         st.session_state.damage_parameter = 0.0  # Initial damage parameter
     
@@ -610,9 +636,9 @@ def main():
 
     st.divider()
     now = datetime.now()
-    st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` max is {st.session_state.current_discourse_page if st.session_state.current_discourse_page else ''}")
-    st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` \n # <center>Chapter {st.session_state.range if st.session_state.range else ''}</center> ", unsafe_allow_html=True)
-    
+    # st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` max is {st.session_state.range if st.session_state.range else ''}")
+    st.markdown(f"# <center>Chapter {float(st.session_state.current_discourse_page/st.session_state.range) if range in st.session_state else '0'}</center> ", unsafe_allow_html=True)
+    st.divider()
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
     st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
@@ -621,32 +647,43 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 1
+        seconds = 3
 
         start_time = time.time()
-        while True:
-            time.sleep(update_frequency / 1000.0)  # Convert to seconds
-            matrix = generate_random_matrix(matrix_size)
-            encoded_matrix = encode_matrix(matrix)
-            # norm_value = frobenius_norm(encoded_matrix)/_scale
-            # norm_values.append(norm_value)
-            
-            # with col1:
-            #     st.write(norm_value)
-            
-            with col2:
-                matrix_placeholder.empty()
-                with matrix_placeholder:
-                    display_matrix(matrix)
-                    
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= seconds:
-                matrix_placeholder.empty()
-                break
-    st.divider()
+        # st.write(st.session_state.current_discourse_page)
+        if st.session_state.current_discourse_page == 0:
+            while True:
+                time.sleep(update_frequency / 1000.0)  # Convert to seconds
+                matrix = generate_random_matrix(matrix_size)
+                encoded_matrix = encode_matrix(matrix)
 
+                # norm_value = frobenius_norm(encoded_matrix)/_scale
+                # norm_values.append(norm_value)
+                
+                # with col1:
+                #     st.write(norm_value)
+                
+                with col2:
+                    matrix_placeholder.empty()
+                    with matrix_placeholder:
+                        display_matrix(matrix)
+                        
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= seconds:
+                    matrix_placeholder.empty()
+                    break
+
+    create_access(key = '', kwargs = {})
+    st.divider()
+    
+    if st.session_state["authentication_status"]:
+        st.error('Error! 🐉 Some content is new')
+        authenticator.logout('Disconnect', 'main', key='disconnect')
+    # st.write(f'Welcome')
     
     st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
+    if st.session_state["authentication_status"]:
+        st.write(f'Welcome, your key is `<{st.session_state["access_key"]}>` 💭 keep it safe.')
 
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])

@@ -13,6 +13,11 @@ class _Authenticate(Authenticate):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.supabase = supabase
         self.credentials['access_key'] = None
+        
+    if "access_key" not in st.session_state:
+        st.session_state['access_key'] = ''
+
+    
     
     def login(self, form_name: str, location: str='main') -> tuple:
         """
