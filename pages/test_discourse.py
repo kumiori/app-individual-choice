@@ -2,6 +2,38 @@ import streamlit as st
 import datetime
 import time
 from streamlit_extras.add_vertical_space import add_vertical_space 
+import yaml
+from yaml.loader import SafeLoader
+
+from lib.texts import _stream_example, corrupt_string
+from pages.test_geocage import get_coordinates
+from lib.survey import CustomStreamlitSurvey
+from streamlit_extras.streaming_write import write as streamwrite 
+import time
+import string
+import streamlit_survey as ss
+from streamlit_extras.row import row
+from streamlit_extras.stateful_button import button as stateful_button
+import random
+from lib.presentation import PagedContainer
+from lib.authentication import _Authenticate
+
+# from pages.test_game import display_dictionary_by_indices
+# from pages.test_pleasure import display_dictionary
+
+from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
+from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
+from lib.survey import CustomStreamlitSurvey
+update_frequency = 500  # in milliseconds
+from lib.texts import match_input
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
+# from pages.test_footer import footer
+import pandas as pd
+import numpy as np
+from lib.geo import get_coordinates
+
+class Authenticate(_Authenticate):
+    pass
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -24,30 +56,6 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 
 st.write(st.secrets["runtime"]["STATUS"])
 
-from lib.texts import _stream_example, corrupt_string
-from pages.test_geocage import get_coordinates
-from lib.survey import CustomStreamlitSurvey
-from streamlit_extras.streaming_write import write as streamwrite 
-import time
-import string
-import streamlit_survey as ss
-from streamlit_extras.row import row
-from streamlit_extras.stateful_button import button as stateful_button
-import random
-from lib.presentation import PagedContainer
-# from pages.test_game import display_dictionary_by_indices
-# from pages.test_pleasure import display_dictionary
-
-from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
-from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
-from lib.survey import CustomStreamlitSurvey
-update_frequency = 500  # in milliseconds
-from lib.texts import match_input
-from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
-# from pages.test_footer import footer
-import pandas as pd
-import numpy as np
-from lib.geo import get_coordinates
 
 df = pd.DataFrame(
     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
@@ -56,6 +64,9 @@ df = pd.DataFrame(
 with open("pages/discourse.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     st.write(f.read())
+    
+with open('data/credentials.yml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
     
 class _PagedContainer(PagedContainer):
 
@@ -91,6 +102,14 @@ class ConnectingContainer(PagedContainer):
             st.write(data)
             st.write(session_state)
             st.stop()
+
+authenticator = _Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
             
 survey = CustomStreamlitSurvey()
 
@@ -133,6 +152,30 @@ def create_map(key, kwargs = {}):
         use_container_width=True)
     st.markdown('### Do you see new patterns _known_?')
     st.markdown('## This is how we think: a _matrix is a map where patterns emerge_')
+
+def create_connection(key, kwargs = {}):
+    authenticator = kwargs.get('authenticator')
+    # authenticator.login('Connect', 'main')
+    st.write(st.session_state.location)
+    # st.info(f"Authentication status: {st.session_state['authentication_status']}")
+    
+    if st.session_state["authentication_status"]:
+        authenticator.logout('Disconnect', 'main', key='disconnect')
+        st.write(f'Welcome')
+        st.title('Some content')
+    elif st.session_state["authentication_status"] is False:
+        st.error('Aww snap! Did anyone touch the clock? Or something is wrong with the lock...')
+    elif st.session_state["authentication_status"] is None:
+        st.warning('Do you already have an access key?')
+
+        try:
+            if authenticator.register_user('Open • Connect • Checkpoint • ', preauthorization=False):
+                st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
+                    💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
+                    Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
+        except Exception as e:
+            st.error(e)
+
 
 def enter_location(label):
     if survey.data.get(label):
@@ -351,6 +394,7 @@ sandbox = """
 """
 
 
+
 def update_range(page_number):
     # Initialize session state
     if 'range' not in st.session_state:
@@ -495,8 +539,12 @@ def main():
     # once usage:
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
+    
+    create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
+
     st.divider()
     now = datetime.datetime.now()
+    
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
     st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
