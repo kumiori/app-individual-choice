@@ -253,6 +253,9 @@ def create_connection(key, kwargs = {}):
                     Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
         except Exception as e:
             st.error(e)
+            
+    else:
+        st.warning("We are already connected. Re•enter using your key, check the connection later.")
 
 def create_access(key, kwargs = {}):
     
@@ -372,7 +375,7 @@ panel_6 = """
 
 panel_7_bis = """
 
-##  If we got our coordinates _completely_ wrong: wonder where we land?
+##  Anyone on the other side?
 
 """
 # What's your name?
@@ -402,9 +405,7 @@ panel_8 = """
 
 ## How to visualise a bigger picture? 
 
-## Verify your location and local time. You will receive an access key to join the conversation.
-
-`If successfully, ...a signature \n`` {signature} ``. Keep it in your files, it will allow swift access to the past.")`
+`If lucky, you have received a `` <{signature}> ``. Keep it in your files, it will allow swift access to the past."`
 
 
 """
@@ -537,7 +538,10 @@ yesses = {
 }
 
 panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7, panel_7_bis, panel_8,
-         panel_9, panel_10, panel_11, panel_12]
+        #  panel_9, 
+        #  panel_10, 
+        #  panel_11, panel_12
+         ]
 
 challenges = [
     ("The Social Contract", ""),
@@ -637,7 +641,7 @@ def main():
     st.divider()
     now = datetime.now()
     # st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` max is {st.session_state.range if st.session_state.range else ''}")
-    st.markdown(f"# <center>Chapter {float(st.session_state.current_discourse_page/st.session_state.range) if range in st.session_state else '0'}</center> ", unsafe_allow_html=True)
+    st.markdown(f"# <center>Chapter {float(st.session_state.current_discourse_page/st.session_state.range) if hasattr(st.session_state, 'range') and st.session_state.range != 0 else '0'}</center> ", unsafe_allow_html=True)
     st.divider()
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
@@ -678,6 +682,8 @@ def main():
     
     if st.session_state["authentication_status"]:
         st.error('Error! 🐉 Some content is new')
+        # st.session_state.current_discourse_page = 9
+        
         authenticator.logout('Disconnect', 'main', key='disconnect')
     # st.write(f'Welcome')
     
