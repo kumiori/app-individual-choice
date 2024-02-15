@@ -279,12 +279,12 @@ def enter_location(label):
         st.session_state.coordinates = coordinates
     
 intro_text = """
-## Our questions are simple: _we don't want a bored audience._ This is why we engage.
+## Our questions are simple. _We don't want a bored audience._ This is why we engage.
 ## We invite participation to construct new narratives and implement ideas based on collective understanding.
 ## To broaden and articulate a vision of imminent social transitions.
 
 
-# `This is your invitation.` :ticket:
+# `This is your invitation:` :ticket:
 
 #### Forward, _just_ use the top button. 
 """
@@ -305,7 +305,7 @@ panel_1 = """ ## We contemplate an international landscape characterised by simu
 
 panel_2 = """
 
-## We are organising a panel discussion at _Europe in Discourse_ conference in Athens, 2024.
+## We organise a panel discussion at _Europe in Discourse_ conference in Athens, in September 2024.
 
 ## Our panel springs at the intersection of Social Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
 
@@ -326,7 +326,7 @@ panel_3 = """
 
 ## Everything seems to lie upon a notion of change and connection.
 
-## _"these are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
+## _"These are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
 ##### • `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
 ## <center> ...  🧶 </center> 
@@ -651,7 +651,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 3
+        seconds = 300
 
         start_time = time.time()
         # st.write(st.session_state.current_discourse_page)

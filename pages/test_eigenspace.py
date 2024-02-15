@@ -184,6 +184,10 @@ def main():
         a, b, c = st.session_state.parameters["a"], st.session_state.parameters["b"], st.session_state.parameters["c"]
     st.markdown(f'# <center>$bc^2$ `{np.around(b*c**2, 1)}` vs. $\pi a^2$ `{np.around(np.pi**2 * a, 1)}`</center>', unsafe_allow_html=True)
     st.markdown(f'# <center>|supp| = $(\pi^2 a / (bc^2))^{{1 / 3}}$ `{np.around((np.pi**2 * a / (b * c**2))**(1/3), 1)}` or $0$</center>', unsafe_allow_html=True)
+    triviality_condition = b*c**2 < np.pi**2 * a
+    
+    st.write(f"# Triviality Condition is {triviality_condition}")
+    
     st.write(st.session_state.parameters)
 
     
