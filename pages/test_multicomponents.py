@@ -5,7 +5,7 @@ st.text("Hello")
 
 _qualitative_selector = components.declare_component(
     "qualitative",
-    url='http://localhost:3000'
+    url='http://localhost:3001'
 )
 
 
