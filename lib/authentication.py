@@ -13,12 +13,12 @@ class _Authenticate(Authenticate):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.supabase = supabase
         self.credentials['access_key'] = None
-        
-    if "access_key" not in st.session_state:
-        st.session_state['access_key'] = ''
 
-    
-    
+    if "access_key" not in st.session_state:
+        print('access_key not in session state')
+        st.session_state['access_key'] = ''
+        print(st.session_state['access_key'])
+        
     def login(self, form_name: str, location: str='main') -> tuple:
         """
         Creates a login widget.
@@ -233,3 +233,62 @@ class _Authenticate(Authenticate):
                 st.session_state['username'] = None
                 st.session_state['authentication_status'] = None
 
+class AuthenticateWithKeys(_Authenticate):
+
+    def register_user(self, form_name: str, location: str='Athens', preauthorization=True) -> bool:
+        """
+        Creates a register new user widget.
+
+        Parameters
+        ----------
+        form_name: str
+            The rendered name of the register new user form.
+        location: str
+            The location of the register new user form i.e. main or sidebar.
+        preauthorization: bool
+            The preauthorization requirement, True: user must be preauthorized to register, 
+            False: any user can register.
+        Returns
+        -------
+        bool
+            The status of registering the new user, True: user registered successfully.
+        """
+        if preauthorization:
+            if not self.preauthorized:
+                raise ValueError("preauthorization argument must not be None")
+        if not location:
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
+
+        register_user_form = st.form('OpenConnection')
+
+        col1, _, col2 = st.columns([2, .1, 2])
+        
+        register_user_form.subheader(form_name)
+
+        new_email = ''
+        new_username = ''
+        new_name = ''
+        new_password = ''
+        new_password_repeat = ''
+        
+        if register_user_form.form_submit_button('`Here` • `Now`'):
+            now = datetime.now()
+            st.write(now) 
+            if len(location) > 0:
+                coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
+                if coordinates:
+                    st.write(f"Coordinates for {location}: Latitude {coordinates[0]}, Longitude {coordinates[1]}")
+                    st.session_state.location = location
+                    st.session_state.coordinates = coordinates
+                    # the access key is the hash of the current time (now) and the location
+                    access_key_string = f"{now}_{location}"
+                    access_key_hash = hashlib.md5(access_key_string.encode()).hexdigest()
+                    
+                    # access_key_hash = hashlib.sha256(access_key_string.encode()).hexdigest()
+                    # st.write(access_key_hash)
+                    if self.__register_credentials(access_key_hash, new_name, new_password, new_email, preauthorization):
+                        self.credentials['access_key'] = access_key_hash
+                # self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
+                return True
+            else:
+                raise RegisterError('We forget the `where`, there...?')
