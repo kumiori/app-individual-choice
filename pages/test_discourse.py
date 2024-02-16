@@ -11,7 +11,6 @@ from lib.geo import reverse_lookup
 
 from lib.texts import _stream_example, corrupt_string
 from pages.test_geocage import get_coordinates
-from lib.survey import CustomStreamlitSurvey
 from streamlit_extras.streaming_write import write as streamwrite 
 import time
 import string

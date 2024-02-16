@@ -18,13 +18,6 @@ else:
         "qualitative",
         url='http://localhost:3001'
     )
-    
-
-
-
-
-
-
 
 def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
     return _qualitative_selector(component = "dichotomy",
@@ -50,7 +43,6 @@ def _qualitative(name, question, label, areas, key=None):
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
-
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
