@@ -23,7 +23,7 @@ import streamlit.components.v1 as components
 #     )
 
 
-from lib.io import conn
+from lib.io import conn, create_equaliser
 from streamlit_extras.add_vertical_space import add_vertical_space 
 
 from lib.texts import _stream_example, corrupt_string, _stream_once
@@ -136,65 +136,15 @@ def create_connection(key, kwargs = {}):
 def main():
     # st.title("Welcome to the Singular Mapping. A solid proof? Forget, and Ask the moon: If If-Then is full, is still Luck a useful tool? \n ## We divide by zero. \n ## and it's just fuck*ng pitch black..")
     title = """
-    ## This is the Settimia
+    # This is Settimia
     """
 
-    """
-        Dynamic information gathering platform
-    # Artists/Collaborators/Investors
-    
-    Landing page with various options of explorations
-    You're here because ....
-    
-    ## -\ we (the fellowship) ..self.
-    ## We (we+you)
-    ## ...
-    ## ...
-    ## Products (anything):
-    # Q: where are you loc? 
-    ## { globeViz }
-
-    Importantly...
-    { ourCoordinates } Astral Chart
-
-    [for residence periods: dynamic group 3bd always
-        - chef
-        - painter/sculptor (inArt)
-        - musician/dancer/writer (inXXX)]
-
-    ## Collect applications (information)
-        Your preferences, profiling.
-        
-    ## Receiving money
-        "Paywall": QR codes (exec) or (diversion)
-        Payment system test.
-    ## (Internal Governance)
-    
-    
-If collab:
-...
-If Apply:
-...
-If Invest:
-	- financial product
-	- business plan
-
-11=EUR 
-
---------------------------
-
-paywall
-
---------------------------
-
-pdf
-    """
     st.markdown(title)
     stream = st.empty()
     
     with stream:
         _stream, errors = corrupt_string(title, damage_parameter=0.0)
-        st.title(f"System errors number {errors}")
+        st.markdown(f"`System errors number {errors}`")
         streamwrite(_stream_once(_stream, damage=0.5), unsafe_allow_html=True)
         # with st.spinner('...'):
             # time.sleep(3)
@@ -207,9 +157,6 @@ pdf
         st.session_state.location = None  # Initial damage parameter
 
     col1, col2, col3 = st.columns(3)
-
-    survey = ss.StreamlitSurvey("The Where?")
-
 
     access_keys = ["3074dac353f359537cbc2df98821c1ef",
                    "e447d257840306371622d4b9a8287969",
@@ -238,142 +185,216 @@ pdf
     authenticator.login('Do you already have a key?')
     
     st.divider()
+    st.write(f'Auth {st.session_state["authentication_status"]}')
     
     if st.session_state["authentication_status"]:
-        st.success('Lovely! 🐉 Fellowship connected!')
+        st.success('Lovely! 🐉 Fellowship connected! Here\'s a story to be told 👇')
         # st.session_state.current_discourse_page = 9
         
+        """🦇✨👽😗🥹♥️❤‍🔥🫠🥴👀🧞‍♂️🐎
+        💫💨🏢🇫🇷☑️🔑🥖🕘🚧🪽✨☀️🔥🫂🧜🏾‍♂️👋🏾✉️🥤🚪💃🫡🎭🧉⏰🦹🕛🕶️💥🔐🕯️
+        ❤️🤌🇮🇹🍝🍕♾️🙏👏🔥🍷🪵☀️💞🌽💦💥🌻🎉🪄😎🗝️🛎️
+        🧡🗝🚪🧼🧿💳💋🥩🧂🐚💦
+        """        
         authenticator.logout('Disconnect', 'main', key='disconnect')
-    st.divider()
-    col1, col2, col3 = st.columns([1, 1.2, 1])
+        st.divider()
+        col1, col2, col3 = st.columns([1, 1.2, 1])
     
     # with col2:
         # st.markdown("## ¿ What is your")
         # location = survey.text_input("_location", help="Our location will appear shortly...", value=st.session_state.location)
-    
-    if location is not None:
-        coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
-        st.session_state.coordinates = coordinates
-        st.write(coordinates)
-        with col1:
-            st.markdown("## As a rule of thumb...")
-            
-        with col3:
-            st.markdown("## Luck (y)")
-            lucky_number = survey.number_input("number", min_value=0, max_value=1000000000)
-
-        # Send Data Button
-        if col1.button(f"Check in from {location}"):
-            data = {
-                "location": survey.data["location"]["value"],
-                "latitude": coordinates[0],
-                "longitude": coordinates[1],
-                "coordinates": coordinates,
-                "luckynumber": survey.data["number"]["value"]
-            }
-
-            signature = hashlib.md5(str(data).encode('utf-8')).hexdigest()
-            # st.write("")
-            data["signature"] = signature
-
-            # Update session state with the signature
-            st.session_state.signature = signature
-
-            newdata = insert_or_update_data(conn, data)
-
-            if newdata:
-                st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access...")
-            else:
-                _default = data["location"]+"-"+str(data["luckynumber"])
-                access = survey.text_input("signature", help="Your fingerprint.")
-                
         
-        col1, col3, col3 = st.columns(3) 
-                       
-        if hasattr(st.session_state, 'coordinates'):
-            if col2.button("Update our Map"):
-                data = fetch_and_display_data(conn, kwargs={"database":"gathering"})
+        if location is not None:
+            coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
+            st.session_state.coordinates = coordinates
+            st.write(coordinates)
+            with col1:
+                st.markdown("## As a rule of thumb...")
                 
-                stream.markdown("# This is how the moon sees the planet revolving...")
-                # with stream:
-                    # st.write('.........')
+            with col3:
+                st.markdown("## Luck (y)")
+                lucky_number = survey.number_input("number", min_value=0, max_value=1000000000)
+
+            # Send Data Button
+            if col1.button(f"Check in from {location}"):
+                data = {
+                    "location": survey.data["location"]["value"],
+                    "latitude": coordinates[0],
+                    "longitude": coordinates[1],
+                    "coordinates": coordinates,
+                    "luckynumber": survey.data["number"]["value"]
+                }
+
+                signature = hashlib.md5(str(data).encode('utf-8')).hexdigest()
+                # st.write("")
+                data["signature"] = signature
+
+                # Update session state with the signature
+                st.session_state.signature = signature
+
+                newdata = insert_or_update_data(conn, data)
+
+                if newdata:
+                    st.success(f"This is your signature \n`` {signature} ``. Keep it in your files, it will allow swift access...")
+                else:
+                    _default = data["location"]+"-"+str(data["luckynumber"])
+                    access = survey.text_input("signature", help="Your fingerprint.")
+                    
+            
+            col1, col3, col3 = st.columns(3) 
+                        
+            if hasattr(st.session_state, 'coordinates'):
+                if col2.button("Update our Map"):
+                    data = fetch_and_display_data(conn, kwargs={"database":"gathering"})
+                    
+                    stream.markdown("# This is how the moon sees the planet revolving...")
+                    # with stream:
+                        # st.write('.........')
+                    
+                    # Generate JavaScript code with city data
+                    javascript_code = f"""
+                    // Gen city data
+                    const VELOCITY = 9; // minutes per frame
+
+                    const sunPosAt = dt => {{
+                        const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
+                        const t = solar.century(dt);
+                        const longitude = (day - dt) / 864e5 * 360 - 180;
+                        return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
+                    }};
+
+                    let dt = +new Date();
+                    const solarTile = {{ pos: sunPosAt(dt) }};
+                    const timeEl = document.getElementById('time');
+
+                    const cityData = { data };
+                    const N = 10;
+
+                    const world = Globe()
+                        (document.getElementById('globeViz'))
+                        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+                        .backgroundColor('rgb(14, 17, 23)')
+                        .tilesData([solarTile])
+                        .tileLng(d => d.pos[0])
+                        .tileLat(d => d.pos[1])
+                        .tileAltitude(0.01)
+                        .tileWidth(180)
+                        .tileHeight(180)
+                        .tileUseGlobeProjection(false)
+                        .tileMaterial(() => new THREE.MeshLambertMaterial({{ color: '#ffff00', opacity: 0.3, transparent: true }}))
+                        .tilesTransitionDuration(0)
+                        .pointsData(cityData)
+                        .pointAltitude('luckynumber');
+
+                    // animate time of day
+                    requestAnimationFrame(() =>
+                        (function animate() {{
+                        dt += VELOCITY * 60 * 1000;
+                        solarTile.pos = sunPosAt(dt);
+                        world.tilesData([solarTile]);
+                        timeEl.textContent = new Date(dt).toLocaleString();
+                        requestAnimationFrame(animate);
+                        }})()
+                    );
+
+                    // Add auto-rotation
+                    world.controls().autoRotate = true;
+                    world.controls().autoRotateSpeed = 3.6;
+                    """
+
+                    # HTML code with embedded JavaScript
+                    html_code = f"""
+                    <head>
+                    <style> body {{ margin: 0em; }} </style>
+                    <script src="//unpkg.com/three"></script>
+                    <script src="//unpkg.com/globe.gl"></script>
+                    <script src="//unpkg.com/solar-calculator"></script>
+                    </head>
+
+                    <body>
+                    <div id="globeViz"></div>
+                    <div id="time"></div>
+                    <script>
+                        { javascript_code }
+                    </script>
+                    </body>
+                    """
+
+                    # Display the HTML code in Streamlit app
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.components.v1.html(html_code, height=700, width=700)
+        
+        equaliser_data = [
+            ("Social Media Presence", ""),
+            ("Conceptual/Business", ""),
+            ("Investor Relations", ""),
+            ("Product Development", ""),
+            ("Event Planning", ""),
+        ]
+
+        # st.write(survey)
+        st.markdown("## Let's think _energetically..._")
+        st.markdown("### Using an _energy_ mixer, where _should_ energy go?")
+        create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
+
+        dev_mode = st.checkbox('Developer Mode')
+
+        # Check if the checkbox is selected
+        if dev_mode:
+
+            """
+                Dynamic information gathering platform
+            # Artists/Collaborators/Investors
+            
+            Landing page with various options of explorations
+            You're here because ....
+            
+            ## -\ we (the fellowship) ..self.
+            ## We (we+you)
+            ## ...
+            ## ...
+            ## Products (anything):
+            # Q: where are you loc? 
+            ## { globeViz }
+
+            Importantly...
+            { ourCoordinates } Astral Chart
+
+            [for residence periods: dynamic group 3bd always
+                - chef
+                - painter/sculptor (inArt)
+                - musician/dancer/writer (inXXX)]
+
+            ## Collect applications (information)
+                Your preferences, profiling.
                 
-                # Generate JavaScript code with city data
-                javascript_code = f"""
-                // Gen city data
-                const VELOCITY = 9; // minutes per frame
+            ## Receiving money
+                "Paywall": QR codes (exec) or (diversion)
+                Payment system test.
+            ## (Internal Governance)
+            
+            
+        If collab:
+        ...
+        If Apply:
+        ...
+        If Invest:
+            - financial product
+            - business plan
 
-                const sunPosAt = dt => {{
-                    const day = new Date(+dt).setUTCHours(0, 0, 0, 0);
-                    const t = solar.century(dt);
-                    const longitude = (day - dt) / 864e5 * 360 - 180;
-                    return [longitude - solar.equationOfTime(t) / 4, solar.declination(t)];
-                }};
+        11=EUR 
 
-                let dt = +new Date();
-                const solarTile = {{ pos: sunPosAt(dt) }};
-                const timeEl = document.getElementById('time');
+        --------------------------
 
-                const cityData = { data };
-                const N = 10;
+        paywall
 
-                const world = Globe()
-                    (document.getElementById('globeViz'))
-                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-                    .backgroundColor('rgb(14, 17, 23)')
-                    .tilesData([solarTile])
-                    .tileLng(d => d.pos[0])
-                    .tileLat(d => d.pos[1])
-                    .tileAltitude(0.01)
-                    .tileWidth(180)
-                    .tileHeight(180)
-                    .tileUseGlobeProjection(false)
-                    .tileMaterial(() => new THREE.MeshLambertMaterial({{ color: '#ffff00', opacity: 0.3, transparent: true }}))
-                    .tilesTransitionDuration(0)
-                    .pointsData(cityData)
-                    .pointAltitude('luckynumber');
+        --------------------------
 
-                // animate time of day
-                requestAnimationFrame(() =>
-                    (function animate() {{
-                    dt += VELOCITY * 60 * 1000;
-                    solarTile.pos = sunPosAt(dt);
-                    world.tilesData([solarTile]);
-                    timeEl.textContent = new Date(dt).toLocaleString();
-                    requestAnimationFrame(animate);
-                    }})()
-                );
-
-                // Add auto-rotation
-                world.controls().autoRotate = true;
-                world.controls().autoRotateSpeed = 3.6;
-                """
-
-                # HTML code with embedded JavaScript
-                html_code = f"""
-                <head>
-                <style> body {{ margin: 0em; }} </style>
-                <script src="//unpkg.com/three"></script>
-                <script src="//unpkg.com/globe.gl"></script>
-                <script src="//unpkg.com/solar-calculator"></script>
-                </head>
-
-                <body>
-                <div id="globeViz"></div>
-                <div id="time"></div>
-                <script>
-                    { javascript_code }
-                </script>
-                </body>
-                """
-
-                # Display the HTML code in Streamlit app
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.components.v1.html(html_code, height=700, width=700)
-                
-                
-
+        pdf
+            """
+            
+            st.write(survey)
 # Run the app
 if __name__ == "__main__":
     main()
