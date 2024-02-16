@@ -118,7 +118,6 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 
 st.write(st.secrets["runtime"]["STATUS"])
 
-
 df = pd.DataFrame(
     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
     columns=['lat', 'lon'])
@@ -141,7 +140,6 @@ class _PagedContainer(PagedContainer):
     
         if self.show_pagination:
             st.write(f"Page {page + 1}/{self.get_total_pages()}")
-
 
 class ConnectingContainer(PagedContainer):
     def display_page(self, page):
