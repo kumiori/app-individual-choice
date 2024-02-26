@@ -3,7 +3,7 @@ import sympy as sp
 import numpy as np
 import plotly.express as px
 
-if st.secrets["runtime"]["STATUS"] == "Production":
+if not st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
         page_title="Celestial Verse Portal",
         page_icon="✨",
@@ -17,6 +17,9 @@ if st.secrets["runtime"]["STATUS"] == "Production":
         [data-testid="collapsedControl"] {
             display: none
         }
+        [data-testid="stHeader"] {
+            display: none
+            }
     </style>
     """,
         unsafe_allow_html=True,
@@ -186,7 +189,7 @@ def main():
     st.markdown(f'# <center>|supp| = $(\pi^2 a / (bc^2))^{{1 / 3}}$ `{np.around((np.pi**2 * a / (b * c**2))**(1/3), 1)}` or $0$</center>', unsafe_allow_html=True)
     triviality_condition = b*c**2 < np.pi**2 * a
     
-    st.write(f"# Triviality Condition is {triviality_condition}")
+    st.write(f"# Triviality Condition is $bc^2 < \pi^2 a$ {triviality_condition}")
     
     st.write(st.session_state.parameters)
 

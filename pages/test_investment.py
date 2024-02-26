@@ -9,6 +9,7 @@ import numpy as np
 
 import sys
 sys.path.append('pages/')
+import pages
 
 from test_multicomponents import dichotomy
 # qualitative, qualitative_parametric
@@ -27,7 +28,7 @@ tabs = ["Questions Portal", "Business Plan", "Cosmic Revelations", "Minimal Gath
 
 _qualitative_selector = components.declare_component(
     "qualitative",
-    url='http://localhost:3000'
+    url='http://localhost:3001'
 )
 
 # def dichotomy(name, question, key=None):

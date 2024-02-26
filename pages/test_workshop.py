@@ -21,6 +21,9 @@ if st.secrets["runtime"]["STATUS"] == "Production":
         [data-testid="collapsedControl"] {
             display: none
         }
+        [data-testid="stHeader"] {
+            display: none
+            }
     </style>
     """,
         unsafe_allow_html=True,
