@@ -36,7 +36,7 @@ from lib.io import create_button, create_dichotomy, create_qualitative, create_y
 import pandas as pd
 import numpy as np
 from lib.geo import get_coordinates
-locale.setlocale(locale.LC_TIME, 'fr_FR')
+# locale.setlocale(locale.LC_TIME, 'fr_FR')
 
 class Authenticate(_Authenticate):
 
