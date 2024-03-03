@@ -667,7 +667,7 @@ def main():
     st.divider()
     st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
     st.markdown("### <center>The intersection of Human and Natural Sciences, Philosophy, and Arts.</center>", unsafe_allow_html=True)
-    st.markdown('<center>``wait a minute``</center>', unsafe_allow_html=True)
+    st.markdown('<center>`wait a minute`</center>', unsafe_allow_html=True)
     st.markdown('', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     with col2:
@@ -958,7 +958,7 @@ def references():
 
     references_dict = {
         "# Book #1 \n ## Pluriverse: A Post-Development Dictionary": {"### `Ashish Kothari, Ariel Salleh, Arturo Escobar, Federico Demaria, Alberto Acosta`"},
-        "# Magazine  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue New Hopes, New Horizons and G20 \n ### [Link to document 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
+        "# Journal  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue: New Hopes, New Horizons and G20 \n ### [Link to issue 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
         "# Docu #0": {"### ..."},
         "# Event #3": {"### ..."},
         "# Story #4": {"### ..."},
