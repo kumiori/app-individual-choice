@@ -261,7 +261,7 @@ def create_connection(key, kwargs = {}):
             st.error(e)
             
     else:
-        st.warning("We are already connected. Re•enter using your key, check the connection later.")
+        st.warning("We are already connected, re•enter using your key.")
 
 def create_access(key, kwargs = {}):
     
@@ -702,14 +702,14 @@ def main():
     st.divider()
     
     if st.session_state["authentication_status"]:
-        st.error('Error! 🐉 Some content is new')
-        # st.session_state.current_discourse_page = 9
+        st.error('🐉 Some content is new')
+        st.write(f'Welcome, your key is `<{st.session_state["access_key"]}>` 💭 keep it safe.')
         
         authenticator.logout('Disconnect', 'main', key='disconnect')
+        add_vertical_space(13)
+        st.divider()
     
     st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%-d')} {now.strftime('%B')} {now.strftime('%Y')}")
-    if st.session_state["authentication_status"]:
-        st.write(f'Welcome, your key is `<{st.session_state["access_key"]}>` 💭 keep it safe.')
 
     
     # with tab1:
@@ -999,4 +999,5 @@ if __name__ == "__main__":
     relations geopolitiques internationales...
                 
                 """)
+    authenticator.login('Author access', key='author_access')
 

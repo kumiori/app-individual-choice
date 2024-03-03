@@ -19,7 +19,7 @@ class _Authenticate(Authenticate):
         st.session_state['access_key'] = ''
         print(st.session_state['access_key'])
         
-    def login(self, form_name: str, location: str='main') -> tuple:
+    def login(self, form_name: str, location: str='main', key: str='') -> tuple:
         """
         Creates a login widget.
 
@@ -44,10 +44,11 @@ class _Authenticate(Authenticate):
         if not st.session_state['authentication_status']:
             self._check_cookie()
             if not st.session_state['authentication_status']:
+                _key = 'Connect' if not key else key
                 if location == 'main':
-                    login_form = st.form('Connect')
+                    login_form = st.form(_key)
                 elif location == 'sidebar':
-                    login_form = st.sidebar.form('Connect')
+                    login_form = st.sidebar.form(_key)
 
                 login_form.subheader(form_name)
                 
