@@ -757,7 +757,7 @@ def main():
         if result:
             st.write(f"Wonderful! We are happy to chime ✨")
             # st.write(f"Your response may be {print_languages(result)}")
-            _msg = f"We respond to your input, scratch@server.io, even in {our_languages(result)}" if our_languages(result) else "We respond to your input, scratch@server.io"
+            _msg = f"We respond to your input, social.from.scratch@proton.me, even in {our_languages(result)}" if our_languages(result) else "We respond to your input, social.from.scratch@proton.me"
             st.success(f"{_msg}")
             
         elif result is False:
