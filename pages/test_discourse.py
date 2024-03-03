@@ -411,7 +411,7 @@ panel_8 = """
 
 ## How to visualise a bigger picture? 
 
-`If lucky, you have received a `` <{signature}> ``. Keep it in your files, it will allow swift access to the past."`
+`You may have received a `` <{signature}> ``. Retreive it from your files, it will allow swift access to the dashboard. If not, we can provide you with one. Check-point below.`
 
 
 """
