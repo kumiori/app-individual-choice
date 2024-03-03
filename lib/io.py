@@ -203,7 +203,6 @@ def create_textinput(key, kwargs = {}):
 
     #     st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
 
-    st.markdown(f"## Forward, confirming that you connect from `{text}`")
 
 def create_checkbox(key, kwargs = {'label': 'Choose'}):
     survey = kwargs.get('survey')

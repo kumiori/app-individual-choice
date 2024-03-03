@@ -203,10 +203,10 @@ def create_map(key, kwargs = {}):
         # # Access relevant information from the first entry
         first_entry = data[0][0]
         # political_union = first_entry["components"]["political_union"]
-        print(first_entry)
+        # st.write(first_entry)
         sun_rise = first_entry["annotations"]["sun"]["rise"]["astronomical"]
         sun_set = first_entry["annotations"]["sun"]["set"]["astronomical"]
-        print(list(first_entry["annotations"]["UN_M49"]["regions"])[-3])
+        # print(list(first_entry["annotations"]["UN_M49"]["regions"])[-3])
         geographical_region = str(list(first_entry["annotations"]["UN_M49"]["regions"])[-3]).title()
         confidence = first_entry["confidence"]
         st.markdown(f"### The Sun rises from the east and sets in the west.")
@@ -214,18 +214,25 @@ def create_map(key, kwargs = {}):
         st.markdown(f"## Our confidence in  level is {confidence}.")
         sun_rise_readable = datetime.utcfromtimestamp(sun_rise).strftime('%H:%M:%S UTC')
         sun_set_readable = datetime.utcfromtimestamp(sun_set).strftime('%H:%M:%S UTC')
-
-        st.markdown(f"At {_c} the sun rises at {friendly_time(sun_rise)} and sets at {friendly_time(sun_set)}.")
+        st.markdown(f"`At {_c} the sun rises at {friendly_time(sun_rise)} in the morning, and sets at {friendly_time(sun_set)} in the evening.`")
         # st.markdown(f"The sun rises at {sun_rise_readable} and sets at {sun_set_readable} in {text}.")
 
+        if geographical_region:
+            st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
 
-        st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
 
-
+    assert _c, "We need a location to connect our map, go Back to enter"
     
+    
+    # df = pd.DataFrame({
+    #     "col1": np.random.randn(1000) / 10 + (-_c[0]),
+    #     "col2": np.random.randn(1000) / 10 + ((_c[1] + 180) % 360),
+    #     "col3": np.random.randn(1000) * 100,
+    #     "col4": np.random.rand(1000, 4).tolist(),
+    # })
     df = pd.DataFrame({
-        "col1": np.random.randn(1000) / 10 + (-_c[0]),
-        "col2": np.random.randn(1000) / 10 + ((_c[1] + 180) % 360),
+        "col1": np.random.randn(1000) / 10 + (_c[0]),
+        "col2": np.random.randn(1000) / 10 + ((_c[1]) % 360),
         "col3": np.random.randn(1000) * 100,
         "col4": np.random.rand(1000, 4).tolist(),
     })
@@ -237,8 +244,7 @@ def create_map(key, kwargs = {}):
         color='col4',
         zoom=6,
         use_container_width=True)
-    st.markdown('### Do you see new patterns _known_?')
-    st.markdown('## This is how we think: a _matrix is a map where patterns emerge_')
+    st.markdown('## A _matrix is a map where patterns emerge_')
 
 def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
@@ -368,14 +374,14 @@ panel_6 = """
 
 ##### This is a great exercise in making communication effective, actionable, and visual.
 
-### These aspects are core for us: 
+### Some of these aspects are core for us: 
 
 
 """
 
 panel_7_bis = """
 
-##  Anyone on the other side?
+##  Approximately locating?
 
 """
 # What's your name?
@@ -547,7 +553,7 @@ challenges = [
     ("The Social Contract", ""),
     ("Cooperation Reinvented", ""),
     ("Inequalities and Sustainability", ""),
-    ("Control variable for lower bound", ""),
+    ("Paris 2024 Olympics", ""),
     ("Climate Change", ""),
     ("Global Value Chains", ""),
     ("Productive Innovation", ""),
@@ -609,6 +615,16 @@ widget_creators = {
     None: lambda x, kwargs: st.write(x)
 }
 
+
+from lib.texts import hash_text
+
+def display_once(text):
+    text_hash = hash_text(text)
+
+    # Check if the text has already been read
+    if text_hash not in st.session_state.display_once:
+        st.session_state.read_texts.add(text_hash)  # Marking text as read
+
 # Main function
 def main():
     # Page title
@@ -620,6 +636,9 @@ def main():
 
     if 'page_number' not in st.session_state:
         st.session_state.page_number = 0
+   
+    if 'played_intro' not in st.session_state:
+        st.session_state.played_intro = False
     
     if 'current_discourse_page' not in st.session_state:
         st.session_state.current_discourse_page = 0
@@ -651,11 +670,11 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 300
+        seconds = 6
 
         start_time = time.time()
-        # st.write(st.session_state.current_discourse_page)
-        if st.session_state.current_discourse_page == 0:
+
+        if not st.session_state.played_intro:
             while True:
                 time.sleep(update_frequency / 1000.0)  # Convert to seconds
                 matrix = generate_random_matrix(matrix_size)
@@ -677,6 +696,8 @@ def main():
                     matrix_placeholder.empty()
                     break
 
+            st.session_state.played_intro = True
+
     create_access(key = '', kwargs = {})
     st.divider()
     
@@ -685,20 +706,42 @@ def main():
         # st.session_state.current_discourse_page = 9
         
         authenticator.logout('Disconnect', 'main', key='disconnect')
-    # st.write(f'Welcome')
     
-    st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
+    st.markdown(f"## _Today_ is {now.strftime('%A')}, {now.strftime('%-d')} {now.strftime('%B')} {now.strftime('%Y')}")
     if st.session_state["authentication_status"]:
         st.write(f'Welcome, your key is `<{st.session_state["access_key"]}>` 💭 keep it safe.')
 
     
     # with tab1:
-    st.markdown(f'# A long story short')
+    st.markdown(f'# A long story short: 🤳🧶🕸️🦚💫✨🍵🫖🧊🍸🥣🎺💻⚙️🪞📨🗞️🧮📍📝💗🌀🔊🔉💭🏁😀🤔👏🫰✋🤚🗣️👥🧑🏿‍🎤👩🏻‍🎤')
+    st.markdown("### This is _this_ and that, and _that_ is whence.")
+    st.image("images/APC_3171.jpg", use_column_width=True)
+    add_vertical_space(13)
+    st.markdown("# Here, new narratives meet")
     connect()
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
-    
 
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["The Frame", "Contributions", "Contact", "Minimal Glossary", "Frequency Asked Questions", "References"])
+    
+    with tab1:
+        st.markdown("## The Frame")
+        st.markdown("### _The Social Contract from Scratch_")
+        st.markdown("""
+                    ##### We bring forward an emancipatory vision of change in an international landscape characterised by simultaneous and juxtaposed crises often described as `polycrises`.
+                    
+                    ##### They emerge as facets of a deeper `organic crisis': the failure of multilateralism in view of collective action.
+                    
+                    ##### Our panel springs at the intersection of Social Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
+                    
+                    ##### To sediment our contributions we deploy an interactive digital platform as a framework to discuss and connect change `to action`.
+                    
+                    ##### Our panel is the first attempt to bridge diverse and even opposing viewpoints.
+                    
+                    ##### What are the priorities in addressing the increasing complexity we face? What should the dynamics of international cooperation look like? What are the relevant timescales?
+                    
+                    ###### _This is an extract from the panel's booklet._
+                    ###### _Request a copy, either connect with us or use the button above_
+        """)
     with tab3:        
         col1, _, col2 = st.columns([3, 0.1, 1.5])
 
@@ -707,11 +750,13 @@ def main():
         with col2:
             response = survey.text_input("Try to respond in your natural language...", help="Our location will appear shortly...", value="")
             result = match_input(response, yesses)
-        st.write(result)
+        # st.write(result)
         if result:
             st.write(f"Wonderful! We are happy to chime ✨")
-            st.write(f"Your response is: {print_languages(result)}")
-            st.success(f"Your response is: {result[0]}")
+            # st.write(f"Your response may be {print_languages(result)}")
+            _msg = f"We respond to your input, scratch@server.io, even in {our_languages(result)}" if our_languages(result) else "We respond to your input, scratch@server.io"
+            st.success(f"{_msg}")
+            
         elif result is False:
             st.error("We are always here...")
         elif result is None:
@@ -748,11 +793,20 @@ def display_category_description(category, description):
     st.write("---")
 
 def print_languages(languages):
-    if "English" in languages:
-        st.write("x")
-    else:
-        st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
+    st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
 
+def our_languages(languages):
+    _our_languages = ["English", "Italian", "Spanish", "French", "Portuguese"]
+    matching_languages = [lang for lang in _our_languages if lang in languages]
+    # join matching languages
+    
+    if len(matching_languages) == 1 and matching_languages[0] == "English":
+        return False
+    elif len(matching_languages) == 1 and matching_languages[0] != "English":
+        joined_languages = matching_languages[0]
+    
+    return joined_languages
+    
 def connect():
     if "current_discourse_page" not in st.session_state:
         st.session_state["current_discourse_page"] = 0
@@ -779,11 +833,18 @@ def connect():
     # st.write(f'Current page is {st.session_state.current_discourse_page}')
     st.divider()
 
-
+    def request_booklet():
+        st.balloons()
+    
+    add_vertical_space(13)
+    st.divider()
+    
+    st.markdown("# Join the panel discussion")
     links_row = row(2, vertical_align="center")
     links_row.button(
-        ":honey_pot: Download the panel's booklet",
+        ":honey_pot: Request the panel's booklet",
         use_container_width=True,
+        on_click=request_booklet
     )
     links_row.link_button(
         ":ticket:  Visit the conference's website",
@@ -797,6 +858,8 @@ def contributions():
     
 
     booklet_dict = {
+        "# Power to W•rds": {"### Amir Issaa \n ### Rap as both a form and content"},
+        "# Moon Module": {"### Hugues Genevois, Laurence White-Bouckaert \n ### An improvisational electroacoustic music duo"},
         "# Le Gai Savoir": {"### Ariane Ahmadi \n ### Crises as vectors for emancipation"},
         "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ### Fragilité et manque de confiance, en mars 1794..."},
         "# Engagement with the Sea": {"### Antonia Taddei \n ### Proposals for personhood as a defense strategy"},
@@ -892,7 +955,7 @@ def references():
 
     references_dict = {
         "# Book #1 \n ## Pluriverse: A Post-Development Dictionary": {"### `Ashish Kothari, Ariel Salleh, Arturo Escobar, Federico Demaria, Alberto Acosta`"},
-        "# Magazine  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue New Hopes, New Horizons and G20 \n ### [Link to 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
+        "# Magazine  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue New Hopes, New Horizons and G20 \n ### [Link to document 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
         "# Docu #0": {"### ..."},
         "# Event #3": {"### ..."},
         "# Story #4": {"### ..."},
@@ -900,7 +963,7 @@ def references():
 
     display_dictionary(references_dict)
 
-    st.markdown("## Suggest reference..")
+    st.markdown("## Connect to suggest a reference.")
 
     return
 
@@ -928,8 +991,7 @@ if __name__ == "__main__":
 
     st.divider()
     
-    st.markdown("## Would you like to participate?")
-    st.markdown("## We are happy to share more and connect")
+    st.markdown("## We are happy to share more and connect.")
 
     st.markdown("""##
                 On est dans la merde
