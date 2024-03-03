@@ -290,7 +290,7 @@ intro_text = """
 ## To broaden and articulate a vision of imminent social transitions.
 
 
-# `This is your invitation:` :ticket:
+# `This is our invitation:` :ticket:
 
 #### Forward, _just_ use the top button. 
 """
