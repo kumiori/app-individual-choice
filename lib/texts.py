@@ -10,7 +10,6 @@ st.write(st.session_state)
 
 if 'read_texts' not in st.session_state:
     st.session_state['read_texts'] = set()
-    # st.session_state.read_texts = set()
 
 def corrupt_string(input_str, damage_parameter):
     # Define the list of symbols
@@ -114,11 +113,12 @@ def friendly_time(timestamp):
 
     human_readable_time = datetime.utcfromtimestamp(timestamp)
 
-    hour = human_readable_time.strftime('%I')
-    minute = human_readable_time.strftime('%M')
-    _period = human_readable_time.strftime('%p').lower()
-    period = 'in the morning' if datetime.utcfromtimestamp(timestamp).strftime('%p').lower() == 'am' else 'in the afternoon'
+    hour = human_readable_time.strftime('%-I')
+    minute = human_readable_time.strftime('%-M')
+    _period = human_readable_time.strftime("%p")
+    print(_period)
+    # period = 'in the morning' if datetime.utcfromtimestamp(timestamp).strftime('%p').lower() == 'am' else 'in the afternoon'
 
-    friendly_time = f"{minute} minutes past {hour} {period}"
+    friendly_time = f"{minute} minutes past {hour}"
 
     return friendly_time
