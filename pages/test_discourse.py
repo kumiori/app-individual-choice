@@ -36,6 +36,9 @@ import pandas as pd
 import numpy as np
 from lib.geo import get_coordinates
 
+if "access_key" not in st.session_state:
+    st.session_state['access_key'] = ''
+
 class Authenticate(_Authenticate):
 
     def register_user(self, form_name: str, location: str='Athens', preauthorization=True) -> bool:
@@ -670,7 +673,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 60
+        seconds = 1
 
         start_time = time.time()
 
