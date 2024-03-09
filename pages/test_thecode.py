@@ -58,6 +58,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     # Add content for this section
     st.header("Interactive Features")
+    st.markdown("[![Documentation Status](https://readthedocs.org/projects/irreversible-variational-solvers/badge/?version=latest)](https://irreversible-variational-solvers.readthedocs.io/en/latest/?badge=latest)")
     # You can add checkboxes, sliders, or any other interactive elements here
         # For example:
         # if st.checkbox("Show Live Demo", key="livedemo"):

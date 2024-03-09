@@ -30,13 +30,13 @@ from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
 from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
 from lib.survey import CustomStreamlitSurvey
 update_frequency = 500  # in milliseconds
-from lib.texts import match_input
+from lib.texts import match_input, _stream_once
 from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
 # from pages.test_footer import footer
 import pandas as pd
 import numpy as np
 from lib.geo import get_coordinates
-# locale.setlocale(locale.LC_TIME, 'fr_FR')
+locale.setlocale(locale.LC_TIME, 'fr_FR')
 
 class Authenticate(_Authenticate):
 
@@ -282,22 +282,36 @@ def enter_location(label):
     
 intro_text = """
 
-on aimeirait bien avoir ton retour sur ce que tu penses de ces questionnements
-utilisateur recoit par mail un lien pour acceder a la page
-questionnaire
+## On aimeirait ... 
 
+## Que penses-tu de ces questionnements ?
 
+### En tant ..., membre  $\partial'$Alembert ...
+Tu as une invitation à prendre part à la conversation, à la réflexion, à la coordination, à l'action.
+
+"""
+
+panel_0 = """
+
+## Mood rings dolly the sheep hey arnold discovery zone sup. Sublime personal computer playa turquoise I don’t want no scrubs, miss cleo I will be your father figure independence day space jam carlton dance.
 
 """
 
 panel_1 = """
+
+Home alone g-shocks troll dolls playstation independence day my heart will go on. Cut-off jean shorts stretch armstrong kool-aid man umbro shorts, discovery zone rocko's modern life quiet storm maze screensavers. Gak oasis slap bracelet mario lemieux airwalk. Home improvement pixie cut turtlenecks george michael sugar ray. Denzel washington aviators tying your sweater around your waist hoodies uncle phil west wing, mazda mpv meg ryan life is like a box of chocolates the truman show i'm king of the world alta vista.
+
+# Question 1: (Fausse dichotomie)
+
 """ 
 
-
-
-
 panel_2 = """
-avez bonnes experiences en presenitel ? 
+
+Avez bonnes experiences en presenitel ? 
+
+Puff daddy bye bye bye fresh windows 95. Life is like a box of chocolates polo shirts with popped collars renting movies at a store west wing, saved by the bell toy story cargo pants wearing your cap backwards. Koosh ball nickelodeon lisa frank crimped hair garth brooks pixie cut, personal computer neon colors rachel green david duchovny. Yo patti mayonnaise quiet storm blur, kool-aid man super nintendo hush puppies I will be your father figure chat rooms.
+
+# Question 2: (Vraie dichotomie)
 
 """
 
@@ -310,135 +324,24 @@ avez bonnes experiences en presenitel ?
 
 panel_3 = """ 
 
-## Everything seems to lie upon a notion of change and connection.
-
-## _"These are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
-
-##### • `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
 ## <center> ...  🧶 </center> 
 
-### _That issue_ was timely. We decide to engage in a conversation in which you participate.
-
-### Your opinion counts, `right`?"""
+"""
  
 panel_4 = """
 
-## To integrate a bigger picture, help us make sense of time scales and policy priorities.
+## Renting movies at a store west wing, saved by the bell toy story cargo pants wearing your cap backwards.
 
-## Picture a _global social transition_: should this be fast or slow or a mix of both?
-
-"""
-
-panel_4_bis = """
-
-## Thank...
-
-## Picture a _global social transition_: should this be fast or slow, or a mix of both?
 
 """
-
+ 
 panel_5 = """
 
-## We are constructing a versatile direct coordination tool, an interactive digital platform as a framework to discuss and connect. 
-
-## _To be clear_, the task is difficult: we need your input.
-
-## You can take _this_ as an opportunity to express, we have taken this as a challenge to address.
-
-## Forward, let's play with perception of priority levels.
-
-"""
-
-panel_6 = """
-## Is the following a list of `social dimensions` for policy concerns? Match the sliders with your perception of priority levels.
-
-##### This is a great exercise in making communication effective, actionable, and visual.
-
-### These aspects are core for us: 
+## Puff daddy bye bye bye fresh windows 95. Life is like a box of chocolates polo shirts with popped collars 
 
 
 """
 
-panel_7_bis = """
-
-##  Anyone on the other side?
-
-"""
-# What's your name?
-
-
-panel_7 = """
-
-## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. 
-
-
-## We are trying to understand how the world is in a state of fracture on several levels: individual, social, and universal.
-
-## Human beings no longer meet in ideas. How do patterns behave?
-
-## Let's map this out together.
-
-### What is your...
-"""
-
-
-panel_8 = """
-
-
-## Here and Now, our commitment is towards action.
-
-## As we invite your free and conscious participation, let's treasure this moment of exchange.
-
-## How to visualise a bigger picture? 
-
-`If lucky, you have received a `` <{signature}> ``. Keep it in your files, it will allow swift access to the past."`
-
-
-"""
-
-panel_9 = """
-
-## We are happy to have you here. You may have a lot of questions, we have a few too.
-## How to connect, - _where_ do we connect from?
-
-"""
-
-panel_10 = """
-
-We are oraganising...
-Our panel
-free software
-
-Would you like to have agency on decisions that (indirectly) concern you?
-
-Would you like to increase your agency in decisions that concern others?
-
-"""
-
-panel_11 = """
-
-## Your preferences have been checkpointed.
-## Feel free to come again in a few days to test your access key
-
-## In the meantime, we are reconstructing our links to backend.
-
-## In {city} it's {weather} and {temperature} degrees. Happy to leave us a message or share a feedback? //`prematuro?`
-
-"""
-
-panel_12 = """
-
-## To take it forward, connect.
-
-qualitative
-    - feedback/support/contribute
-
-## We are happy to share and develop with you,
-## this is our email: [email]. 
-
-# Looking forward.
-
-"""
 
 sandbox = """
 ## We'll tell you all about it in a moment...
@@ -458,9 +361,8 @@ sandbox = """
 
 """
 
-# """ `We have accepted explosion of information, are you willing to accept explosion of undertsanding?`
-""" `We have accepted explosion of information, will you accept an explosion of undertsanding?`
-
+""" `Punchline, en français et avec point d'interrogation finale ?`
+    `La mécanique à l'echelle humaine ?`
 """
 
 if 'range' not in st.session_state:
@@ -476,87 +378,32 @@ def update_range(page_number):
         st.session_state.range = page_number
 
 
-yesses = {
-    "Albanian": "po",
-    "Basque": "bai",
-    "Belarusian": "ды",
-    "Bosnian": "da",
-    "Bulgarian": "да",
-    "Catalan": "si",
-    "Corsican": "Iè",
-    "Croatian": "Da",
-    "Czech": "Ano",
-    "Danish": "Ja",
-    "Dutch": "Ja",
-    "Estonian": "jah",
-    "Finnish": "Joo",
-    "French": "Oui",
-    "Frisian": "ja",
-    "Galician": "Si",
-    "German": "Ja",
-    "Greek": "Ναί",
-    "Hungarian": "Igen",
-    "Icelandic": "Já",
-    "Irish": "yes",
-    "English": "yes",
-    "Italian": "sì",
-    "Italian": "si",
-    "Latvian": "jā",
-    "Lithuanian": "taip",
-    "Luxembourgish": "Jo",
-    "Macedonian": "Да",
-    "Maltese": "iva",
-    "Norwegian": "ja",
-    "Polish": "tak",
-    "Portuguese": "sim",
-    "Romanian": "da",
-    "Russian": "да",
-    "Scots Gaelic": "Tha",
-    "Serbian": "да",
-    "Slovak": "Áno",
-    "Slovenian": "ja",
-    "Spanish": "sí",
-    "Swedish": "ja",
-    "Tatar": "әйе",
-    "Ukrainian": "так",
-    "Welsh": "ie",
-    "Yiddish": "יאָ",
-}
-
-panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  panel_7, panel_7_bis, panel_8,
+panel = [panel_0, panel_1, panel_2, panel_3, panel_4, panel_5
         #  panel_9, 
         #  panel_10, 
         #  panel_11, panel_12
          ]
 
 challenges = [
-    ("The Social Contract", ""),
-    ("Cooperation Reinvented", ""),
-    ("Inequalities and Sustainability", ""),
+    ("Direction, Vision, Structure", ""),
+    ("Liberté", ""),
+    ("...", ""),
     ("Control variable for lower bound", ""),
-    ("Climate Change", ""),
-    ("Global Value Chains", ""),
-    ("Productive Innovation", ""),
-    ("Artificial intelligence", ""),
-    ("Farmers and Development", ""),
-    ("Adaptation and Finance", ""),
-    ("Social Migration", ""),
-    ("Food system concerns", ""),
-    ("Endogenous Solutions", "")
 ]
 
 widget_info = [
     {"type": None, "key": None},
     {"type": "yesno", "key": "button_0", "kwargs": 
-        {"survey": survey, "callback": (yes_forward, no_clicked)}},
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Oui !", "Non, merci."]}},
     {"type": "yesno", "key": "button_1", "kwargs": 
-        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":[":honey_pot: Yes, please!", ":ticket: No, thank you."]}},
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":[":honey_pot: ", ":ticket: "]}},
+    {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:3], "survey": survey}},
+    # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'La question posée : .','messages': ["Oui", "Non", "_il y a-t-il des options ?_"], 'forward_message': "" }},
+    {"type": None, "key": None},
     {"type": "yesno", "key": "button_1", "kwargs": 
         {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, indeed!", "Not really, I'm not sure."]}},
-    # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates: the slower the lighter.','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
-    {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
     {"type": "textinput", 
         "key": "location?",
@@ -619,14 +466,14 @@ def main():
     if 'coordinates' not in st.session_state:
         st.session_state['coordinates'] = None  # Initial damage parameter
     # once usage:
-    # streamwrite(_stream_once(intro_text, 0))
+    
+    streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
     
     # create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
 
     st.divider()
     now = datetime.now()
-    # st.markdown(f"`Now is {now.strftime('%s')}-{now.strftime('%f')}~` max is {st.session_state.range if st.session_state.range else ''}")
     st.markdown(f"# <center>Cher·ère·s Tou·te·s </center> ", unsafe_allow_html=True)
     st.markdown(f"# <center>{float(st.session_state.current_discourse_page/st.session_state.range) if hasattr(st.session_state, 'range') and st.session_state.range != 0 else '0'}</center> ", unsafe_allow_html=True)
     st.divider()
@@ -681,44 +528,16 @@ def main():
     # with tab1:
     connect()
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Connecting", "Dashboard", "Les sujets", "Minimal Glossary", "Frequency Asked Questions", "References"])
+    tab1, tab2 = st.tabs(["References", "Plus si affinités..."])
     
-
-    with tab3:        
-        col1, _, col2 = st.columns([3, 0.1, 1.5])
-
-        with col1:
-            st.markdown("## Are you happy...to interact?")
-        with col2:
-            response = survey.text_input("Try to respond in your natural language...", help="Our location will appear shortly...", value="")
-            result = match_input(response, yesses)
-        st.write(result)
-        if result:
-            st.write(f"Wonderful! We are happy to chime ✨")
-            st.write(f"Your response is: {print_languages(result)}")
-            st.success(f"Your response is: {result[0]}")
-        elif result is False:
-            st.error("We are always here...")
-        elif result is None:
-            st.info('All other non-intelligible input is considered as a \'no\'.')
-
-    with tab2:
-        # st.markdown("# Panel contributions so far")
-        # contributions()
-        pass
-
-    with tab4:
-        st.markdown("## Minimal Glossary")
-        glossary()
-
-    with tab5:
-        st.markdown("## Frequently Asked Questions")
-        faq()
-        
-    with tab6:
-        st.markdown("## The bounty")
+    with tab1:
+        st.markdown("## Le botin")
         references()
 
+    with tab2:
+        st.markdown("## Affinités electives")
+        affinites()
+        
     return survey
 
 def display_category_description(category, description):
@@ -733,12 +552,6 @@ def display_category_description(category, description):
         st.markdown(description)
     st.write("---")
 
-def print_languages(languages):
-    if "English" in languages:
-        st.write("x")
-    else:
-        st.write(", ".join(f"{language}" for language in languages[0::-1]), f"and {languages[-1]}")
-
 def connect():
     if "current_discourse_page" not in st.session_state:
         st.session_state["current_discourse_page"] = 0
@@ -746,12 +559,12 @@ def connect():
     st.session_state.total_discourse_page = paginator.get_total_pages()
     # st.write(f'Current page is {st.session_state.current_discourse_page}/{st.session_state.total_discourse_page}')
     with st.container():
-        col1, _, col2 = st.columns([2, 10, 3])
+        col1, _, col2 = st.columns([2, 12, 2])
         with col2:
-            if st.button("Forward >", key="next_discourse_page"):
+            if st.button("$ • > $", key="next_discourse_page"):
                 st.session_state["current_discourse_page"] = min(st.session_state.current_discourse_page + 1, paginator.get_total_pages() - 1)
         with col1:
-            if st.button("• Back", key="prev_discourse_page"):
+            if st.button("• $<$", key="prev_discourse_page"):
                 st.session_state["current_discourse_page"] = max(st.session_state.current_discourse_page - 1, 0)
         with _:
             st.progress((st.session_state.current_discourse_page+1) / paginator.get_total_pages(), text=None)
@@ -760,62 +573,8 @@ def connect():
         paginator.display_page(st.session_state.current_discourse_page)
         update_range(st.session_state.current_discourse_page)
 
-
-    
-    # st.write(f'Current page is {st.session_state.current_discourse_page}')
     st.divider()
 
-
-    # links_row = row(2, vertical_align="center")
-    # links_row.button(
-    #     ":honey_pot: Download the panel's booklet",
-    #     use_container_width=True,
-    # )
-    # links_row.link_button(
-    #     ":ticket:  Visit the conference's website",
-    #     "https://www.europeindiscourse.eu/",
-    #     use_container_width=True,
-    # )
-
-    # st.write(st.session_state.read_texts)
-
-def contributions():
-    
-
-    booklet_dict = {
-        "# Le Gai Savoir": {"### Ariane Ahmadi \n ### Crises as vectors for emancipation"},
-        "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ### Fragilité et manque de confiance, en mars 1794..."},
-        "# Engagement with the Sea": {"### Antonia Taddei \n ### Proposals for personhood as a defense strategy"},
-        "## tba": {"Gabrielle Dyson"},
-        "# Âmes de Paname": {"### Bianca Apollonio \n ### The city as a living organism"},
-        "# Pulse": {"### Giorgio Funaro \n ### An electronic impulse through an immersive voyage"},
-        "# We Are Enough": {"### Roger Niyigena Karera \n ### Arts and introspection of contemporary society"},
-        "# Rethinking Solutions": {"### Graziano Mazza \n ### Polysemic nature of religion as the ancestor of economics"},
-        "# Je Suis l'Eau": {"### Alessandra Carosi \n ### Emotional landscapes that lie beneath the surface of our world"},
-        "## A Fantasy Of Stochastic Moral Guardians ": {"## Claire Glanois \n ### Aligning Automated Decision Making with European Values⁠ "},
-        "## tba": {"### Andrés León Baldelli"},
-    }
-    sorted_items = sorted(booklet_dict.items(), key=lambda x: list(x[1])[0])
-    st.markdown(f"# Contributions are {len(booklet_dict)} so far...")
-
-    # Create a new dictionary from the sorted list
-    booklet_dict = dict(sorted_items)
-    
-    paged_container = _PagedContainer(booklet_dict, items_per_page=2, show_pagination = False)
-
-    with st.container():
-        col1, _, col2 = st.columns([2, 10, 2])
-        with col2:
-            if st.button("Next"):
-                st.session_state["current_booklet_page"] = min(st.session_state.current_booklet_page + 1, paged_container.get_total_pages() - 1)
-        with col1:
-            if st.button("Prev"):
-                st.session_state["current_booklet_page"] = max(st.session_state.current_booklet_page - 1, 0)
-
-        paged_container.display_page(st.session_state.current_booklet_page)
-        
-            
-    return
 
 def glossary():
     categories = [
@@ -844,83 +603,39 @@ def more():
         use_container_width=True,
     )
     links_row.link_button(
-        ":ticket:  Visit the conference's website",
+        ":ticket: Visit the conference's website",
         "https://www.europeindiscourse.eu/",
         use_container_width=True,
     )
 
     return
     
-def faq():
-    faq_dictionary = {
-    "### What is the main theme of the conference panel discussion?": {"The panel discussion revolves around the theme of 'Change and Societal Transformation' within the context of Europe."},
-    "### Who are the key participants in the panel discussion?": {"The panel will feature policymakers, scholars, experts, thinkers, artists, and institutional leaders, creating a diverse and dynamic conversation."},
-    "### How can I actively participate in the discussion?": {"We encourage active engagement from the audience through live questions, comments, and feedback during the panel session."},
-    "### What innovative interfaces will be presented during the discussion?": {"We plan to showcase new interfaces that harness data and preferences, offering a unique platform for global discussions on societal transitions."},
-    "### How will the interactive equaliser metaphor be applied in the discussion?": {"Participants will have virtual sliders representing different categories, allowing them to express preferences, sensitivities, and perceptions related to societal changes."},
-    "### What are the initial topics of focus for the discussion categories?": {"Initial topics include but are not limited to environmental sustainability, technological advancements, cultural shifts, economic models, and educational reforms."},
-    "### Will the panel address global challenges or focus specifically on Europe?": {"While the primary focus is on Europe, the discussions will touch on global challenges, recognizing the interconnected nature of societal transformations."},
-    "### How can I stay updated on the preparation and organization of the panel?": {"Regular updates, including framework details and participant information, will be available on our dedicated conference panel webpage."},
-    "### Is there an opportunity for networking and collaboration after the panel discussion?": {"Yes, we encourage participants to connect, share contact information, and explore potential collaborations during and after the conference."},
-    "### Can I access recordings of the panel discussion after the conference?": {"Who knows! Recordings may be made available for those who may have missed the live sessions, allowing for continued engagement and knowledge sharing."}
-    }
-    
-    display_dictionary(faq_dictionary)
-    
-    return
-
 def references():
-    with st.expander("Show all the data", expanded=False):
-        st.write("Survey Data:")
+    with st.expander("Toutes les données", expanded=False):
+        st.write("Données de Profil:")
         st.json(survey.data, expanded=True)
-
         st.json(st.session_state, expanded=True)
 
+    # st.markdown("## Suggest reference..")
+
+    return
+
+def affinites():
+
     references_dict = {
-        "# Book #1 \n ## Pluriverse: A Post-Development Dictionary": {"### `Ashish Kothari, Ariel Salleh, Arturo Escobar, Federico Demaria, Alberto Acosta`"},
-        "# Magazine  #2 \n ## Development Cooperation Review": {"### `Ed. Sachin Chaturvedi, Amar Sinha` \n ### Special Issue New Hopes, New Horizons and G20 \n ### [Link to 📃](https://www.ris.org.in/sites/default/files/2023-09/DCR%20July-September%2020231_New.pdf)"},
-        "# Docu #0": {"### ..."},
-        "# Event #3": {"### ..."},
-        "# Story #4": {"### ..."},
+        "## Livre #1 \n ## David Graeber": {"### `Zzz zzz zzz`"},
+        "## Anecdote #1": {"### ..."},
     }
 
     display_dictionary(references_dict)
 
-    st.markdown("## Suggest reference..")
-
-    return
 
 if __name__ == "__main__":
     
     survey = main()
     add_vertical_space(7)
-    # more()
-    # footer()
     
-    challenges = [
-        ("Productive transformation and Innovation", ""),
-        ("Global Value Chains", ""),
-        ("Artificial intelligence", ""),
-        # ("Farmers and Development", ""),
-        # ("Climate Change", ""),
-        # ("Adaptation and Finance", ""),
-        # ("Social Migration", ""),
-        # ("The Social Contract", ""),
-        # ("Cooperation Reinvented", ""),
-        # ("Values, Inequalities, and Sustainability", ""),
-        # ("Food system concerns", ""),
-        # ("Endogenous Solutions", "")
-    ]
-
-    # st.divider()
-    
-    # st.markdown("## Would you like to participate?")
-    # st.markdown("## We are happy to share more and connect")
-
     st.markdown("""##
-                On est dans la merde
-        On est revenus a un etat de chaos dans les 
-    relations geopolitiques internationales...
                 
                 """)
 

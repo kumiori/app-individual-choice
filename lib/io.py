@@ -22,14 +22,15 @@ def create_dichotomy(key, kwargs = {}):
     with col1:    
         response = survey.dichotomy(name=name, 
                                 label=label,
-                                question=question, 
+                                question=question,
+                                gradientWidth = 40, 
                                 key=key)
     with col3:
         if response:
             st.markdown('\n')            
             st.markdown(f'## Your choice:', unsafe_allow_html=True)
             st.markdown(f'## {inverse_choice(float(response))}')
-
+            st.markdown(f'{float(response)}', unsafe_allow_html=True)
             if float(response) < 0.1:
                 st.success(messages[0])
             if float(response) > 0.9:
@@ -39,7 +40,7 @@ def create_dichotomy(key, kwargs = {}):
         else:
             st.markdown(f'## Take your time:', unsafe_allow_html=True)
     if response:
-        st.markdown('## Mind your choice, then forward to the next step.')
+        st.markdown('## You can always change your mind. Now, to the next step.')
     
     return
 

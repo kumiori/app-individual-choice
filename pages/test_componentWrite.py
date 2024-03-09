@@ -1,3 +1,4 @@
+
 import streamlit as st
 from st_supabase_connection import SupabaseConnection
 import streamlit.components.v1 as components

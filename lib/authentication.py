@@ -88,7 +88,7 @@ class _Authenticate(Authenticate):
                     self.cookie_manager.set(self.cookie_name, self.token,
                         expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days))
                     st.session_state['authentication_status'] = True
-                    st.info('cookie set')
+                    st.info('Cookie set')
                 else:
                     return True
             else:
