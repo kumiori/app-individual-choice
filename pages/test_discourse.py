@@ -160,8 +160,8 @@ class ConnectingContainer(PagedContainer):
 
     def check_no_exit(self, session_state, data):
         if session_state.no_clicked:
-            st.warning("Perhaps we misuderstood.")
-            st.info("We are always here, we can meet back later.")
+            st.warning("We'd be curious to hear your own perspective, if you are interested in sharing further.")
+            st.info("Connect with us: social.from.scratch@proton.me.")
             st.write(data)
             st.write(session_state)
             st.stop()
@@ -295,16 +295,17 @@ intro_text = """
 
 # `This is our invitation:` :ticket:
 
-#### Forward, _just_ use the top button. 
+#### Forward, _just_ use the Forward > button. 
 """
 
-panel_1 = """ ## We contemplate an international landscape characterised by simultaneous and juxtaposed crises often described as '_polycrises'_.
+panel_1 = """ ## We contemplate an international landscape characterised by simultaneous crises sometimes described as `polycrises`.
 
 ## These crises are not only juxtaposed but often interconnected as much in their effects as in their causes.
 
- ## They emerge as facets of a deeper `organic` crisis.
+ ## They emerge as facets of a deeper `_________` crisis.
 
-## Does this resonate with you? `Yes, advances automatically` 
+
+## Does this resonate with you? 
  
 
 """ 
@@ -342,13 +343,14 @@ panel_3 = """
 
 ### _That issue_ was timely. We decide to engage in a conversation in which you participate.
 
-### Your opinion counts, `right`?"""
+### Your opinion matters, `right`?"""
  
 panel_4 = """
 
-## To integrate a bigger picture, help us make sense of time scales and policy priorities.
+## Let's expand the scope. Can you help us make sense of time scales and policy priorities?
 
-## Picture a _global social transition_: should this be fast or slow or a mix of both?
+## Picture a _global social transition_: however you imagine it.
+# What rate of change do you envision? Fast, slow, or a blend of both?
 
 """
 
@@ -373,11 +375,10 @@ panel_5 = """
 """
 
 panel_6 = """
-## Is the following a list of `social dimensions` for policy concerns? Match the sliders with your perception of priority levels.
+## Here is a list of `dimensions` for policy concerns. Match the sliders with your perception of priority levels.
 
 ##### This is a great exercise in making communication effective, actionable, and visual.
 
-### Some of these aspects are core for us: 
 
 
 """
@@ -392,12 +393,12 @@ panel_7_bis = """
 
 panel_7 = """
 
-## Your conscious input is precious, and energy naturally flows where is most needed. Thank you for your participation. 
+## Your conscious input is precious, and energy naturally flows where it is most needed. Thank you for your participation. 
 
 
-## We are trying to understand how the world is in a state of fracture on several levels: individual, social, and universal.
+## We are trying to understand how the world is in a state of fracture across multiple levels: individual, social, and universal.
 
-## Human beings no longer meet in ideas. How do patterns behave?
+## Do humans still coalesce around shared ideas?
 
 ## Let's map this out together.
 
@@ -408,13 +409,13 @@ panel_7 = """
 panel_8 = """
 
 
-## Here and Now, our commitment is towards action.
+## Now, our commitment is action.
 
-## As we invite your free and conscious participation, let's treasure this moment of exchange.
+## As we invite your free and conscious participation, we take a snapshot of this exchange.
 
-## How to visualise a bigger picture? 
+## Pass the checkpoint to mark our first connection, the end of Chapter 1.
 
-`You may have received a `` <{signature}> ``. Retreive it from your files, it will allow swift access to the dashboard. If not, we can provide you with one. Check-point below.`
+`You will receive a `` <{signature}> ``. Keep it in your files, it will allow swift access to the portal.`
 
 
 """
@@ -554,8 +555,8 @@ panel = [intro_text, panel_1, panel_2, panel_3, panel_4,  panel_5, panel_6,  pan
 
 challenges = [
     ("The Social Contract", ""),
-    ("Cooperation Reinvented", ""),
-    ("Inequalities and Sustainability", ""),
+    ("International Cooperation", ""),
+    ("Socio-economic Inequalities", ""),
     ("Paris 2024 Olympics", ""),
     ("Climate Change", ""),
     ("Global Value Chains", ""),
@@ -577,7 +578,7 @@ widget_info = [
     {"type": "yesno", "key": "button_1", "kwargs": 
         {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, indeed!", "Not really, I'm not sure."]}},
     # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'a mix ✨', "name": 'there', 'question': 'Visualise social transitions and transformation rates: the slower the lighter.','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'both ✨', "name": 'there', 'question': 'Click on the visual below to indicate the rate: the slowest is on the light end of the spectrum.','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
@@ -997,10 +998,11 @@ if __name__ == "__main__":
     st.markdown("## We are happy to share more and connect.")
 
     st.markdown("""##
-                On est dans la merde
-        On est revenus a un etat de chaos dans les 
-    relations geopolitiques internationales...
-                
+        On est dans la merde.
+        On est revenu à un état de chaos dans les 
+    relations géopolitiques internationales.
+    
+    <Ariane Ahmadi>
                 """)
     authenticator.login('Author access', key='author_access')
 

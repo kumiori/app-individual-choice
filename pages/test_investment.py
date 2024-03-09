@@ -103,11 +103,11 @@ def question_portal():
                 )
 
                 if dine_together == "Yes":
-                    st.write("To match your wishes, are you willing to store your preferences?")
+                    st.write("To match my wishes, I am willing to store my preferences")
                     move_1 = survey.select_slider(
                         "move_1",
-                        value = "nan",
-                        options=["Yes", "nan", "No"],
+                        value = "Unsure",
+                        options=["True", "Unsure", "False"],
                         label_visibility="collapsed",
                     )
                     
@@ -128,17 +128,17 @@ def question_portal():
 
                 # Question 1 in the first column
                 with col1:
-                    investment_references = survey.text_area("Would you like to share a wish?", help="Share your thoughts on investment.")
+                    investment_references = survey.text_area("This is my wish", help="Share your thoughts on investment.")
 
                 # Question 2 in the second column
                 with col2:
-                    current_local_time = survey.timeinput("What is your current local time? Sorry to ask..")
-                    localisation = survey.text_input("We start by showing something we have never seen...Where are you located now?", help="Enter the name of your birthplace.")
+                    current_local_time = survey.timeinput("My current local time, to double check..")
+                    localisation = survey.text_input("My location is", help="Enter the name of your birthplace.")
 
                 # Question 3 and 4 in the third column
                 with col3:
-                    birthplace = survey.text_input("Where were you born?", help="Enter the name of your birthplace.")
-                    lucky_number = survey.number_input("What's your lucky number?", min_value=0, max_value=100000000)
+                    birthplace = survey.text_input("If I remember well, I was born in", help="Enter the name of your birthplace.")
+                    lucky_number = survey.number_input("Here is my lucky number", min_value=0, max_value=100000000)
 
                 st.write("----")
                 name = survey.text_input("My animal spirit is...", id="name")

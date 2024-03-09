@@ -43,6 +43,7 @@ def _qualitative(name, question, label, areas, key=None):
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
+Button = ss.SurveyComponent.from_st_input(st.button)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
@@ -56,3 +57,5 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
     def qualitative_parametric(self, label: str = "", id: str = None, key=None, **kwargs):
         return ParametricQualitative(self, label, id, **kwargs).display()
 
+    def button(self, label: str = "", id: str = None, **kwargs) -> str:
+        return Button(self, label, id, **kwargs).display()

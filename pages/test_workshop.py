@@ -190,3 +190,22 @@ if __name__ == "__main__":
         # Create a Pandas DataFrame
         df = pd.DataFrame(data)
         st.table(df)
+
+
+
+# list of ppl
+# letter invitation pdf avec motivation
+# comme ca verifient iteret et contribution
+# catering in loco
+# webapp / reseaux
+# reserver salle
+# abstract titles
+# 0-1month - conference: title
+# tentative programme check conflicts
+# mail: -2months, -1month, -1week, -1day
+# follow ups, -1.5months, -0.5months, -1weeks
+# ask restrictions for programme allocation
+# from tday to day, time time, talks minutes
+# work sessions, q&a, 25+5
+# -1month mail: confirm information, constraints days, 
+# agenda
