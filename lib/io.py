@@ -255,3 +255,59 @@ def fetch_and_display_data(conn, kwargs):
         st.write(f"No data found in the {table_name} table.")
     return _data
 
+
+
+import streamlit as st
+import json
+
+class QuestionnaireDatabase:
+    def __init__(self, conn, table_name="questionnaire"):
+        self.conn = conn
+        self.table_name = table_name
+
+    def check_existence(self, username):
+        if username == "":
+            st.error("Please provide a username.")
+            return
+
+        # Check if the username already exists
+        user_exists, count = self.conn.table(self.table_name) \
+            .select("*") \
+            .ilike('name', f'%{username}%') \
+            .execute()
+
+        return len(user_exists[1]) == 1
+
+    def insert_data(self, username, response_data):
+        # Insert the response_data into the PostgreSQL table
+        api = self.conn.table(self.table_name)
+        api.upsert([
+            {"name": username, "response_data": response_data}
+        ]).execute()
+        st.write("Data stored in the table.")
+
+    def insert_or_update_data(self, username, response_data):
+        try:
+            data = {'response_data': json.dumps(response_data)}
+            st.write(data)
+            user_exists = self.check_existence(username)
+
+            if user_exists:
+                # Username exists, update the existing record
+                update_query = self.conn.table(self.table_name).update(data).eq('name', username).execute()
+                
+                if update_query:
+                    st.success("Data updated successfully.")
+                else:
+                    st.error("Failed to update data.")
+            else:
+                # Username does not exist, insert a new record
+                data = {'name': username, 'response_data': json.dumps(response_data)}
+                insert_result = self.conn.table('questionnaire').upsert(data).execute()
+                st.info("Username does not exist, yet. Accounted for preferences")
+        except Exception as e:
+            st.error(f"Error inserting or updating data in the database: {str(e)}")
+
+# Usage example:
+# db = QuestionnaireDatabase(conn)
+# db.insert_or_update_data(username, response_data)

@@ -7,6 +7,8 @@ import hashlib
 from streamlit_authenticator.exceptions import CredentialsError, ForgotError, RegisterError, ResetError, UpdateError
 
 from lib.geo import get_coordinates
+import random
+import json
 
 class _Authenticate(Authenticate):
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, preauthorized: dict):
@@ -39,8 +41,8 @@ class _Authenticate(Authenticate):
         str
             Username of the authenticated user.
         """
-        if location not in ['main', 'sidebar']:
-            raise ValueError("Location must be one of 'main' or 'sidebar'")
+        # if location not in ['main', 'sidebar']:
+            # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if not st.session_state['authentication_status']:
             self._check_cookie()
             if not st.session_state['authentication_status']:
@@ -293,3 +295,92 @@ class AuthenticateWithKeys(_Authenticate):
                 return True
             else:
                 raise RegisterError('We forget the `where`, there...?')
+
+    
+class GateAuthenticate(_Authenticate):
+
+    def register_user(self, form_name: str, data: list, match: bool=False, preauthorization=True) -> bool:
+        """
+        Creates a register new user widget.
+
+        Parameters
+        ----------
+        form_name: str
+            The rendered name of the register new user form.
+        location: str
+            The location of the register new user form i.e. main or sidebar.
+        preauthorization: bool
+            The preauthorization requirement, True: user must be preauthorized to register, 
+            False: any user can register.
+        Returns
+        -------
+        bool
+            The status of registering the new user, True: user registered successfully.
+        """
+        if preauthorization:
+            if not self.preauthorized:
+                raise ValueError("preauthorization argument must not be None")
+
+        register_user_form = st.form(form_name)
+
+        col1, _, col2 = st.columns([2, .1, 2])
+        
+        register_user_form.subheader(form_name)
+        
+        access_key_hash = hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest()
+        
+        # encode and get a hash of the passed data
+        
+        json_data = json.dumps(data, sort_keys=True)
+        access_key_hash = hashlib.sha256(json_data.encode()).hexdigest()
+
+        if register_user_form.form_submit_button('`Here` • `Now`'):
+            now = datetime.now()
+            st.write(now) 
+            if match:
+                if self.__register_credentials(access_key_hash, preauthorization):
+                    self.credentials['access_key'] = access_key_hash
+                    return True
+                else: 
+                    return False
+            else:
+                raise RegisterError('We forget the `where`, there...?')
+
+    def __register_credentials(self, access_key: str, preauthorization: bool):
+        """
+        Adds to credentials dictionary the new user's information.
+
+        Parameters
+        ----------
+        username: str
+            The username of the new user.
+        name: str
+            The name of the new user.
+        password: str
+            The password of the new user.
+        email: str
+            The email of the new user.
+        preauthorization: bool
+            The preauthorization requirement, True: user must be preauthorized to register, 
+            False: any user can register.
+        """
+        # if not self.validator.validate_username(username):
+        #     raise RegisterError('Username is not valid')
+        # if not self.validator.validate_name(name):
+        #     raise RegisterError('Name is not valid')
+        # if not self.validator.validate_email(email):
+        #     raise RegisterError('Email is not valid')
+        
+        existing_access_key = self.get_existing_access_key(access_key)
+        
+        if existing_access_key:
+            st.info(f"Access key {access_key} already exists.")
+            return False
+        
+        data = {'key': access_key}
+        response = self.supabase.table('access_keys').insert(data).execute()
+        st.write(data, response)
+        
+        if response:
+            return True
+    
