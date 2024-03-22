@@ -122,6 +122,10 @@ if st.secrets["runtime"]["STATUS"] == "Production":
 
 st.write(st.secrets["runtime"]["STATUS"])
 
+if 'range' not in st.session_state:
+    st.session_state["range"] = 0  # Set the initial value
+
+
 df = pd.DataFrame(
     np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
     columns=['lat', 'lon'])
@@ -365,10 +369,6 @@ sandbox = """
     `La mécanique à l'echelle humaine ?`
 """
 
-if 'range' not in st.session_state:
-    st.session_state.range = 0  # Set the initial value
-
-
 
 def update_range(page_number):
     # Initialize session state
@@ -455,7 +455,7 @@ def main():
         st.session_state.page_number = 0
     
     if 'current_discourse_page' not in st.session_state:
-        st.session_state.current_discourse_page = 0
+        st.session_state["current_discourse_page"] = 0
     
     if 'damage_parameter' not in st.session_state:
         st.session_state.damage_parameter = 0.0  # Initial damage parameter
@@ -553,8 +553,7 @@ def display_category_description(category, description):
     st.write("---")
 
 def connect():
-    if "current_discourse_page" not in st.session_state:
-        st.session_state["current_discourse_page"] = 0
+
     paginator = ConnectingContainer(items = list(zip(panel, widget_info)), items_per_page=1)
     st.session_state.total_discourse_page = paginator.get_total_pages()
     # st.write(f'Current page is {st.session_state.current_discourse_page}/{st.session_state.total_discourse_page}')
