@@ -674,7 +674,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 60
+        seconds = 30
 
         start_time = time.time()
 

@@ -9,7 +9,7 @@ import streamlit_player as st_player
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
-        page_title="Infinite Potential - Settimia",
+        page_title="Workshop - Cryosphère et stabilité",
         page_icon="✨",
         # layout="wide",
         initial_sidebar_state="collapsed"

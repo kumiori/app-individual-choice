@@ -1,7 +1,31 @@
-import streamlit as st
-import streamlit_survey as ss
-import streamlit.components.v1 as components
+import hashlib
+import json
+import random
+import time
 
+import streamlit as st
+import streamlit.components.v1 as components
+import streamlit_survey as ss
+from lib.geo import get_coordinates
+from lib.io import conn, create_equaliser, fetch_and_display_data, QuestionnaireDatabase
+from lib.texts import _stream_example, _stream_once, corrupt_string
+from streamlit_extras.add_vertical_space import add_vertical_space
+from streamlit_extras.row import row
+from streamlit_extras.streaming_write import write as streamwrite
+
+
+
+st.write(st.secrets["runtime"]["STATUS"])
+_qualitative_selector = components.declare_component(
+    "qualitative",
+    url='http://localhost:3000'
+)
+
+import streamlit_survey as ss
+import yaml
+from lib.authentication import AuthenticateWithKeys, GateAuthenticate
+from lib.survey import CustomStreamlitSurvey
+from yaml.loader import SafeLoader
 
 # if st.secrets["runtime"]["STATUS"] == "Production":
 #     st.set_page_config(
@@ -22,28 +46,6 @@ import streamlit.components.v1 as components
 #         unsafe_allow_html=True,
 #     )
 
-
-from lib.io import conn, create_equaliser
-from streamlit_extras.add_vertical_space import add_vertical_space 
-
-from lib.texts import _stream_example, corrupt_string, _stream_once
-from lib.geo import get_coordinates
-from streamlit_extras.streaming_write import write as streamwrite 
-import time
-import json
-import hashlib
-from lib.io import fetch_and_display_data
-st.write(st.secrets["runtime"]["STATUS"])
-_qualitative_selector = components.declare_component(
-    "qualitative",
-    url='http://localhost:3000'
-)
-
-from lib.survey import CustomStreamlitSurvey
-from lib.authentication import AuthenticateWithKeys
-import streamlit_survey as ss
-import yaml
-from yaml.loader import SafeLoader
 
 # Initialize read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
@@ -79,7 +81,7 @@ def insert_or_update_data(conn, data):
             return False
         else:
             insert_result = conn.table('gathering').upsert(data).execute()
-            st.info("You happily signed and luck does not exist, yet. Lucky you!")
+            st.info("You signed and luck does not exist, yet. Lucky you!")
             return True
             
     except Exception as e:
@@ -96,43 +98,67 @@ def qualitative_parametric(name, question, areas, key=None):
 with open('data/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-
 if "access_key" not in st.session_state:
-    print('access_key not in session state')
     st.session_state['access_key'] = ''
-    print(st.session_state['access_key'])
+
+if 'selected_idea' not in st.session_state:
+    st.session_state["selected_idea"] = None
+
+if 'selected_name' not in st.session_state:
+    st.session_state["selected_name"] = None
     
-authenticator = AuthenticateWithKeys(
+def clear_session_state():
+    st.session_state["selected_name"] = None
+    st.session_state["selected_idea"] = None
+
+
+# authenticator = AuthenticateWithKeys(
+authenticator = GateAuthenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
     config['cookie']['expiry_days'],
     config['preauthorized']
 )
+
+
+
 survey = CustomStreamlitSurvey()
             
 def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
     survey = kwargs.get('survey')
-    # _location = survey.data['location']['value']
-    _location = survey.data.get('location', {}).get('value', 'Venegono Superiore, Varese, Italy')
-    st.write(_location)
+    data = kwargs.get('data')
+    # st.write(data)
+    # _location = survey.data.get('location').get('value', 'Venegono Superiore, Varese, Italy')
     if st.session_state["authentication_status"] is None:
         try:
-            if authenticator.register_user(' Check • Point ', location = _location,  preauthorization=False):
-                st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
-                    💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
-                    Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
+            if authenticator.register_user(' Check • Point ', data = data, match = True, preauthorization=False):
+                st.success(f'Very good 🎊. We have created ourselves a new key 🗝️.\
+                    💨 This means ✨ <`{ authenticator.credentials["access_key"] }`>.        \
+                    Keep it safe 💭. You will use it to re•open the connection 💫')
         except Exception as e:
             st.error(e)
             
     else:
         st.warning("We are already connected. Re•enter using your key, check the connection later.")
+        # authenticator.logout('Disconnect', 'main', key='disconnect')
 
 
-# 2 bedrooms sabatical house, rent income:
-# interested in the other apt: 7-12d rental = 1500EUR+50
+def account_for_data(conn, username, data):
+    try:
+        data_json = json.loads(data)
+        insert_or_update_data(conn, username, data_json)
+    except json.JSONDecodeError:
+        st.error("Invalid JSON format. Please provide a valid JSON string.")
 
+    st.download_button(
+        label="Download data JSON",
+        data=data,
+        file_name='survey.json',
+        mime='text/json',
+    )
+    
 def main():
     # st.title("Welcome to the Singular Mapping. A solid proof? Forget, and Ask the moon: If If-Then is full, is still Luck a useful tool? \n ## We divide by zero. \n ## and it's just fuck*ng pitch black..")
     title = """
@@ -175,15 +201,132 @@ def main():
             st.markdown(f"`{key}`", unsafe_allow_html=True)
     st.divider()
    
+   
+    st.markdown("## Let's get started creating a new key")
+   
     col1, col2, col3 = st.columns([1, 1.2, 1])
+    
+    with col2:
+        if st.button("Clear Memory"):
+            clear_session_state()
+            st.info("Session state cleared.")
+    
+    def commit_to_state(data_type, value):
+        if data_type == "name":
+            st.session_state["selected_name"] = value
+        elif data_type == "idea":
+            st.session_state["selected_idea"] = value
+
+
+    if st.session_state["selected_name"] is None:
+        st.title("Match the Name with the ✨!")
+    else:
+        st.title(f"Match *{st.session_state['selected_name']}* with the 'moji!")
+   
+    names = ["Andrew", "Leslie", "Mai-Brit", "Giampaolo", "Andrés", "Victoria", "Settimia"]
+    ideas = list(set(["🦇", "✨", "👽", "😗", "🥹", "♥️", "❤️‍🔥", "🫠", "🥴", "👀", "🧞‍♂️", "🐎", "💫", "💨", "🏢", "🇫🇷", "☑️", "🔑", "🥖", "🕘", "🚧", "🪽", "✨", "☀️", "🔥", "🫂", "🧜🏾‍♂️", "👋🏾", "✉️", "🥤", "🚪", "💃", "🫡", "🎭", "🧉", "⏰", "🦹", "🕛", "🕶️", "💥", "🔐", "🕯️", "❤️", "🤌", "🇮🇹", "🍝", "🍕", "♾️", "🙏", "👏", "🔥", "🍷", "🪵", "☀️", "💞", "🌽", "💦", "💥", "🌻", "🎉", "🪄", "😎", "🗝️", "🛎️", "🧡", "🗝", "🚪", "🧼", "🧿", "💳", "💋", "🥩", "🧂", "🐚", "💦"]))
+    random.shuffle(names)
+    random.shuffle(ideas)
+
+
+    def check_answer():
+        return True
+    
+        
+    def display_ideas(icon_row, _ideas):
+        for word in _ideas:
+            if icon_row.button(
+                    word,
+                    key = f"button_{word}",
+                    use_container_width=True,
+                    on_click = commit_to_state, args = ["idea", word]):
+                st.session_state["selected_idea"] = word
+                if st.session_state["selected_name"] is not None:
+                    check_answer()
+
+    if st.session_state["selected_name"] is None:
+        icon_row = row(3)
+        for num in names:
+            if icon_row.button(
+                str(num),
+                key = f"button_{num}",
+                use_container_width=True,
+                on_click = commit_to_state, args = ["name", num]):
+                st.session_state["selected_name"] = num
+                if st.session_state["selected_idea"] is not None:
+                    check_answer()
+    else:
+        col1.markdown(
+            f"# {st.session_state['selected_name']}",
+            unsafe_allow_html=True,
+        )
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+
+    if st.session_state["selected_idea"] is None:
+        icon_row = row(6)
+        _ideas = ideas[0:19]+["..."]
+        display_ideas(icon_row, _ideas)
+        
+    elif st.session_state["selected_idea"] == "...":
+        icon_row = row(6)
+        _ideas = ideas[19::]+["∣"]
+        display_ideas(icon_row, _ideas)
+        
+    else:
+        col3.markdown(
+            f"# {st.session_state['selected_idea']}",
+            unsafe_allow_html=True,
+        )
+    st.write('''<style>
+        [data-testid="stVerticalBlock"] [data-testid="baseButton-secondary"] p {
+            font-size: 2rem;
+            padding: 1rem;
+        }
+    </style>''', unsafe_allow_html=True)
+    
+    match = True
+    if st.session_state["selected_name"] is not None and st.session_state["selected_idea"] is not None:
+        # col1, col2, col3 = st.columns([1, 1.2, 1])
+        col1.markdown(
+            f"# {st.session_state['selected_name']}",
+            unsafe_allow_html=True,
+        )
+        # col3.markdown(
+        #     f"# {st.session_state['selected_idea']}",
+        #     unsafe_allow_html=True,
+        # )
+        if col2.button("Check Answer"):
+            st.success("Yes", icon="✨")
+            # match = check_answer()
+            # st.info(correct_association[st.session_state["selected_idea"]]["question"])
+        # st.json(st.session_state, expanded=False)
+    
+        create_connection(key = "authors", kwargs = {"survey": survey, 
+                                                     "authenticator": authenticator,
+                                                     "data": {"name": st.session_state["selected_name"],
+                                                              "idea": st.session_state["selected_idea"]}, 
+                                                     "match": check_answer()})
+
+
+   
+    # create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
+    authenticator.login('Do you already have a key?')
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+        
+    with col1:
+        if st.button('Show Key'):
+            # st.write(st.session_state)
+            col2.markdown(f"{st.session_state['access_key']}")
+    with col3:
+        authenticator.logout('Disconnect', 'main', key='disconnect2')
+
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    
     with col1:
         st.markdown("## ¿ What is your location")
     with col2:
         location = survey.text_input("location", help="Our location will appear shortly...", value=st.session_state.get('location', 'Venegono Superiore, Varese, Italy'))
 
-    # create_connection("connection", kwargs = {"survey": survey, "authenticator": authenticator})
-    authenticator.login('Do you already have a key?')
-    
     st.divider()
     st.write(f'Auth {st.session_state["authentication_status"]}')
     
@@ -196,20 +339,14 @@ def main():
         ❤️🤌🇮🇹🍝🍕♾️🙏👏🔥🍷🪵☀️💞🌽💦💥🌻🎉🪄😎🗝️🛎️
         🧡🗝🚪🧼🧿💳💋🥩🧂🐚💦
         """        
-        authenticator.logout('Disconnect', 'main', key='disconnect')
+        # authenticator.logout('Disconnect', 'main', key='disconnect')
         st.divider()
         col1, col2, col3 = st.columns([1, 1.2, 1])
-    
-    # with col2:
-        # st.markdown("## ¿ What is your")
-        # location = survey.text_input("_location", help="Our location will appear shortly...", value=st.session_state.location)
         
         if location is not None:
             coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
             st.session_state.coordinates = coordinates
             st.write(coordinates)
-            with col1:
-                st.markdown("## As a rule of thumb...")
                 
             with col3:
                 st.markdown("## Luck (y)")
@@ -339,7 +476,16 @@ def main():
         create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
 
         dev_mode = st.checkbox('Developer Mode')
-
+        data = survey.data
+        
+        
+        db = QuestionnaireDatabase(conn)
+        
+        if st.button(f"Account for preferences, signature: {st.session_state['access_key']}"):
+            try:
+                account_for_data(conn, st.session_state['access_key'], data)
+            except json.JSONDecodeError:
+                st.error("Invalid JSON format. Please provide a valid JSON string.")
         # Check if the checkbox is selected
         if dev_mode:
 
@@ -395,6 +541,7 @@ def main():
             """
             
             st.write(survey)
+
 # Run the app
 if __name__ == "__main__":
     main()

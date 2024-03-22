@@ -70,7 +70,6 @@ def show_powers():
     
     st.write('''<style>
         [data-testid="stVerticalBlock"] [data-testid="baseButton-secondary"] p {
-            # border: 20px groove grey;
             font-size: 2rem;
             padding: 1rem;
         }

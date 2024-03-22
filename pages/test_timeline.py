@@ -6,7 +6,7 @@ import json
 import datetime
 
 # use full page width
-st.set_page_config(page_title="Timeline Example", layout="wide")
+st.set_page_config(page_title="Settimia's Timeline", layout="wide")
 
 # load data
 # with open('example.json', "r") as f:
@@ -88,7 +88,7 @@ data = {
         },
         "text": {
             "headline": "Settimia's Timeline",
-            "text": "<p>A timeline with major events, workshops, and an auction.</p>"
+            "text": "<p>A timeline with events (large and small), workshops, and an auction.</p>"
         }
     },
     "events": [
@@ -99,31 +99,51 @@ data = {
             },
             "start_date": {
                 "year": str(current_year),
-                "month": "1",
-                "day": "1"
+                "month": "3",
+                "day": "30"
             },
             "text": {
-                "headline": "Major Event 1",
-                "text": "<p>The first major event of the year.</p>"
+                "headline": "Settimia Hosts: Call it Easter",
+                "text": "<p>Andrew's Birthday, The first major event of the year.</p>"
             }
         },
         {
             "media": {
                 "url": "",
-                "caption": "Two-Week Workshop 1"
+                "caption": "Men's Fashion Week (Mi)"
             },
             "start_date": {
                 "year": str(current_year),
-                "month": "2",
-                "day": "1"
+                "month": "6",
+                "day": "15"
             },
             "end_date": {
                 "year": str(current_year),
-                "month": "2",
-                "day": "14"
+                "month": "6",
+                "day": "19"
             },
             "text": {
-                "headline": "Two-Week Workshop 1",
+                "headline": "Men's Fashion Week (Mi)",
+                "text": "<p>The first two-week workshop of the year.</p>"
+            }
+        },
+        {
+            "media": {
+                "url": "",
+                "caption": "Women's Fashion Week (Mi)"
+            },
+            "start_date": {
+                "year": str(current_year),
+                "month": "9",
+                "day": "18"
+            },
+            "end_date": {
+                "year": str(current_year),
+                "month": "9",
+                "day": "24"
+            },
+            "text": {
+                "headline": "Women's Fashion Week (Mi)",
                 "text": "<p>The first two-week workshop of the year.</p>"
             }
         },
