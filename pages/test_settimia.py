@@ -95,7 +95,7 @@ def qualitative_parametric(name, question, areas, key=None):
     data_values  = [1, 2, 10],
     question = question)
 
-with open('data/credentials.yml') as file:
+with open('data/credentials_settimia.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
 if "access_key" not in st.session_state:
@@ -118,6 +118,7 @@ authenticator = GateAuthenticate(
     config['cookie']['name'],
     config['cookie']['key'],
     config['cookie']['expiry_days'],
+    config['cookie']['expiry_minutes'],
     config['preauthorized']
 )
 
@@ -145,19 +146,13 @@ def create_connection(key, kwargs = {}):
         # authenticator.logout('Disconnect', 'main', key='disconnect')
 
 
-def account_for_data(conn, username, data):
+def account_for_data(db, username, data):
     try:
-        data_json = json.loads(data)
-        insert_or_update_data(conn, username, data_json)
+        # data_json = json.loads(data)
+        db.insert_or_update_data(username, data)
     except json.JSONDecodeError:
         st.error("Invalid JSON format. Please provide a valid JSON string.")
 
-    st.download_button(
-        label="Download data JSON",
-        data=data,
-        file_name='survey.json',
-        mime='text/json',
-    )
     
 def main():
     # st.title("Welcome to the Singular Mapping. A solid proof? Forget, and Ask the moon: If If-Then is full, is still Luck a useful tool? \n ## We divide by zero. \n ## and it's just fuck*ng pitch black..")
@@ -364,7 +359,7 @@ def main():
 
                 signature = hashlib.md5(str(data).encode('utf-8')).hexdigest()
                 # st.write("")
-                data["signature"] = signature
+                # data["signature"] = signature
 
                 # Update session state with the signature
                 st.session_state.signature = signature
@@ -475,20 +470,35 @@ def main():
         st.markdown("### Using an _energy_ mixer, where _should_ energy go?")
         create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
 
-        dev_mode = st.checkbox('Developer Mode')
         data = survey.data
+
+        db = QuestionnaireDatabase(conn, "settimia")
         
-        
-        db = QuestionnaireDatabase(conn)
-        
+        # st.json(data)
         if st.button(f"Account for preferences, signature: {st.session_state['access_key']}"):
             try:
-                account_for_data(conn, st.session_state['access_key'], data)
+                locator = {'key': st.session_state['access_key'], 'label': 'signature'}
+                account_for_data(db, locator, data = {'label': 'data', 'record': data})
             except json.JSONDecodeError:
                 st.error("Invalid JSON format. Please provide a valid JSON string.")
-        # Check if the checkbox is selected
-        if dev_mode:
 
+
+        col1, col2, col3 = st.columns([1, 1.2, 1])
+        
+        if col1.button("Fetch Data"):
+            _data = db.fetch_data()
+            
+        col3.download_button(
+            label="Download raw",
+            data=survey.to_json(),
+            file_name=f'survey_{st.session_state["access_key"]}.json',
+            mime='text/json',
+        )
+        # Check if the checkbox is selected
+        dev_mode = st.checkbox('Developer Mode')
+
+        if dev_mode:
+            st.json(st.session_state)
             """
                 Dynamic information gathering platform
             # Artists/Collaborators/Investors

@@ -14,16 +14,17 @@ def create_button(key, kwargs = {}):
 def create_dichotomy(key, kwargs = {}):
     survey = kwargs.get('survey')
     label = kwargs.get('label', 'Confidence')
-    name = kwargs.get('name', 'Spirit')
+    name = kwargs.get('name', 'there')
     question = kwargs.get('question', 'Dychotomies, including time...')
     messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
     inverse_choice = kwargs.get('inverse_choice', lambda x: x)
+    _response = kwargs.get('response', '## You can always change your mind. Now, to the next step.')
     col1, col2, col3 = st.columns([3, .1, 1])
     with col1:    
         response = survey.dichotomy(name=name, 
                                 label=label,
                                 question=question,
-                                gradientWidth = 40, 
+                                gradientWidth = kwargs.get('gradientWidth', 30), 
                                 key=key)
     with col3:
         if response:
@@ -40,9 +41,9 @@ def create_dichotomy(key, kwargs = {}):
         else:
             st.markdown(f'## Take your time:', unsafe_allow_html=True)
     if response:
-        st.markdown('## You can always change your mind. Now, to the next step.')
+        st.markdown(_response)
     
-    return
+    return response
 
 def create_qualitative(key, kwargs = {}):
     survey = kwargs.get('survey')
@@ -204,7 +205,6 @@ def create_textinput(key, kwargs = {}):
 
     #     st.markdown(f"## Forward, confirming that you connect from `{geographical_region}`")
 
-
 def create_checkbox(key, kwargs = {'label': 'Choose'}):
     survey = kwargs.get('survey')
     return survey.checkbox(kwargs.get('label', ''), key=key)
@@ -255,8 +255,6 @@ def fetch_and_display_data(conn, kwargs):
         st.write(f"No data found in the {table_name} table.")
     return _data
 
-
-
 import streamlit as st
 import json
 
@@ -265,48 +263,67 @@ class QuestionnaireDatabase:
         self.conn = conn
         self.table_name = table_name
 
-    def check_existence(self, username):
-        if username == "":
-            st.error("Please provide a username.")
+    def check_existence(self, key, key_label = 'signature'):
+        if key == "":
+            st.error("Please provide a key.")
             return
 
         # Check if the username already exists
         user_exists, count = self.conn.table(self.table_name) \
             .select("*") \
-            .ilike('name', f'%{username}%') \
+            .ilike(key_label, f'%{key}%') \
             .execute()
 
-        return len(user_exists[1]) == 1
+        return len(user_exists[1]) > 0
 
-    def insert_data(self, username, response_data):
-        # Insert the response_data into the PostgreSQL table
+    def insert_data(self, key, key_label, data, data_label = 'response_data'):
+        # Insert the data into the PostgreSQL table
         api = self.conn.table(self.table_name)
         api.upsert([
-            {"name": username, "response_data": response_data}
+            {key_label: key, data_label: data}
         ]).execute()
         st.write("Data stored in the table.")
 
-    def insert_or_update_data(self, username, response_data):
+    def insert_or_update_data(self, username, data):
         try:
-            data = {'response_data': json.dumps(response_data)}
-            st.write(data)
-            user_exists = self.check_existence(username)
+            user_exists = self.check_existence(username.get('key'), username.get('label'))
 
             if user_exists:
+                data = {data.get('label', 'data'): json.dumps(data.get('record'))}
                 # Username exists, update the existing record
-                update_query = self.conn.table(self.table_name).update(data).eq('name', username).execute()
+                update_query = self.conn.table(self.table_name).update(data).eq(username.get('label'), 
+                                                                                username.get('key')).execute()
                 
                 if update_query:
-                    st.success("Data updated successfully.")
+                    st.success(f"Data updated successfully.")
                 else:
                     st.error("Failed to update data.")
             else:
                 # Username does not exist, insert a new record
-                data = {'name': username, 'response_data': json.dumps(response_data)}
-                insert_result = self.conn.table('questionnaire').upsert(data).execute()
-                st.info("Username does not exist, yet. Accounted for preferences")
+                # data = {'name': username, 'data': json.dumps(data)}
+                data = {username.get('label'): username.get('key'), 
+                        data.get('label', 'data'): json.dumps(data.get('record'))}
+                # st.write(data)
+                insert_result = self.conn.table(self.table_name).upsert(data).execute()
+                st.info("Username does not exist, yet. Yet, accounted for preferences")
         except Exception as e:
             st.error(f"Error inserting or updating data in the database: {str(e)}")
+
+
+    def fetch_data(self, kwargs = {}):
+        # Fetch all data from the "questionnaire" table
+        st.write(f"Fetching data from the {self.table_name} table.")
+        response = self.conn.table(self.table_name).select("*").execute()
+        st.write(response)
+        if response and response.data:
+            data = response.data
+            _data = []
+            # Display each row of data
+            for row in data:
+                _data.append(row)
+        else:
+            st.write(f"No data found in the {self.table_name} table.")
+        return _data
 
 # Usage example:
 # db = QuestionnaireDatabase(conn)
