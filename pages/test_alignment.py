@@ -10,7 +10,10 @@ if "removed_images" not in st.session_state:
     st.session_state["removed_images"] = []
 
 if "current_index" not in st.session_state:
-    st.session_state["current_index"] = 0
+    st.session_state["current_index"] = []
+
+if "choices" not in st.session_state:
+    st.session_state["choices"] = {}
 
 # Path to the directory containing the images
 image_dir = "images/cards/clear"
@@ -53,7 +56,7 @@ def get_next_image():
 # Function to handle button clicks
 def handle_button_click(image_index, choice):
     st.session_state["removed_images"].append(image_index)
-    print(image_index, choice)
+    st.session_state["choices"].update({st.session_state["current_index"][-2]: choice})
 
 # Function to handle button clicks
 def on_button_click(choice):
@@ -152,13 +155,15 @@ def create_dichotomy(key, kwargs = {}):
         
         if callable:
             callable(*kwargs.get('args', []), response)
-            st.write(*kwargs.get('args', []), index, response)
             
     return response, index
 
 next_image_url, current_index = get_next_image()
 
-response = create_dichotomy(key = "steering", kwargs={'survey': survey,
+st.session_state["current_index"].append(current_index)
+
+if next_image_url:
+    response = create_dichotomy(key = "steering", kwargs={'survey': survey,
                                            'label': 'resonance', 
                                            'question': 'Do you resonate with',
                                            'gradientWidth': 1,
@@ -168,10 +173,11 @@ response = create_dichotomy(key = "steering", kwargs={'survey': survey,
                                             'args': (current_index,)}
                             )
 
+    wrapper.image(next_image_url,
+                width=500,
+                caption=f"Idea {current_index}")
 
-wrapper.image(next_image_url,
-            width=500,
-            caption=f"Idea {current_index}")
-
-st.write(st.session_state["removed_images"])
-st.write(f"response: {response}, current_index: {current_index}")
+    st.write(st.session_state["removed_images"])
+    st.write(f"response: {response}, current_index: {current_index}, last_image: {st.session_state['current_index']}")
+    st.write(st.session_state["choices"])
+    st.write(st.session_state["current_index"])

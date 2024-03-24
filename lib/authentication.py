@@ -11,7 +11,7 @@ import random
 import json
 
 class _Authenticate(Authenticate):
-    def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, preauthorized: dict):
+    def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, cookie_expiry_minutes: int, preauthorized: dict):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.supabase = supabase
         self.credentials['access_key'] = None
@@ -88,7 +88,7 @@ class _Authenticate(Authenticate):
                     self.exp_date = self._set_exp_date()
                     self.token = self._token_encode()
                     self.cookie_manager.set(self.cookie_name, self.token,
-                        expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days))
+                        expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days, minutes=self.cookie_expiry_minutes))
                     st.session_state['authentication_status'] = True
                     st.info('Cookie set')
                 else:

@@ -4,18 +4,23 @@ import {
     withStreamlitConnection,
 } from "streamlit-component-lib"
 import React, { ReactNode } from "react"
-
+import { useRef, useState, useEffect } from 'react';
 interface State {
-    numClicks: number
-    isFocused: boolean
-}
+    numClicks: number;
+    isFocused: boolean;
+    clickedValue: null;
+  }
 
 class Dichotomy extends StreamlitComponentBase<State> {
-    public state = { numClicks: 0, isFocused: false, clickedValue: null }
+    public state: State = { numClicks: 0, isFocused: false, clickedValue: null };
+
+    private svgRef = React.createRef<SVGSVGElement>();
+    // const [svgWidth: any, setSvgWidth: any] = useState<number>(0);
 
     public render = (): ReactNode => {
         const name = this.props.args["name"]
         const question = this.props.args["question"]
+        const label = this.props.args["label"]
         const rotationAngle = this.props.args["rotationAngle"]; // Specify the desired rotation angle in degrees
         const gradientWidth = this.props.args["gradientWidth"]; // Specify the desired rotation angle in degrees
         // const shift = this.props.args["shift"]; // Specify the desired rotation angle in degrees
@@ -24,7 +29,12 @@ class Dichotomy extends StreamlitComponentBase<State> {
         // const shift = 40;
         const color1 = invertColors ? '#fff' : '#000';
         const color2 = invertColors ? '#000' : '#fff';
+        let svgWidth = 10;
 
+        if (this.svgRef.current) {
+            const rect = this.svgRef.current.getBoundingClientRect();
+            svgWidth = rect.width;
+        }
         function inverseRotatePoint(x: number, y: number, rotationAngle: number): { x: number; y: number } {
             // Convert rotation angle to radians
             const thetaRad = (rotationAngle * Math.PI) / 180;
@@ -78,42 +88,19 @@ class Dichotomy extends StreamlitComponentBase<State> {
 
             const absoluteWidth = rect.width;
             const absoluteHeight = rect.height;
-        
             const xPosition = parseFloat(clickedElement.getAttribute('x') || '0'); // Default to 0 if 'x' attribute is not present
             const svgWidth = clickedElement.ownerSVGElement?.width.baseVal.value || 0;
-            const absoluteX = (xPosition / 100) * svgWidth;
-            const transformValue = computedStyle.transform || computedStyle.webkitTransform;
-            const rotationAngle = getRotationAngle(transformValue);
-            const rotatedClickPoint = inverseRotatePoint(x, y, rotationAngle);
+            // const rotationAngle = getRotationAngle(transformValue);
+            // const rotatedClickPoint = inverseRotatePoint(x, y, rotationAngle);
             // const distanceToBoundary = distanceToRectangleBoundary(rotatedClickPoint.x, rotatedClickPoint.y, absoluteWidth, absoluteHeight);
             const _offset = 0;
-            const _value = (rotatedClickPoint.x-_offset-absoluteX)/absoluteWidth;
+            // const _value = (rotatedClickPoint.x-_offset-absoluteX)/absoluteWidth;
+            const _value = (x-rect.x)/absoluteWidth;
 
             const elementId = clickedElement.id;
             const customDataValue = _value.toFixed(2);
-      
+
             Streamlit.setComponentValue(customDataValue);
-
-            // console.log("");
-            // console.log("Absolute Width:", absoluteWidth);
-            // console.log("Absolute Height:", absoluteHeight);
-            // console.log(clickedElement)
-            // console.log("SVG Width:", svgWidth);
-            // console.log('Absolute X-position of the clicked rectangle:', absoluteX);
-            // console.log('X-position of the clicked, relative:', xPosition, "%");
-            // console.log('X-position of the clicked, absolute:', x-absoluteX);
-            // console.log('X-position of the clicked, relative to width:', (x-absoluteX)/absoluteWidth);
-            // console.log("Transform value:", transformValue);
-            // console.log("Angle value:", rotationAngle);
-            // console.log("rotatedClickPoint:", rotatedClickPoint);
-            // console.log("projectedClickPoint:", rotatedClickPoint.x-absoluteX);
-            // console.log("relative projectedClickPoint:", (rotatedClickPoint.x-_offset-absoluteX)/absoluteWidth);
-            // console.log("Distance to boundary:", distanceToBoundary);
-            // console.log("Clicked element coordinates:", x, y);
-            // console.log("clickedElement:", clickedElement);
-            // console.log("relative value:", _value);
-            // console.log("Clicked element ID: " + elementId);
-
 
         }
 
@@ -132,14 +119,8 @@ class Dichotomy extends StreamlitComponentBase<State> {
         
         return (
             <div id="happy">
-                <span>
-                    Hello, {name}
-                    <br />
-                    <p>{question}</p>
-                </span>
+                <p>Hello, {name}. {question}</p>
                 <svg className="col-md-12 col-sm-12" height="200" style={{ paddingLeft: 0 }}>
-                    {/* <path d="M100,100 h200 a20,20 0 0 1 20,20 v200 a20,20 0 0 1 -20,20 h-200 a20,20 0 0 1 -20,-20 v-200 a20,20 0 0 1 20,-20 z" fill="none" stroke="black" stroke-width="3" /> */}
-
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{ stopColor: color1 }} />
@@ -148,7 +129,7 @@ class Dichotomy extends StreamlitComponentBase<State> {
                     </defs>
                     
                     <rect
-                        rx="15" ry="15" 
+                        // rx="15" ry="15" 
                         width="100%"
                         height="100%"
                         fill={color1}
@@ -158,24 +139,20 @@ class Dichotomy extends StreamlitComponentBase<State> {
                         data-value='0'
                     />
                     <rect
-                        // width="20%"
-                        width={gradientWidth ? `${gradientWidth/2}%` : '0'}
+                        width={gradientWidth ? `${gradientWidth}%` : '0'}
                         height="100%"
-                        // x="40%" // Shift the second rectangle by 30% of the width
-                        x={gradientWidth ? `${gradientWidth - shift}%` : '0'}  // Adjusted x position based on the width
+                        x={gradientWidth ? `calc(50% - ${gradientWidth / 2}%)` : '0'}
                         fill="url(#gradient)" // Gradient background for the third rectangle
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the second rectangle
-                        // y="-600"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickTransition(e)}
                     />
                     <rect
-                        width="100%"
+                        rx="00" ry="10" 
+                        width="50%"
                         height="100%"
-                        // x="60%" // Shift the third rectangle by 60% of the width
-                        x={gradientWidth ? `${gradientWidth * 3/2-.1}%` : '0'}  // Adjusted x position based on the width
+                        x={gradientWidth ? `calc(50% + ${gradientWidth / 2}%)` : '0'}
                         fill={color2}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
-                        // y="-500"  // Adjusted y position for the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}
                         data-value='1'
                     />
