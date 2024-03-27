@@ -45,6 +45,9 @@ def create_dichotomy(key, kwargs = {}):
     
     return response
 
+def create_dichotomy_with3cols(key, kwargs = {}):
+    return create_dichotomy(key, kwargs)
+
 def create_qualitative(key, kwargs = {}):
     survey = kwargs.get('survey')
     return survey.qualitative_parametric(name="Spirit",
@@ -312,9 +315,10 @@ class QuestionnaireDatabase:
 
     def fetch_data(self, kwargs = {}):
         # Fetch all data from the "questionnaire" table
-        st.write(f"Fetching data from the {self.table_name} table.")
+        if kwargs.get('verbose', False):
+            st.write(f"Fetching data from the {self.table_name} table.")
         response = self.conn.table(self.table_name).select("*").execute()
-        st.write(response)
+        # st.write(response)
         if response and response.data:
             data = response.data
             _data = []

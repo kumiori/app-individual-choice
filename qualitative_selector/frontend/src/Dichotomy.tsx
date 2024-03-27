@@ -21,6 +21,8 @@ class Dichotomy extends StreamlitComponentBase<State> {
         const name = this.props.args["name"]
         const question = this.props.args["question"]
         const label = this.props.args["label"]
+        const width = this.props.args["width"]; // or any other value
+        const height = this.props.args["height"]
         const rotationAngle = this.props.args["rotationAngle"]; // Specify the desired rotation angle in degrees
         const gradientWidth = this.props.args["gradientWidth"]; // Specify the desired rotation angle in degrees
         // const shift = this.props.args["shift"]; // Specify the desired rotation angle in degrees
@@ -120,7 +122,7 @@ class Dichotomy extends StreamlitComponentBase<State> {
         return (
             <div id="happy">
                 <p>Hello, {name}. {question}</p>
-                <svg className="col-md-12 col-sm-12" height="200" style={{ paddingLeft: 0 }}>
+                <svg className="col-md-12 col-sm-12" width="100%"  height={height}  style={{ paddingLeft: 15 }}>
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{ stopColor: color1 }} />
@@ -147,10 +149,10 @@ class Dichotomy extends StreamlitComponentBase<State> {
                         onClick={(e) => handleElementClickTransition(e)}
                     />
                     <rect
-                        rx="00" ry="10" 
-                        width="50%"
+                        rx="00" ry="0" 
+                        width="100%"
                         height="100%"
-                        x={gradientWidth ? `calc(50% + ${gradientWidth / 2}%)` : '0'}
+                        x={gradientWidth ? `calc(50% + ${gradientWidth / 2 - .1}%)` : '0'}
                         fill={color2}
                         transform={`rotate(${rotationAngle} 0 0)`} // Rotate the third rectangle
                         onClick={(e) => handleElementClickBoundary(e)}

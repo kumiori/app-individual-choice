@@ -171,6 +171,7 @@ authenticator = Authenticate(
     config['cookie']['name'],
     config['cookie']['key'],
     config['cookie']['expiry_days'],
+    0,
     config['preauthorized']
 )
             

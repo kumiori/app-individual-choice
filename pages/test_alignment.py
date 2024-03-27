@@ -29,7 +29,6 @@ image_urls = [f"{image_dir}/{file}" for file in image_files]
 
 # Shuffle the list of image URLs
 random.shuffle(image_urls)
-
 # Initialize current image index
 current_index = 0
 st.markdown(
@@ -79,13 +78,13 @@ def on_button_click(choice):
     current_index = 0 if current_index >= len(image_urls) else current_index
     
 
-st.title("Do you resonate?")
+# st.title("Do you resonate?")
 # Display the current image
 col1, col2, col3 = st.columns([1, 5, 1])
 survey = CustomStreamlitSurvey()
 
 next_image_url = None
-wrapper = st.empty()
+wrapper = col2.empty()
 
 if next_image_url is None:
     wrapper.write("No more images to display.")
@@ -110,7 +109,6 @@ if next_image_url is None:
 #             caption=f"Idea {current_index + 1}")
 # 
 
-st.divider()
 
 
 
@@ -120,17 +118,17 @@ def create_dichotomy(key, kwargs = {}):
     name = kwargs.get('name', 'there')
     index = kwargs.get('index', -1)
     question = kwargs.get('question', 'Dychotomies, including time...')
-    question += f' {index}'
+    # question += f' {index}'
     messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
     inverse_choice = kwargs.get('inverse_choice', lambda x: x)
     _response = kwargs.get('response', '## You can always change your mind. Now, to the next step.')
     col1, col2, col3 = st.columns([3, .1, 1])
     callable = kwargs.get('callback')
     
-    with col1:    
-        response = survey.dichotomy(name=name, 
+    response = survey.dichotomy(name=name, 
                                 label=label,
                                 question=question,
+                                height = kwargs.get('height'),
                                 gradientWidth = kwargs.get('gradientWidth', 30), 
                                 key=key)
     # with col3:
@@ -165,8 +163,9 @@ st.session_state["current_index"].append(current_index)
 if next_image_url:
     response = create_dichotomy(key = "steering", kwargs={'survey': survey,
                                            'label': 'resonance', 
-                                           'question': 'Do you resonate with',
+                                           'question': 'Like it or not? 🤔 Hit White or Black, respectively.',
                                            'gradientWidth': 1,
+                                           'height': 100,
                                            'inverse_choice': lambda x: '',
                                            'index': current_index,
                                             'callback': handle_button_click,
@@ -175,9 +174,11 @@ if next_image_url:
 
     wrapper.image(next_image_url,
                 width=500,
-                caption=f"Idea {current_index}")
+                # caption=f"Idea {current_index}"
+                )
 
     st.write(st.session_state["removed_images"])
     st.write(f"response: {response}, current_index: {current_index}, last_image: {st.session_state['current_index']}")
     st.write(st.session_state["choices"])
     st.write(st.session_state["current_index"])
+
