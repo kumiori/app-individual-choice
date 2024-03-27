@@ -16,9 +16,9 @@ import pandas as pd
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
-        page_title="Celestial Verse Portal",
+        page_title="Panel in Discourse ¶ Authors Portal",
         page_icon="✨",
-        layout="wide",
+        layout="centered",
         initial_sidebar_state="collapsed"
     )
 
