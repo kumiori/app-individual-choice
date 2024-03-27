@@ -9,12 +9,59 @@ from streamlit_authenticator.exceptions import RegisterError
 from streamlit_extras.row import row
 from yaml.loader import SafeLoader
 from lib.survey import CustomStreamlitSurvey
+from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IODatabase
+import streamlit_shadcn_ui as ui
+import pandas as pd
+
+
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Celestial Verse Portal",
+        page_icon="✨",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+        [data-testid="stHeader"] {
+            display: none
+            }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
+if 'selected_idea' not in st.session_state:
+    st.session_state["selected_idea"] = None
+
+ideas = list(set(["🦇", "✨", "👽", "😗", "🥹", "♥️", "❤️‍🔥", "🫠", "🥴", "👀", "🧞‍♂️", "🐎", "💫", "💨", "🏢", "🇫🇷", "☑️", "🔑", "🥖", "🕘", "🚧", "🪽", "✨", "☀️", "🔥", "🫂", "🧜🏾‍♂️", "👋🏾", "✉️", "🥤", "🚪", "💃", "🫡", "🎭", "🧉", "⏰", "🦹", "🕛", "🕶️", "💥", "🔐", "🕯️", "❤️", "🤌", "🇮🇹", "🍝", "🍕", "♾️", "🙏", "👏", "🔥", "🍷", "🪵", "☀️", "💞", "🌽", "💦", "💥", "🌻", "🎉", "🪄", "😎", "🗝️", "🛎️", "🧡", "🗝", "🚪", "🧼", "🧿", "💳", "💋", "🥩", "🧂", "🐚", "💦"]))
+
+ideas = list(set({
+    "🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫", "⬜", "⬛", 
+    "🟣", "🟢", "🔵", "🟠", "🔴", "🟡", "🟣", "🟤", "⚫",
+    "⚪", "🔴", "🟠", "🟡", "🟢", "🔵", "🟣", "🟤", "🟦",
+    "🟩", "🟪", "🟫", "⬜", "⬛",
+    "▪️", "▫️", "🔶", "🔷", "🔸", "🔹", "🔻", "🔺", "🟧",
+    "🟨", "🟩", "🟦", "🟪", "🟫", "⬜", "⬛", "🟣", "🟢",
+    "🔵", "🟠", "🔴", "🟡", "🟣", "🟤", "⚫", "⚪", "🔴",
+    "🟠", "🟡", "🟢", "🔵", "🟣", "🟤", "🟦", "🟩", "🟪",
+    "🟫", "⬜", "⬛",
+    "🔶", "🔷", "🔸", "🔹", "🔻", "🔺"
+}
+))
+st.markdown("`There may be small data discrepancies due to the time it takes to divide by zero.`")
 
 # Define the list of conference contributions and corresponding authors
 contributions = [
     "Le Gai Savoir", "The Aftermath Of Political Violence", "Engagement with the Sea",
     "tbaGD", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau",
-    "A Fantasy Of Stochastic Moral Guardians", "tbaALB"
+    "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing"
 ]
 
 authors = [
@@ -32,7 +79,6 @@ questions = [
 
 with open('data/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
-    
 class Authenticate(_Authenticate):
 
     def register_user(self, form_name: str, match: bool=False, preauthorization=True) -> bool:
@@ -62,21 +108,38 @@ class Authenticate(_Authenticate):
         col1, _, col2 = st.columns([2, .1, 2])
         
         register_user_form.subheader(form_name)
+        self._apply_css_style()
         
         access_key_hash = hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest()
         if register_user_form.form_submit_button('`Here` • `Now`'):
-            # now = datetime.now()
-            # st.write(now) 
             if match:
                 if self.__register_credentials(access_key_hash, preauthorization):
                     self.credentials['access_key'] = access_key_hash
-
                 return True
             else:
-                st.error("now") 
-                
-                raise RegisterError('We forget the `where`, there...?')
+                st.success("now") 
+                raise RegisterError('`where` will the key open, there...?')
 
+    def _apply_css_style(self):
+        # with st.container(border=False):
+        st.write('<span class="custom-button"/>', unsafe_allow_html=True)
+
+        st.write("""
+        <style>
+            div[data-testid="stForm"]
+                button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            height: 5em;
+            border-radius: 4px;
+            }
+        </style>
+        """, unsafe_allow_html=True)
 
     def __register_credentials(self, access_key: str, preauthorization: bool):
         """
@@ -130,6 +193,7 @@ authenticator = Authenticate(
     config['cookie']['name'],
     config['cookie']['key'],
     config['cookie']['expiry_days'],
+    config['cookie']['expiry_minutes'],
     config['preauthorized']
 )
 
@@ -177,65 +241,139 @@ def commit_to_state(data_type, value):
 
 # Main Streamlit app
 def main():
-    st.title("Match the Number with the Word!")
-    st.write("Match the number with the corresponding word.")
+    st.markdown("# <center>• Welcome •</center>", unsafe_allow_html=True)
+    st.markdown("# <center>The Social Contract from Scratch</center>", unsafe_allow_html=True)
+    st.markdown("## <center>`platform for authors and contributors`</center>", unsafe_allow_html=True)
+    st.markdown("`This platform is a real-pseudo-time system for gathering and understanding how we can best interact and coordinate, in our own way.`")
+    # st.write("This is a simple way to connect the who and the what.")
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-    # Display the correct association
-    st.write("Correct Association:")
-    # for num, word in correct_association.items():
-        # st.write(f"{num}: {word}")
+    # st.write("🔑")
+    # st.write(st.session_state["authentication_status"])
+    # st.write(authenticator.credentials["access_key"])
+    # st.write(authenticator)
+    authenticator.login('🎶 • Do you have an access key?', key='author_access')
 
-    random.shuffle(contributions)
-    random.shuffle(authors)
+    if st.session_state["authentication_status"]:
+        cols = st.columns(4)
+        db = IODatabase(conn, "access_keys")
 
-    # Create buttons for each number-word pair
+        data = db.fetch_data()
+        df = pd.DataFrame(data)
 
-    if st.session_state["selected_author"] is None:
-        icon_row = row(5)
-        for num in authors:
-            if icon_row.button(
-                str(num),
-                key = f"button_{num}",
-                use_container_width=True,
-                on_click = commit_to_state, args = ["number", num]):
-                st.session_state["selected_author"] = num
-                if st.session_state["selected_contribution"] is not None:
-                    check_answer()
-    else:
-        col1.markdown(
-            f"# {st.session_state['selected_author']}",
-            unsafe_allow_html=True,
-        )
+        item_count = len(df)
+        with cols[0]:
+            ui.metric_card(title="Total count", content=item_count, description="Keys forged", key="card1")
+        with cols[1]:
+            ui.metric_card(title="Total funding", content="0.01 €", description="Since the start", key="card2")
+        with cols[2]:
+            ui.metric_card(title="Pending invites", content="10", description="...", key="card3")
+        with cols[3]:
+            st.markdown("### Panel")
+            ui.badges(badge_list=[("experiment", "secondary")], class_name="flex gap-2", key="viz_badges2")
+            ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
+            
+        # st.error('🐉 Some content is new')
+        key = st.session_state["access_key"] if st.session_state["access_key"] else authenticator.credentials["access_key"]
+        no_key = 'unknown'
+        st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
+        st.success('🐉 Wonderful, you made it work!')
+        
+        """_🎊 Booklet download_
+        
+        🧾 Discover more about our panel discussions by downloading the booklet. 
+        """
+        
+        download_pdf()
+        
+        authenticator.logout('Commit my changes / Disconnect', 'main', key='disconnect')
+        # add_vertical_space(13)
+        st.divider()
 
-    if st.session_state["selected_contribution"] is None:
-        icon_row = row(5)
-        for word in contributions:
-            if icon_row.button(
-                word,
-                key = f"button_{word}",
-                use_container_width=True,
-                on_click = commit_to_state, args = ["word", word]):
-                st.session_state["selected_contribution"] = word
-                if st.session_state["selected_author"] is not None:
-                    check_answer()
-    else:
-        col3.markdown(
-            f"# {st.session_state['selected_contribution']}",
-            unsafe_allow_html=True,
-        )
-    
+
+    if st.session_state["authentication_status"] is None:
+        st.markdown("## <center>...otherwise: you create one, only if...</center>", unsafe_allow_html=True)
+        st.title("Match your Name with the Title")
+        if st.button("Clear Memory?", use_container_width=True):
+            clear_session_state()
+            st.info("Forgot names and titles.", icon="🫧")
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+
+        random.shuffle(contributions)
+        random.shuffle(authors)
+
+        # Create buttons for each number-word pair
+
+        if st.session_state["selected_author"] is None:
+            icon_row = row(5)
+            # st.write('<span class="custom-authors">asd</span>', unsafe_allow_html=True)
+            for num in authors:
+                if icon_row.button(
+                    str(num),
+                    key = f"button_{num}",
+                    use_container_width=True,
+                    type='primary',
+                    on_click = commit_to_state, args = ["number", num]):
+                    st.session_state["selected_author"] = num
+                    if st.session_state["selected_contribution"] is not None:
+                        check_answer()
+
+            # st.write("""
+            #     <style>
+            #         div[data-testid="stVerticalBlockBorderWrapper"]:has(
+            #             >div>div>div[data-testid="element-container"] .custom-authors 
+            #         ) button {
+            #             outline: 2px solid red;
+            #             border-radius: 2px; 
+            #         }
+            #     </style>
+            #     """, unsafe_allow_html=True)
+        else:
+            col1.markdown(
+                f"# {st.session_state['selected_author']}",
+                unsafe_allow_html=True,
+            )
+
+        if st.session_state["selected_contribution"] is None:
+            icon_row = row(5)
+            for word in contributions:
+                if icon_row.button(
+                    word,
+                    key = f"button_{word}",
+                    type = "secondary",
+                    use_container_width=True,
+                    on_click = commit_to_state, args = ["word", word]):
+                    st.session_state["selected_contribution"] = word
+                    if st.session_state["selected_author"] is not None:
+                        check_answer()
+        else:
+            col3.markdown(
+                f"# {st.session_state['selected_contribution']}",
+                unsafe_allow_html=True,
+            )
+            
     match = True
-    if st.session_state["selected_author"] is not None and st.session_state["selected_contribution"] is not None:
+    if st.session_state["selected_author"] is not None \
+        and st.session_state["selected_contribution"] is not None \
+        and st.session_state["authentication_status"] is None:
         if st.button("Check Answer"):
-            # match = check_answer()
             st.info(correct_association[st.session_state["selected_contribution"]]["question"])
-        # st.json(st.session_state, expanded=False)
     
         create_connection(key = "authors", kwargs = {"survey": survey, "authenticator": authenticator, "match": check_answer()})
 
         col2.divider()
     
+
+def download_pdf():
+    pdf_file_path = "data/booklet.pso.pdf"
+
+    with open(pdf_file_path, "rb") as f:
+        pdf_bytes = f.read()
+    st.download_button(label="Download PDF", data=pdf_bytes, 
+                       file_name="file.pdf", mime="application/pdf",
+                       use_container_width=True)
+
+# Display the download button
 def clear_session_state():
     st.session_state["selected_author"] = None
     st.session_state["selected_contribution"] = None
@@ -244,8 +382,7 @@ def check_answer():
     selected_author = st.session_state["selected_author"]
     selected_contribution = st.session_state["selected_contribution"]
     correct_author = correct_association[selected_contribution]['author']
-    # st.write(f"selected_author {selected_author}")
-    # st.write(f"correct_author {correct_author}")
+
     if selected_author == correct_author:
         # st.success("Correct!")
         return True
@@ -256,8 +393,28 @@ def check_answer():
 if __name__ == "__main__":
     
     # Add a button to clear session state
-    if st.button("Clear Session State"):
-        clear_session_state()
-        st.info("Session state cleared.")
-    
+
+    # st.markdown("""
+    # <style>
+    # .custom-button {
+    # background-color: #4CAF50;
+    # color: white;
+    # padding: 14px 20px;
+    # margin: 8px 0;
+    # border: none;
+    # cursor: pointer;
+    # width: 100%;
+    # height: 5em;
+    # border-radius: 4px;
+    # }
+    # .custom-button:hover {
+    # opacity: 0.8;
+    # }
+    # </style>
+    # ### <button class="custom-button">`Check • In`</button>
+    # """, unsafe_allow_html=True)
+
     main()
+    # st.write(st.session_state["authentication_status"])
+    # st.write(authenticator.credentials["access_key"])
+    

@@ -13,6 +13,7 @@ import json
 class _Authenticate(Authenticate):
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, cookie_expiry_minutes: int, preauthorized: dict):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
+        self.cookie_expiry_minutes = cookie_expiry_minutes
         self.supabase = supabase
         self.credentials['access_key'] = None
 
@@ -58,7 +59,7 @@ class _Authenticate(Authenticate):
                 st.session_state['access_key'] = self.access_key
                 # self.password = login_form.text_input('Password', type='password')
 
-                if login_form.form_submit_button('Open with key'):
+                if login_form.form_submit_button('Open with key 🔑'):
                     self._check_credentials()
 
         return st.session_state['name'], st.session_state['authentication_status'], st.session_state['access_key']
@@ -215,7 +216,7 @@ class _Authenticate(Authenticate):
         else:
             return None
 
-    def logout(self, button_name: str, location: str='main', key: str=None):
+    def logout(self, button_name: str, location: str='main', key: str=None, use_container_width: bool=False):
         """
         Creates a logout button.
 
@@ -229,7 +230,7 @@ class _Authenticate(Authenticate):
         if location not in ['main', 'sidebar']:
             raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            if st.button(button_name, key):
+            if st.button(button_name, key, use_container_width=use_container_width):
                 self.cookie_manager.delete(self.cookie_name)
                 st.session_state['logout'] = True
                 st.session_state['name'] = None
@@ -296,7 +297,6 @@ class AuthenticateWithKeys(_Authenticate):
             else:
                 raise RegisterError('We forget the `where`, there...?')
 
-    
 class GateAuthenticate(_Authenticate):
 
     def register_user(self, form_name: str, data: list, match: bool=False, preauthorization=True) -> bool:

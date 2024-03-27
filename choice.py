@@ -8,23 +8,24 @@ import time
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
 
-# st.set_page_config(
-#     page_title="Choice choosen",
-#     page_icon="👋",
-#     initial_sidebar_state="collapsed"
-# )
+st.set_page_config(
+    page_title="Choice choosen",
+    page_icon="👋",
+    initial_sidebar_state="collapsed"
+)
 
 
-# st.markdown(
-#     """
-# <style>
-#     [data-testid="collapsedControl"] {
-#         display: none
-#     }
-# </style>
-# """,
-#     unsafe_allow_html=True,
-# )
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
 st.header('Freedom of Choice is choice by Choosing')
 # st.header("This is abstract 👋 Hello?")
 

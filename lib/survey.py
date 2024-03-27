@@ -19,11 +19,12 @@ else:
         url='http://localhost:3001'
     )
 
-def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
+def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, height = 100, invert = False, shift = 0, key=None):
     return _qualitative_selector(component = "dichotomy",
     name = name,
     label = label,
     key=key,
+    height=height,
     question = question,
     rotationAngle = rotationAngle,
     gradientWidth = gradientWidth,
