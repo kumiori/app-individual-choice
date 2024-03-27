@@ -12,7 +12,7 @@ from lib.survey import CustomStreamlitSurvey
 from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IODatabase
 import streamlit_shadcn_ui as ui
 import pandas as pd
-
+import datetime
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -212,7 +212,7 @@ def create_connection(key, kwargs = {}):
             if authenticator.register_user(' Check • Point ', match = match,  preauthorization=False):
                 st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
                     💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
-                    Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to re•open the connection 💫')
+                    Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')
         except Exception as e:
             st.error(e)
             
@@ -258,6 +258,10 @@ def main():
     authenticator.login('🎶 • Do you have an access key?', key='author_access')
 
     if st.session_state["authentication_status"]:
+        st.balloons()
+        now = datetime.datetime.now()
+        st.markdown(f"# _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
+
         cols = st.columns(4)
         db = IODatabase(conn, "access_keys")
 
@@ -295,7 +299,7 @@ def main():
 
 
     if st.session_state["authentication_status"] is None:
-        st.markdown("## <center>...otherwise, let's create one (only if...)</center>", unsafe_allow_html=True)
+        st.markdown("## <center>...otherwise, let's create one</center>", unsafe_allow_html=True)
         st.title("You connect (yourself) to a Title")
         if st.button("To reset choice, clear the memory", use_container_width=True):
             clear_session_state()
@@ -369,6 +373,7 @@ def main():
                 + "¿ 🧐$\Longleftrightarrow$🧾 ? " \
                 # + f" {st.session_state['selected_author'].split()[0]}")
                 + "Before we forge a key please double-check, then click the button below to check-in.")
+            st.markdown("Matching 🧐 with 🧾 is a simple way to allow access to the authors. Then checkpointing `Here•Now` below will forge a `<key>` for your access. If the match 🧐 with 🧾 is correct, the key will open the door. Otherwise, opening will graciously fail.")
     
         create_connection(key = "authors", kwargs = {"survey": survey, "authenticator": authenticator, "match": check_answer()})
 
