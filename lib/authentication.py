@@ -11,11 +11,12 @@ import random
 import json
 
 class _Authenticate(Authenticate):
-    def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, cookie_expiry_minutes: int, preauthorized: dict):
+    def __init__(self, credentials: dict, cookie_name: str, cookie_key: str, cookie_expiry_days: int, cookie_expiry_minutes: int, preauthorized: dict, webapp: str):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.cookie_expiry_minutes = cookie_expiry_minutes
         self.supabase = supabase
         self.credentials['access_key'] = None
+        self.webapp = webapp
 
     if "access_key" not in st.session_state:
         print('access_key not in session state')
