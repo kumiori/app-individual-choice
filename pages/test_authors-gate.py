@@ -60,7 +60,7 @@ st.markdown("`There may be small data discrepancies due to the time it takes to 
 # Define the list of conference contributions and corresponding authors
 contributions = [
     "Le Gai Savoir", "The Aftermath Of Political Violence", "Engagement with the Sea",
-    "tbaGD", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau",
+    "tba", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau",
     "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing"
 ]
 
