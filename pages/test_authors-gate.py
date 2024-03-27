@@ -115,7 +115,7 @@ class Authenticate(_Authenticate):
         access_key_hash = hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest()
         if register_user_form.form_submit_button('`Here` • `Now`'):
             if match:
-                if self.__register_credentials(access_key_hash, preauthorization):
+                if self.__register_credentials(access_key_hash, self.webapp, preauthorization):
                     self.credentials['access_key'] = access_key_hash
                 return True
             else:
@@ -145,7 +145,7 @@ class Authenticate(_Authenticate):
         </style>
         """, unsafe_allow_html=True)
 
-    def __register_credentials(self, access_key: str, preauthorization: bool):
+    def __register_credentials(self, access_key: str, webapp: str, preauthorization: bool):
         """
         Adds to credentials dictionary the new user's information.
 
@@ -176,7 +176,7 @@ class Authenticate(_Authenticate):
             st.write("Access key already exists. Choose a different location or try again later.")
             return False
         
-        data = {'key': access_key}
+        data = {'key': access_key, 'webapp': webapp}
         response = self.supabase.table('access_keys').insert(data).execute()
         # st.write(data, response)
         if response:
@@ -198,8 +198,10 @@ authenticator = Authenticate(
     config['cookie']['key'],
     config['cookie']['expiry_days'],
     config['cookie']['expiry_minutes'],
-    config['preauthorized']
+    config['preauthorized'],
+    webapp = 'discourse-authors'
 )
+
 
 survey = CustomStreamlitSurvey()
 
