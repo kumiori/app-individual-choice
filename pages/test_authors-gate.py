@@ -16,7 +16,7 @@ import pandas as pd
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
-        page_title="Panel in Discourse ¶ Authors Portal",
+        page_title="Panel in Discourse ¶ Authors ¶Portal",
         page_icon="✨",
         layout="centered",
         initial_sidebar_state="collapsed"
@@ -117,8 +117,10 @@ class Authenticate(_Authenticate):
                     self.credentials['access_key'] = access_key_hash
                 return True
             else:
-                st.success("now") 
-                raise RegisterError('`where` will the key open, there...?')
+                st.success(f'Well 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
+                    💨 Here the key <`{ hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest() }`>.        \
+                    Keep it in your pocket, add it to your wallet...keep it safe 💭. It will open only if the match holds 🕯️')
+                raise RegisterError('Speaking of matches, have you watched the movie `The Match Factory Girl`, by Aki Kaurismäki? 🎥')
 
     def _apply_css_style(self):
         # with st.container(border=False):
