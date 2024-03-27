@@ -60,20 +60,22 @@ st.markdown("`There may be small data discrepancies due to the time it takes to 
 # Define the list of conference contributions and corresponding authors
 contributions = [
     "Le Gai Savoir", "The Aftermath Of Political Violence", "Engagement with the Sea",
-    "tba", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau",
-    "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing"
+    "tba", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau", 
+    "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing",
+    "Moon Module"
 ]
 
 authors = [
     "Ariane Ahmadi", "Sophie Wahnich", "Antonia Taddei", "Gabrielle Dyson",
     "Bianca Apollonio", "Giorgio Funaro", "Roger Niyigena Karera", "Graziano Mazza",
-    "Alessandra Carosi", "Claire Glanois", "Andrés León Baldelli"
+    "Alessandra Carosi", "Claire Glanois", "Andrés León Baldelli",
+    "H. Genevois, L. White-Bouckaert"
 ]
 
 questions = [
     "Philo1??", "Revolution au pres?", "Social Contract?",
     "Fermentation?", "Generation?", "Immersive?", "Art?", "Shaman?", "Experimental?",
-    "Liminal?", "Writing?"
+    "Liminal?", "Writing?", "Moon?"
 ]
 
 
@@ -118,7 +120,7 @@ class Authenticate(_Authenticate):
                 return True
             else:
                 st.success(f'Well 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
-                    💨 Here the key <`{ hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest() }`>.        \
+                    This is yours <`{ hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest() }`>.        \
                     Keep it in your pocket, add it to your wallet...keep it safe 💭. It will open only if the match holds 🕯️')
                 raise RegisterError('Speaking of matches, have you watched the movie `The Match Factory Girl`, by Aki Kaurismäki? 🎥')
 
@@ -268,7 +270,7 @@ def main():
         with cols[1]:
             ui.metric_card(title="Total funding", content="0.01 €", description="Since the start", key="card2")
         with cols[2]:
-            ui.metric_card(title="Pending invites", content="10", description="...", key="card3")
+            ui.metric_card(title="Pending invites", content="10", description="This is an art", key="card3")
         with cols[3]:
             st.markdown("### Panel")
             ui.badges(badge_list=[("experiment", "secondary")], class_name="flex gap-2", key="viz_badges2")
@@ -278,11 +280,11 @@ def main():
         key = st.session_state["access_key"] if st.session_state["access_key"] else authenticator.credentials["access_key"]
         no_key = 'unknown'
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
-        st.success('🐉 Wonderful, you made it work!')
+        st.success('🐉 Wonderful, we made it work!')
         
         """_🎊 Booklet download_
         
-        🧾 Discover more about our panel discussions by downloading the booklet. 
+        🧾 Discover more about our panel discussions, download the latest the booklet. 
         """
         
         download_pdf()
@@ -293,9 +295,9 @@ def main():
 
 
     if st.session_state["authentication_status"] is None:
-        st.markdown("## <center>...otherwise: you create one, only if...</center>", unsafe_allow_html=True)
-        st.title("Match your Name with the Title")
-        if st.button("Clear Memory?", use_container_width=True):
+        st.markdown("## <center>...otherwise, let's create one (only if...)</center>", unsafe_allow_html=True)
+        st.title("You connect (yourself) to a Title")
+        if st.button("To reset choice, clear the memory", use_container_width=True):
             clear_session_state()
             st.info("Forgot names and titles.", icon="🫧")
 
@@ -332,7 +334,7 @@ def main():
             #     """, unsafe_allow_html=True)
         else:
             col1.markdown(
-                f"# {st.session_state['selected_author']}",
+                f"# 🧐 {st.session_state['selected_author']}",
                 unsafe_allow_html=True,
             )
 
@@ -350,7 +352,7 @@ def main():
                         check_answer()
         else:
             col3.markdown(
-                f"# {st.session_state['selected_contribution']}",
+                f"# 🧾 {st.session_state['selected_contribution']}",
                 unsafe_allow_html=True,
             )
             
@@ -358,12 +360,18 @@ def main():
     if st.session_state["selected_author"] is not None \
         and st.session_state["selected_contribution"] is not None \
         and st.session_state["authentication_status"] is None:
-        if st.button("Check Answer"):
-            st.info(correct_association[st.session_state["selected_contribution"]]["question"])
+        col2.divider()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        if col2.button("Review and Connect", use_container_width=True):
+            st.info(
+                ""
+                # correct_association[st.session_state["selected_contribution"]]["question"] \
+                + "¿ 🧐$\Longleftrightarrow$🧾 ? " \
+                # + f" {st.session_state['selected_author'].split()[0]}")
+                + "Before we forge a key please double-check, then click the button below to check-in.")
     
         create_connection(key = "authors", kwargs = {"survey": survey, "authenticator": authenticator, "match": check_answer()})
 
-        col2.divider()
     
 
 def download_pdf():
@@ -371,8 +379,10 @@ def download_pdf():
 
     with open(pdf_file_path, "rb") as f:
         pdf_bytes = f.read()
-    st.download_button(label="Download PDF", data=pdf_bytes, 
-                       file_name="file.pdf", mime="application/pdf",
+        
+        
+    st.download_button(label="Panel Booklet • from Scratch (PDF)", data=pdf_bytes, 
+                       file_name=f"athens_panel_contract_from_scratch-{st.session_state['selected_author']}.pdf", mime="application/pdf",
                        use_container_width=True)
 
 # Display the download button
