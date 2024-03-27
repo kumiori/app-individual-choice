@@ -1,20 +1,36 @@
 # Import gettext module
 import gettext
+import os
 
 # Set the local directory
 appname = 'i18n'
-localedir = '../locales'
+localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'locales')
 
+print(localedir)
 # Set up Gettext
-en_i18n = gettext.translation(appname, localedir, fallback=True, languages=['en'])
+lang_en = gettext.translation(appname, localedir, 
+                              fallback=True, languages=['es'])
 
 # Create the "magic" function
-en_i18n.install()
+lang_en.install()
+
+print(lang_en)
+# 
 
 # Translate message
 print(_("Hello World"))
+# print(_("Learn i18n"))
+print("Message Catalog:")
+print(lang_en._catalog)
+print("\nCharacter Set:")
+print(lang_en.charset)
+print("\nFallback Enabled:")
+print(lang_en._fallback)
+print("\nTranslator Info:")
+print(lang_en.info())
 
-#  2815  xgettext -d base -o ../locales/i18n.pot test_i18n.py\n
-#  2817  code ../locales/en/LC_MESSAGES/i18n.po
-#  2821  msgfmt -o ../locales/en/LC_MESSAGES/i18n.mo ../locales/en/LC_MESSAGES/i18n.po
-#  2822  python3 test_i18n.py
+# pybabel init -l fr -i locales/i18n.pot -d locales -D i18n
+# pybabel init -l <...> -i locales/i18n.pot -d locales -D i18n
+# pybabel init -l <...> -i locales/i18n.pot -d locales -D i18n
+# pybabel compile -d locales -D i18n
+# python3 tests/test_i18n.py
