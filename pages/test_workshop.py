@@ -137,7 +137,7 @@ def main():
     # st.markdown()
     now = datetime.datetime.now()
     st.markdown("# <center>Que dire sur la stabilité des grandes structures de glace ?</center>", unsafe_allow_html=True)
-    st.markdown('#### `Que nous dit la rupture des grandes structures de glace sur les dynamiques et les échanges énérgetiques planetaires ? Sur ce sujet nous organisons :`', unsafe_allow_html=True)
+    st.markdown('#### `Que nous dit la rupture des grandes structures de glace sur les dynamiques et les échanges énérgetiques ? Sur ce sujet nous organisons :`', unsafe_allow_html=True)
     # st.markdown("### <center>nous organisons : </center>", unsafe_allow_html=True)
     st.markdown("# <center>Atelier, Cryosphère et Stabilité</center>", unsafe_allow_html=True)
     st.markdown("### <center>Grenoble, 2024</center>", unsafe_allow_html=True)
