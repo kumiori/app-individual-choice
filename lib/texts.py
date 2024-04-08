@@ -65,7 +65,7 @@ def _stream_once(text, damage):
     # st.write(sleep_lengths.values() * (1+damage))
 
     # Check if the text has already been read
-    if text_hash not in st.session_state.read_texts:
+    if text_hash not in st.session_state["read_texts"]:
         # st.write(text)
     
         for i, word in enumerate(text.split()):
@@ -83,7 +83,7 @@ def _stream_once(text, damage):
             else:
                 time.sleep(0.3)
             
-        st.session_state.read_texts.add(text_hash)  # Marking text as read
+        st.session_state["read_texts"].add(text_hash)  # Marking text as read
 
 def create_streamed_columns(panel):
     num_panels = len(panel)

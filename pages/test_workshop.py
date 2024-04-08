@@ -333,7 +333,9 @@ The cryosphere, comprising ice sheets, glaciers, sea ice, and permafrost, plays 
         uploaded_file = st.file_uploader("Contribute a BibTeX file", type=['bib'])
 
     with tab6:
-        display_dictionary(naq())
+        # display_dictionary(naq())
+        st.write('`Never asked?`')
+        pass
 
 # list of ppl
 # letter invitation pdf avec motivation
