@@ -3,3 +3,4 @@ virtual/*
 */frontend/node_modules/
 pages/credentials.yml
 .DS_Store
+**__pycache__

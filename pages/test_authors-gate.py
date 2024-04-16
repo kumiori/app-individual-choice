@@ -382,7 +382,7 @@ def main():
     
 
 def download_pdf():
-    pdf_file_path = "data/booklet.pso.pdf"
+    pdf_file_path = "data/SocialContractFromScratch-Panel.pso.pdf"
 
     with open(pdf_file_path, "rb") as f:
         pdf_bytes = f.read()
