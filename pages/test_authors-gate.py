@@ -60,22 +60,22 @@ st.markdown("`There may be small data discrepancies due to the time it takes to 
 # Define the list of conference contributions and corresponding authors
 contributions = [
     "Le Gai Savoir", "The Aftermath Of Political Violence", "Engagement with the Sea",
-    "tba", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau", 
+    "Retribution and Reform", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau", 
     "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing",
-    "Moon Module"
+    "Moon Module", "Navigating Social Interactions"
 ]
 
 authors = [
     "Ariane Ahmadi", "Sophie Wahnich", "Antonia Taddei", "Gabrielle Dyson",
     "Bianca Apollonio", "Giorgio Funaro", "Roger Niyigena Karera", "Graziano Mazza",
     "Alessandra Carosi", "Claire Glanois", "Andrés León Baldelli",
-    "H. Genevois, L. White-Bouckaert"
+    "H. Genevois, L. White-Bouckaert", "FLCALB"
 ]
 
 questions = [
-    "Philo1??", "Revolution au pres?", "Social Contract?",
-    "Fermentation?", "Generation?", "Immersive?", "Art?", "Shaman?", "Experimental?",
-    "Liminal?", "Writing?", "Moon?"
+    "Philosophy Street?", "Revolution au présent?", "Contract with the Elements?",
+    "Damage Claim?", "Generation?", "Immersive?", "Art and Society?", "Shamans speak?", "Experimental?",
+    "Sub•Super-Liminal?", "Writing where?", "Moon Performance?", "Games Understood?"
 ]
 
 
