@@ -75,7 +75,7 @@ def _stream_example(text):
         time.sleep(0.1)
         
 if "text_streamed" not in st.session_state:
-    st.session_state.text_streamed = False
+    st.session_state["text_streamed"] = False
 
 # Celestial Portal
 def question_portal():
@@ -155,13 +155,13 @@ def question_portal():
 
                 # if st.button("Stream data"):
                 # streamwrite(_stream_example(text1))
-                if not st.session_state.text_streamed:
+                if not st.session_state["text_streamed"]:
                     # Triggered by a button press or any other event
                     # if st.button("Stream data"):
                     streamwrite(_stream_example(text1))
 
                     # Mark that the text has been streamed in the current session
-                    st.session_state.text_streamed = True
+                    st.session_state["text_streamed"] = True
                 else:
                     st.write(text1)
                     
