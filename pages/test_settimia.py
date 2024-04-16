@@ -48,8 +48,8 @@ from yaml.loader import SafeLoader
 
 
 # Initialize read_texts set in session state if not present
-if 'read_texts' not in st.session_state:
-    st.session_state.read_texts = set()
+# if 'read_texts' not in st.session_state:
+#     st.session_state["read_texts"] = set()
 
 def check_existence(conn, signature):
     if signature == "":
@@ -119,7 +119,8 @@ authenticator = GateAuthenticate(
     config['cookie']['key'],
     config['cookie']['expiry_days'],
     config['cookie']['expiry_minutes'],
-    config['preauthorized']
+    config['preauthorized'],
+    webapp='settimia'
 )
 
 
@@ -172,10 +173,10 @@ def main():
         streamwrite(_stream_once("## ...", damage=0.), unsafe_allow_html=True)
 
     if 'location' not in st.session_state:
-        st.session_state.location = None  # Initial damage parameter
+        st.session_state["location"] = None  # Initial damage parameter
     
     if 'coordinates' not in st.session_state:
-        st.session_state.location = None  # Initial damage parameter
+        st.session_state["coordinates"] = None  # Initial damage parameter
 
     col1, col2, col3 = st.columns(3)
 
