@@ -276,7 +276,7 @@ def main():
         with cols[1]:
             ui.metric_card(title="Total funding", content="0.01 €", description="Since the start", key="card2")
         with cols[2]:
-            ui.metric_card(title="Pending invites", content="10", description="This is an art", key="card3")
+            ui.metric_card(title="Pending invites", content="13", description="This is an art", key="card3")
         with cols[3]:
             st.markdown("### Panel")
             ui.badges(badge_list=[("experiment", "secondary")], class_name="flex gap-2", key="viz_badges2")
@@ -290,7 +290,7 @@ def main():
         
         """_🎊 Booklet download_
         
-        🧾 Discover more about our panel discussions, download the latest the booklet. 
+        🧾 Discover more about our panel discussions, download the latest booklet. 
         """
         
         download_pdf()
