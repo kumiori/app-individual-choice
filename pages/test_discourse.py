@@ -172,7 +172,8 @@ authenticator = Authenticate(
     config['cookie']['key'],
     config['cookie']['expiry_days'],
     0,
-    config['preauthorized']
+    config['preauthorized'],
+    webapp = 'discourse'
 )
             
 survey = CustomStreamlitSurvey()
@@ -185,6 +186,9 @@ if "current_booklet_page" not in st.session_state:
 
 if "total_discourse_page" not in st.session_state:
     st.session_state["total_discourse_page"] = 1
+
+if "range" not in st.session_state:
+    st.session_state["range"] = 0
 
 if 'no_clicked' not in st.session_state:
     st.session_state["no_clicked"] = False
@@ -488,11 +492,6 @@ sandbox = """
 
 """
 
-if 'range' not in st.session_state:
-    st.session_state.range = 0  # Set the initial value
-
-
-
 def update_range(page_number):
     # Initialize session state
 
@@ -640,16 +639,16 @@ def main():
     col1, col2, col3 = st.columns(3)
 
     if 'page_number' not in st.session_state:
-        st.session_state.page_number = 0
+        st.session_state["page_number"] = 0
    
     if 'played_intro' not in st.session_state:
-        st.session_state.played_intro = False
+        st.session_state["played_intro"] = False
     
     if 'current_discourse_page' not in st.session_state:
-        st.session_state.current_discourse_page = 0
+        st.session_state["current_discourse_page"] = 0
     
     if 'damage_parameter' not in st.session_state:
-        st.session_state.damage_parameter = 0.0  # Initial damage parameter
+        st.session_state["damage_parameter"] = 0.0  # Initial damage parameter
     
     if 'location' not in st.session_state:
         st.session_state['location'] = None  # Initial damage parameter
@@ -679,7 +678,7 @@ def main():
 
         start_time = time.time()
 
-        if not st.session_state.played_intro:
+        if not st.session_state["played_intro"]:
             while True:
                 time.sleep(update_frequency / 1000.0)  # Convert to seconds
                 matrix = generate_random_matrix(matrix_size)
