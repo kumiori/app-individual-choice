@@ -15,8 +15,53 @@ import pandas as pd
 import datetime
 from streamlit_extras.mandatory_date_range import date_range_picker 
 import re
+import json
 
 import streamlit_survey as ss
+
+
+def check_existence(conn, key, table="access_keys", index = 'key'):
+    if key == "":
+        st.error("Please provide a key.")
+        return
+
+    # Check if the key already exists
+    user_exists, count = conn.table(table) \
+        .select("*") \
+        .ilike(index, f'%{key}%') \
+        .execute()
+
+    return len(user_exists[1]) == 1
+
+
+def insert_or_update_data(conn, signature, response_data, data_label:str ='path_001'):
+    try:
+        data = {
+            data_label: json.dumps(response_data)
+        }
+        # st.write(data)
+        # user_exists = check_existence(conn, signature)
+        preferences_exists = check_existence(conn, signature, table="discourse-data", index='signature')
+        
+        if preferences_exists:
+            # signature exists, update the existing record
+            update_query = conn.table("discourse-data").update(data).eq('signature', signature).execute()
+
+            if update_query:
+                st.success("Data updated successfully.")
+            else:
+                st.error("Failed to update data.")
+        else:
+            # signature does not exist, insert a new record
+            data = {
+                'signature': signature,
+                data_label: json.dumps(response_data)
+            }
+            insert_result = conn.table('discourse-data').upsert(data).execute()
+            st.info("Preferences did not exist, yet. Accounted for preferences")
+            
+    except Exception as e:
+        st.error(f"Error inserting or updating data in the database: {str(e)}")
 
 
 def is_valid_phone(phone):
@@ -230,7 +275,7 @@ authenticator = Authenticate(
 
 
 survey = CustomStreamlitSurvey()
-personal_data = ss.StreamlitSurvey(label="personal")
+personal_data = CustomStreamlitSurvey(label="personal")
 
 def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
@@ -328,16 +373,19 @@ def main():
             with st.expander("Personal Details", expanded=False):
                 col1, col2 = st.columns([1, 1])
                 with col1:
-                    name = personal_data.text_input("Name", key="name")
-                    email = personal_data.text_input("Email", key="email")
+                    signature = personal_data.text_input("Signature", id='signature', key="signature", value=key)
+                    name = personal_data.text_input("Name", id="name", key="name")
+                    email = personal_data.text_input("Email", id="email", key="email")
                 with col2:
-                    phone = personal_data.text_input("Phone Number (starting with +)", key="phone")
+                    phone = personal_data.text_input("Phone Number (starting with +)", id="phone", key="phone")
                     default_start = datetime.datetime(2024, 9, 24)
                     default_end = default_start + timedelta(days=5)
-                    # desired_bedrooms = st.number_input("Desired Number of Beds", min_value=1, max_value=2, step=1)
-                    date_range = date_range_picker("Which days to stay in Athena?", default_start=default_start, default_end=default_end)
-                    
-                additional_comments = personal_data.text_area("Any additional comments or preferences?", key="extra")
+                    # date_range = personal_data.mandatory_date_range("Which days to stay in Athena?", id='athena-range-dates', 
+                    #                                              default_start=default_start, default_end=default_end)
+                    date_range = date_range_picker("Which days to stay in Athena?", 
+                                                #    id='athena-range-dates', 
+                                                    default_start=default_start, default_end=default_end)
+                additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
         
             if st.button("Review"):
 
@@ -345,6 +393,7 @@ def main():
                 
                 col1, col2 = st.columns(2)
                 with col2:
+                    st.title(f"{num_nights} nights in Athena")
                     if phone:
                         if is_valid_phone(phone):
                             st.success("✅ Seems a valid phone number")
@@ -359,6 +408,23 @@ def main():
                 st.markdown("### All the personal data")
                 st.json(personal_data.data, expanded=False)
 
+            if st.button("Clear Session"):
+                # Clear session state
+                st.session_state.clear()
+
+            if st.button("Save"):
+                signature_exists = check_existence(conn, key)
+                st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
+                try:
+                    # response_data_json = json.loads(personal_data.data)
+                    response_data_json = personal_data.data
+                    insert_or_update_data(conn, key, response_data_json, data_label='personal_data')
+                except json.JSONDecodeError:
+                    st.error("Invalid JSON format. Please provide a valid JSON string.")
+
+                pass
+
+            st.divider()
             st.write("Next steps")
             st.write("""
             - [ ] Review the information
@@ -379,7 +445,8 @@ def main():
         
         download_pdf()
         
-        authenticator.logout('Save my preferences & Disconnect', 'main', key='disconnect')
+        authenticator.logout('(Save my preferences &) Disconnect', 'main', key='save-disconnect')
+        authenticator.logout('Disconnect', 'main', key='disconnect')
         # add_vertical_space(13)
         st.divider()
 
