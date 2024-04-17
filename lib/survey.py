@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 from streamlit_vertical_slider import vertical_slider 
 import streamlit_survey as ss
 import os 
+from streamlit_extras.mandatory_date_range import date_range_picker 
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.write(os.path.basename(__file__))
@@ -41,10 +42,38 @@ def _qualitative(name, question, label, areas, key=None):
     data_values  = [1, 2, 10],
     question = question)
 
+def _date_range_picker(name,
+                       label,
+                        default_start = None, 
+                        default_end = None,
+                        min_date = None,
+                        max_date = None,
+                        error_message = "",
+                        id=None, key=None):
+        
+    return date_range_picker(
+        name = name,
+        default_start = None,
+        default_end = None,
+        min_date = None,
+        max_date = None,
+        error_message = "",
+        key=key,
+        )
+        
+# (title: str, 
+# default_start: date | None = None, 
+# default_end: date | None = None, 
+# min_date: date | None = None, 
+# max_date: date | None = None, 
+# error_message: str = "Please select start and end date", 
+# key: str | None = None) -> Tuple[date, date]
+
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 Button = ss.SurveyComponent.from_st_input(st.button)
+MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
@@ -60,3 +89,7 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
 
     def button(self, label: str = "", id: str = None, **kwargs) -> str:
         return Button(self, label, id, **kwargs).display()
+    
+    def mandatory_date_range(self, name: str = "", id: str = None, **kwargs) -> str:
+        return MandatoryDateRange(self, name, id, **kwargs).display()
+    
