@@ -269,8 +269,10 @@ def main():
 
         data = db.fetch_data()
         df = pd.DataFrame(data)
-
         item_count = len(df)
+        
+        # st.write(df)
+        
         with cols[0]:
             ui.metric_card(title="Total count", content=item_count, description="Keys forged", key="card1")
         with cols[1]:
