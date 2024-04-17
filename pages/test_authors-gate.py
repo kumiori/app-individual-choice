@@ -363,7 +363,7 @@ def main():
         st.success('🐉 Wonderful, we made it work!')
         
         st.divider()
-        st.title('Step 0: What is all this about?')
+        st.title('Step 0: What is this all about?')
         
         """_🎊 Booklet download_
         
