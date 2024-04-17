@@ -173,7 +173,7 @@ authenticator = Authenticate(
     config['cookie']['expiry_days'],
     0,
     config['preauthorized'],
-    webapp = 'discourse'
+    webapp = 'discourse-*'
 )
             
 survey = CustomStreamlitSurvey()
