@@ -362,6 +362,20 @@ def main():
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         st.success('🐉 Wonderful, we made it work!')
         
+        st.divider()
+        st.title('Step 0: What is all this about?')
+        
+        """_🎊 Booklet download_
+        
+        🧾 Discover more about our panel discussions, download the latest booklet. 
+        """
+        
+        download_pdf()
+
+        st.divider()
+
+
+        st.title('Step 1: Share preferences and some details')
             
         switch_value = ui.switch(default_checked=False, label="I am happy to share some extra details", key="switch1")
         
@@ -387,7 +401,7 @@ def main():
                                                     default_start=default_start, default_end=default_end)
                 additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
         
-            if st.button("Review"):
+            if st.button("Review preferences"):
 
                 num_nights = abs((date_range[0] - date_range[1]).days)
                 
@@ -408,11 +422,11 @@ def main():
                 st.markdown("### All the personal data")
                 st.json(personal_data.data, expanded=False)
 
-            if st.button("Clear Session"):
-                # Clear session state
-                st.session_state.clear()
+            # if st.button("Clear Session"):
+            #     # Clear session state
+            #     st.session_state.clear()
 
-            if st.button("Save"):
+            if st.button("Save preferences"):
                 signature_exists = check_existence(conn, key)
                 st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
                 try:
@@ -427,23 +441,16 @@ def main():
             st.divider()
             st.write("Next steps")
             st.write("""
-            - [ ] Review the information
-            - [ ] Click the button below to save your preferences
-            - [ ] Download the booklet
-            - [ ] Disconnect
-            
-            - [ ] Check existence of signature in access keys
+            - [X] Download the booklet
+            - [X] Save your preferences
+            - [?] Disconnect
+            - [ ] Display information
             - [ ] Update data
+            - [ ] Overview of the mission
             
             """)
 
-        st.divider()
-        """_🎊 Booklet download_
-        
-        🧾 Discover more about our panel discussions, download the latest booklet. 
-        """
-        
-        download_pdf()
+
         
         authenticator.logout('(Save my preferences &) Disconnect', 'main', key='save-disconnect')
         authenticator.logout('Disconnect', 'main', key='disconnect')
