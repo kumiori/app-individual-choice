@@ -13,6 +13,7 @@ from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IOData
 import streamlit_shadcn_ui as ui
 import pandas as pd
 import datetime
+from streamlit_extras.mandatory_date_range import date_range_picker 
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.set_page_config(
@@ -271,7 +272,7 @@ def main():
         df = pd.DataFrame(data)
         item_count = len(df)
         
-        # st.write(df)
+        st.write(df)
         
         with cols[0]:
             ui.metric_card(title="Total count", content=item_count, description="Keys forged", key="card1")
@@ -290,6 +291,32 @@ def main():
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         st.success('🐉 Wonderful, we made it work!')
         
+            
+        switch_value = ui.switch(default_checked=False, label="I am happy to share some extra details", key="switch1")
+        
+        
+        if switch_value:
+            """
+            Some explaination is in order...
+            """
+            with st.expander("Personal Details", expanded=False):
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    name = st.text_input("Name", "")
+                    email = st.text_input("Email", "")
+                with col2:
+                    phone = st.text_input("Phone Number", "")
+                    default_start = datetime(2024, 9, 24)
+                    default_end = default_start + timedelta(days=5)
+                    # desired_bedrooms = st.number_input("Desired Number of Beds", min_value=1, max_value=2, step=1)
+                    date_range = date_range_picker("Select a date range", default_start=default_start, default_end=default_end)
+                    
+                    
+                additional_comments = st.text_area("Any additional comments or preferences?", "")
+        
+        
+        
+        st.divider()
         """_🎊 Booklet download_
         
         🧾 Discover more about our panel discussions, download the latest booklet. 
