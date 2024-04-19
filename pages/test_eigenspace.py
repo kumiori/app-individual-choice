@@ -156,7 +156,7 @@ def main():
     """
     The variational quotient defiend above, often referred to as the Rayleigh ratio, is a fundamental concept that plays a crucial role in the study of stability and instabilities, in the context of the analysis of (nonlinear) complex systems. Named after `Lord Rayleigh`, it is used to estimate the lowest eigenvalue of a functional operator, and it plays a crucial role to assess the uniqueness of evolution paths and the stability of states.
     
-    In the context of stability analysis for constrained (irreversible) systems, particularly in the study of multiscale, nonconvex, nonlinear systems, we exploit the Rayleigh quotient to estimate the stability of (critical) equilibrium points along their manifold paths. For a nonlinear system represented by an energy $E$ (a real scalar associated to of its configurations), the stability of the system is closely related to the sign of minimal eigenvalue of $E''$, roughly speaking, the curvature of the energy.
+    In the context of stability analysis for constrained (irreversible) systems, particularly in the study of multiscale, nonconvex, nonlinear systems, we exploit the Rayleigh quotient to estimate the stability of (critical) equilibrium points along their manifold paths. For a nonlinear system represented by an energy $E$ (a real scalar associated to all of its configurations), the stability of the system is closely related to the sign of minimal eigenvalue of $E''$, roughly speaking, the curvature of the energy landscape.
     
     The Rayleigh quotient provides a quantitative measure that aids in understanding the stability of complex systems, making it an essential concept in theoretical investigations and scientific computations.
     """
