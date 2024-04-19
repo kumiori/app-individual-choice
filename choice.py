@@ -4,12 +4,26 @@ from streamlit_extras.streaming_write import write as streamwrite
 from pages.test_1d import _stream_example, corrupt_string
 from lib.texts import _stream_once
 import time
+from streamlit_gtag import st_gtag
 
 st.set_page_config(
     page_title="Choice choosen",
     page_icon="👋",
     initial_sidebar_state="collapsed"
 )
+
+
+st_gtag(
+    key="gtag_app_main",
+    id="G-MTGGPQLE4C",
+    event_name="app_main_page",
+    params={
+        "event_category": "test_category_a",
+        "event_label": "test_label_a",
+        "value": 97,
+    },
+)
+
 if 'read_texts' not in st.session_state:
     st.session_state["read_texts"] = set()
 
