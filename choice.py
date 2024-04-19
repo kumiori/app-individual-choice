@@ -4,6 +4,10 @@ from streamlit_extras.streaming_write import write as streamwrite
 from pages.test_1d import _stream_example, corrupt_string
 from lib.texts import _stream_once
 import time
+import shutil
+import pathlib
+from bs4 import BeautifulSoup
+import logging
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
@@ -14,6 +18,38 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+def inject_ga():
+    GA_ID = "google_analytics"
+
+
+    GA_JS = """
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MTGGPQLE4C"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-MTGGPQLE4C');
+    </script>
+    """
+
+    # Insert the script in the head tag of the static template inside your virtual
+    index_path = pathlib.Path(st.__file__).parent / "static" / "index.html"
+    logging.info(f'editing {index_path}')
+    soup = BeautifulSoup(index_path.read_text(), features="html.parser")
+    if not soup.find(id=GA_ID): 
+        bck_index = index_path.with_suffix('.bck')
+        if bck_index.exists():
+            shutil.copy(bck_index, index_path)  
+        else:
+            shutil.copy(index_path, bck_index)  
+        html = str(soup)
+        new_html = html.replace('<head>', '<head>\n' + GA_JS)
+        index_path.write_text(new_html)
+
+
+inject_ga()
 
 st.markdown(
     """
