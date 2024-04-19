@@ -214,6 +214,6 @@ if modal.is_open():
         # st.write(st.session_state[f'{modal.key}-src'])
         # if hasattr(modal, 'src'):
         #     st.toast(modal.src)
-        #     st.balloons()
         #     components.iframe(modal.src, height=1500)
         components.iframe(st.session_state[f'{modal.key}-src'], height=1500)
+        st.snow()

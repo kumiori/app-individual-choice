@@ -400,7 +400,9 @@ def main():
                                                 #    id='athena-range-dates', 
                                                     default_start=default_start, default_end=default_end)
                 additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
-        
+            
+            color = st.color_picker('Favourite colour?', '#00f900')
+
             if st.button("Review preferences"):
 
                 num_nights = abs((date_range[0] - date_range[1]).days)
@@ -450,13 +452,31 @@ def main():
             
             """)
 
-
+        st.title('Step 2: A first mission estimate')
+        """ ## The rationale:
+            (contributors + support) * days * perdiem[0] * days
+    
+    Where: contributors = 14, support = 3, perdiem[0]* = 167, days = 5
+    
+    *: cf. Direction générale des Finances publiques, frais de mission.
+        https://www.economie.gouv.fr/dgfip/mission_taux_chancellerie/frais_resultat/GR
+        """
         
+        contributors = 14
+        support = 3
+        perdiem = [167, 167, 167, 152, 152]
+        days = 5
+        ub = (contributors + support ) * days * perdiem[0] * days
+        st.markdown(f"## Estimate: {ub} EUR")
+        st.write("`Remark: this is an upper bound, excluding flights.`")
         authenticator.logout('(Save my preferences &) Disconnect', 'main', key='save-disconnect')
         authenticator.logout('Disconnect', 'main', key='disconnect')
         # add_vertical_space(13)
         st.divider()
-
+        
+    st.title('Step 3: Display information')
+    
+    st.markdown('https://t.me/+upPANq0yNnBmMzhk')
 
     if st.session_state["authentication_status"] is None:
         st.markdown("## <center>...otherwise, let's create one</center>", unsafe_allow_html=True)

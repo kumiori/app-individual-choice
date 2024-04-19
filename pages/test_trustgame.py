@@ -111,7 +111,7 @@ Trusting behavior often depends on factors such as perceived trustworthiness of 
         # User input for matrix size
     N = st.slider("Select number of players (or its root):", value=10, min_value=2, max_value=100, step=3)
         # User input for matrix size
-    M = st.slider("Select number of nonzero in the sparse:", min_value=0, max_value=N, step=1)
+    M = st.slider("Select number of nonzero in the sparse:", min_value=1, max_value=N, step=1)
 
     st.write("Players: ", N+1)
     
@@ -125,7 +125,7 @@ Trusting behavior often depends on factors such as perceived trustworthiness of 
         
         # Plot random matrix
         # plot_random_matrix(random_matrix, placeholder)
-        fig = plot_random_matrix_matplotlib(random_matrix)
+        # fig = plot_random_matrix_matplotlib(random_matrix)
         fig = plot_random_matrix_matplotlib2(random_matrix)
         fig2 = plot_random_matrix_matplotlib2(sparse_matrix)
 
