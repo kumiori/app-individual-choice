@@ -161,12 +161,12 @@ def main():
     The Rayleigh quotient provides a quantitative measure that aids in understanding the stability of complex systems, making it an essential concept in theoretical investigations and scientific computations.
     """
     
-    st.title("The solution strategy")
+    st.title("The solution strategy, to attack")
     """
     We solve the problem above in full generality in the one-dimensional case, leaving the specification of the energy (and hence the constants a, b, c) to the applications. In our view, the latter concern fundamental questions arising from solid mechanics, economy, biology, game theory, and quantum physics. We consider the two cases: the minimisation in the vector space $V$ and in the convex cone $K^+_0$.
     
     
-    ### How we attack:
+    ### How we solve?
     
     1. First, establish existence of the minimum in $V$ and $K^+_0$
         - use the compactness of the embedding $H^1 \\hookrightarrow L^2$, coercivity, and lower semicontinuity
