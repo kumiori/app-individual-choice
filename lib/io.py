@@ -15,6 +15,7 @@ def create_dichotomy(key, kwargs = {}):
     survey = kwargs.get('survey')
     label = kwargs.get('label', 'Confidence')
     name = kwargs.get('name', 'there')
+    title = kwargs.get('title', 'Your choice')
     question = kwargs.get('question', 'Dychotomies, including time...')
     messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
     inverse_choice = kwargs.get('inverse_choice', lambda x: x)
@@ -24,16 +25,17 @@ def create_dichotomy(key, kwargs = {}):
         response = survey.dichotomy(name=name, 
                                 label=label,
                                 question=question,
+                                height = kwargs.get('height', 100),
                                 gradientWidth = kwargs.get('gradientWidth', 30), 
                                 key=key)
     with col3:
         if response:
             st.markdown('\n')            
-            st.markdown(f'## Your choice:', unsafe_allow_html=True)
+            st.markdown(f'## {title}:', unsafe_allow_html=True)
             st.markdown(f'## {inverse_choice(float(response))}')
             st.markdown(f'{float(response)}', unsafe_allow_html=True)
             if float(response) < 0.1:
-                st.success(messages[0])
+                st.warning(messages[0])
             if float(response) > 0.9:
                 st.info(messages[1])
             elif 0.1 < float(response) < 0.9:
