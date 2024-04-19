@@ -224,10 +224,13 @@ def main():
     col1, col2, col3 = st.columns(3)
     
     with col1:
+        st.markdown("# <center>a</center>", unsafe_allow_html=True)
         a = st.slider("a", 0.0, 10.0, 1.0)
     with col2:
+        st.markdown("# <center>b</center>", unsafe_allow_html=True)
         b = st.slider("b", 0.0, 10.0, 1.0)
     with col3:
+        st.markdown("# <center>c</center>", unsafe_allow_html=True)
         c = st.slider("c", -10.0, 10.0, 1.0)
     parameters = {"a": a, "b": b, "c": c}
 
