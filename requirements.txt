@@ -150,6 +150,7 @@ streamlit-card==0.0.61
 streamlit-embedcode==0.1.2
 streamlit-extras==0.3.5
 streamlit-faker==0.0.3
+streamlit-gtag @ git+https://github.com/kumiori/streamlit-gtag.git@7a04ab228f8cb7edac23d1534e7ed8a095a53299
 streamlit-image-coordinates==0.1.6
 streamlit-keyup==0.2.0
 streamlit-modal==0.1.2
