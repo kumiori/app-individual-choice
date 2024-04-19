@@ -10,7 +10,12 @@ from datetime import datetime, timedelta, date
 def main():
     st.markdown("## <center> • Staying at Base • </center> ", unsafe_allow_html=True)
     survey = CustomStreamlitSurvey()
+    col0, col1, col2 = st.columns([.5, 1, .5])
+    video_file = open('data/base_tour.mp4', 'rb')
+    video_bytes = video_file.read()
 
+    col1.video(video_bytes, 'rb')
+    st.toast("Your preferences have been saved!", icon="🚀")
     # Two columns layout
     col1, col2 = st.columns([1, 1])
 
@@ -29,7 +34,7 @@ def main():
 
     switch_value = ui.switch(default_checked=True, label="Happy to share some extra details?", key="switch1")
     
-    
+ 
     if switch_value:
         with st.expander("Personal Details", expanded=False):
             col1, col2 = st.columns([1, 1])
