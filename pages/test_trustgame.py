@@ -186,21 +186,35 @@ And, more importantly, to foresee what are the outcomes.
     # take a lot of people? how many people are there?
     
     st.divider()
-    
+    st.header("Disclaimer:")
+    st.write("""
+             `This game involves real-time decision-making and may involve real-world consequences. 
+             ................................... Please play consciously ....................................
+             This game involves money, and the outcomes are real. Please play responsibly.
+             What money really is, is a question that has been asked for centuries.
+             This time, we ask you to play with it. Using it as a tool, to understand trust,
+             to send encoded signals.
+             `
+    """)
+    st.write('`.|.|..........|.....................................|............*..............|.....||.`')
+    st.write('`A matter of trust, coded fast.`')
+    st.write('`In an infinite-dimensional energy space there are two players: player I and player B...`')
     st.header("Instructions:")
     st.write("In this game, you will act as an investor deciding how much trust to invest in the bank (the Trustee).")
     st.write("Your task is to choose a level of trust, represented by a value between 0 and 1.")
     st.write("You will also have an initial capital to allocate to the bank, for you to gauge.")
+    st.write("The bank has received a challenge: to repay the investor's trust allocating a small part of its financial assets to the investor, to allow the investor play a role facing the shared issues facing climate concerns.")
+    st.write("Will the Trustee accept the challenge and move, or will it betray the investor's trust?")
     st.write("Based on your the investor's perceptions and the bank's response, both players will receive certain payoffs.")
-    st.write("Remember, your level of trust can change over time.")
-    
+    st.write("Remember, your level of trust can change and this is of utmost importance.")
     
     st.header("Gameplay:")
+    st.write("0. Are you happy to pay? Save your preferences.")
     st.write("1. Choose a level of trust (α) between 0 and 1 using the slider.")
-    st.write("2. Allocate an initial capital (C) to the bank.")
-    st.write("3. The bank, or someone on their behalf, will decide whether to 'move' or 'betray'.")
-    st.write("4. Based on the bank's decision(s) and your trust level, things will unfold.")
-    st.write("5. Rember: you can adjust your trust level at any time, increase is free - decrease leaves a trace.")
+    # st.write("2. Allocate an initial capital (C) to the bank.")
+    st.write("2. The bank, or someone on their behalf, will decide whether to 'move' or 'betray'.")
+    st.write("3. Based on the bank's decision(s) and your trust level, things will unfold.")
+    st.write("4. Rember: you can adjust your trust level at any time, increase is free - decrease leaves a trace.")
     
     
     st.divider()
@@ -224,7 +238,7 @@ And, more importantly, to foresee what are the outcomes.
     st.write("Your current trust level: ", trust_level)
     
     st.divider()
-    st.header("Capital Allocation:")
+    st.header("Preferences:")
     capital = st.number_input("Enter, roughly, the capital you host on the Trustee's network:", min_value=1, step=1000)
     capital_oom = int(np.log10(capital))
     st.write("Your order of magnitude: ", capital_oom, 'zeros')
@@ -519,7 +533,7 @@ And, more importantly, to foresee what are the outcomes.
     st.divider()
     st.header("Visualisation:")
     st.markdown("`Red flags denote bets against the investor.`")
-    
+    st.write("If you wish to send us a donation, just bet against us.")
     
     col1, _, col2 = st.columns([1, .3, 1])
     
