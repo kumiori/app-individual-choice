@@ -10,6 +10,8 @@ from streamlit_elements import elements, mui, html
 # elements() takes a key as parameter.
 # This key can't be reused by another frame or Streamlit widget.
 
+st.header("Streamlit Elements")
+st.button("Click me")
 with elements("new_element"):
 
     # Let's create a Typography element with "Hello world" as children.
@@ -54,8 +56,9 @@ with elements("multiple_children"):
 
     with mui.Button:
         mui.icon.EmojiPeople()
-        mui.icon.DoubleArrow()
-        mui.Typography("Button with multiple children")
+        mui.icon.BatteryCharging20()
+        mui.Typography("Button with multiple children", variant = 'h3')
+        mui.Typography("Paragraph", variant = 'body', paragraph = True)
 
 with elements("nested_children"):
 
