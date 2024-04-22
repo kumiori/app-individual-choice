@@ -1,18 +1,4 @@
 import streamlit as st
-import numpy as np
-import time
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-import plotly.express as px
-from matplotlib.patches import Polygon
-from lib.survey import CustomStreamlitSurvey
-from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
-
-from streamlit_extras.stateful_button import button as stateful_button 
-from streamlit_extras.stylable_container import stylable_container
-from streamlit_modal import Modal
-from streamlit import rerun as rerun  # type: ignore
-import streamlit.components.v1 as components
 
 
 if st.secrets["runtime"]["STATUS"] == "Production":
@@ -36,6 +22,23 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     """,
         unsafe_allow_html=True,
     )
+
+
+import numpy as np
+import time
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+import plotly.express as px
+from matplotlib.patches import Polygon
+from lib.survey import CustomStreamlitSurvey
+from lib.io import create_button, create_dichotomy, create_qualitative, create_yesno, create_yesno_row, create_next, create_globe, create_textinput, create_checkbox, create_equaliser, fetch_and_display_data, conn
+
+from streamlit_extras.stateful_button import button as stateful_button 
+from streamlit_extras.stylable_container import stylable_container
+from streamlit_modal import Modal
+from streamlit import rerun as rerun  # type: ignore
+import streamlit.components.v1 as components
+
 
 
 class _Modal(Modal):
