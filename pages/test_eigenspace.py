@@ -5,6 +5,29 @@ import plotly.express as px
 import pages
 
 
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Celestial Verse Portal",
+        page_icon="✨",
+        # layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+        [data-testid="stHeader"] {
+            display: none
+            }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
 st.write(st.secrets["runtime"]["STATUS"])
 
 if 'parameters' not in st.session_state:
@@ -156,17 +179,17 @@ def main():
     """
     The variational quotient defiend above, often referred to as the Rayleigh ratio, is a fundamental concept that plays a crucial role in the study of stability and instabilities, in the context of the analysis of (nonlinear) complex systems. Named after `Lord Rayleigh`, it is used to estimate the lowest eigenvalue of a functional operator, and it plays a crucial role to assess the uniqueness of evolution paths and the stability of states.
     
-    In the context of stability analysis for constrained (irreversible) systems, particularly in the study of multiscale, nonconvex, nonlinear systems, we exploit the Rayleigh quotient to estimate the stability of (critical) equilibrium points along their manifold paths. For a nonlinear system represented by an energy $E$ (a real scalar associated to all of its configurations), the stability of the system is closely related to the sign of minimal eigenvalue of $E''$, roughly speaking, the curvature of the energy landscape.
+    In the context of stability analysis for constrained (irreversible) systems, particularly in the study of multiscale, nonconvex, nonlinear systems, we exploit the Rayleigh quotient to estimate the stability of (critical) equilibrium points along their manifold paths. For a nonlinear system represented by an energy $E$ (a real scalar associated to of its configurations), the stability of the system is closely related to the sign of minimal eigenvalue of $E''$, roughly speaking, the curvature of the energy.
     
     The Rayleigh quotient provides a quantitative measure that aids in understanding the stability of complex systems, making it an essential concept in theoretical investigations and scientific computations.
     """
     
-    st.title("The solution strategy, to attack")
+    st.title("The solution strategy")
     """
     We solve the problem above in full generality in the one-dimensional case, leaving the specification of the energy (and hence the constants a, b, c) to the applications. In our view, the latter concern fundamental questions arising from solid mechanics, economy, biology, game theory, and quantum physics. We consider the two cases: the minimisation in the vector space $V$ and in the convex cone $K^+_0$.
     
     
-    ### How we solve?
+    ### How we attack:
     
     1. First, establish existence of the minimum in $V$ and $K^+_0$
         - use the compactness of the embedding $H^1 \\hookrightarrow L^2$, coercivity, and lower semicontinuity
