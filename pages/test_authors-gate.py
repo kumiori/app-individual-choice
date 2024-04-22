@@ -41,6 +41,51 @@ def check_existence(conn, key, table="access_keys", index = 'key'):
 
     return len(user_exists[1]) == 1
 
+def fetch_and_display_personal_data(conn, kwargs):
+    # Fetch all data from the "questionnaire" table
+    table_name = kwargs.get('database')
+    signature = kwargs.get('key')
+    # st.write(f"Fetching data from the {table_name} table.")
+    response = conn.table(table_name).select("*").eq('signature', signature).execute()
+
+    # Check if there is any data in the response
+    if response and response.data:
+        data = response.data
+        _data = []
+        # Display each row of data
+        # st.json(data, expanded=False)
+        # Display the dataset
+        for item in data:
+            # st.write(f"ID: {item['id']}")
+            updated_at = datetime.datetime.fromisoformat(item['updated_at'][:-6])
+            st.write(f"Preferences updated at: {updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            # st.write(f"Updated At: {item['updated_at']}")
+            st.write(f"Signature: {item['signature']}")
+
+            # Parse and display personal data
+            personal_data = json.loads(item['personal_data'])
+            st.write("Personal Data:")
+            for key, value in personal_data.items():
+                if key == "athena-range-dates":
+                    continue  # Skip displaying this key-value pair
+                if isinstance(value, dict):
+                    st.write(f"- {key}: {value['value']}")
+                else:
+                    st.write(f"- {key}: {value}")
+
+            # Convert and display datetime objects
+            if 'athena-range-dates' in personal_data:
+                st.write("Athena stay - range dates:")
+                for date_obj in personal_data['athena-range-dates']:
+                    date = datetime.datetime(date_obj['year'], date_obj['month'], date_obj['day'])
+                    st.write(date.strftime("%Y-%m-%d"))
+
+            # st.write("Path 001:", item['path_001'])
+            st.write("Created At:", item['created_at'])
+    else:
+        st.write(f"No data found in the {table_name} table.")
+    return _data
+
 
 def insert_or_update_data(conn, signature, response_data, data_label:str ='path_001'):
     from lib.survey import date_decoder
@@ -388,6 +433,10 @@ def main():
         no_key = 'unknown'
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         st.success('🐉 Wonderful, we made it work!')
+        st.markdown("### _Known issues:_")
+        st.info(""" 
+                1. The date picker is often picky. If it shows an error message (`TypeError: list indices must be integers or slices, not str`), try reloading the page.
+                """)
         
         st.divider()
         st.title('Step 0: What is this all about?')
@@ -477,7 +526,8 @@ def main():
                 # If none of the above conditions are met, assign the value of signature
                 else:
                     _key = signature
-                    
+                
+                st.session_state["access_key"] = _key
                 signature_exists = check_existence(conn, _key)
                 
                 st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
@@ -489,6 +539,16 @@ def main():
                     st.error("Invalid JSON format. Please provide a valid JSON string.")
 
                 pass
+            
+            
+            with st.expander("Show personal data", expanded=False):
+                
+                signature = st.text_input("Signature", key="fetch-signature", value=st.session_state["access_key"])
+                if st.button("Fetch preferences"):
+                    fetch_and_display_personal_data(conn,
+                                                    kwargs = {"key" : signature, 
+                                                              "database": "discourse-data", 
+                                                              "index": 'signature'})
 
             st.divider()
             st.write("Next steps")
