@@ -4,16 +4,16 @@ from streamlit_extras.streaming_write import write as streamwrite
 from pages.test_1d import _stream_example, corrupt_string
 from lib.texts import _stream_once
 import time
+import pages
+
+# st.set_page_config(
+#     page_title="Choice choosen",
+#     page_icon="👋",
+#     initial_sidebar_state="collapsed"
+# )
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
-
-st.set_page_config(
-    page_title="Choice choosen",
-    page_icon="👋",
-    initial_sidebar_state="collapsed"
-)
-
 
 st.markdown(
     """

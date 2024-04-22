@@ -46,14 +46,14 @@ def main():
     # st.write('You picked', return_value)
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "perspective",
-                            rotationAngle=60,
-                            gradientWidth=10)
+                            rotationAngle=10,
+                            gradientWidth=30)
 
     st.write('You picked', return_value)
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "invert",
+                            rotationAngle=10,
                             gradientWidth=50,
-                            rotationAngle=30,
                             invert=True,
                             #  invert=False,
                             )
@@ -62,7 +62,7 @@ def main():
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "nuances",
                             gradientWidth=100,
-                            shift = 100)
+                            shift = 0)
     st.write('You picked', return_value)
 
 
