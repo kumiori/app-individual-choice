@@ -35,7 +35,7 @@ def create_dichotomy(key, kwargs = {}):
             st.markdown(f'## {inverse_choice(float(response))}')
             st.markdown(f'{float(response)}', unsafe_allow_html=True)
             if float(response) < 0.1:
-                st.warning(messages[0])
+                st.success(messages[0])
             if float(response) > 0.9:
                 st.info(messages[1])
             elif 0.1 < float(response) < 0.9:
@@ -213,6 +213,11 @@ def create_textinput(key, kwargs = {}):
 def create_checkbox(key, kwargs = {'label': 'Choose'}):
     survey = kwargs.get('survey')
     return survey.checkbox(kwargs.get('label', ''), key=key)
+
+def create_date_range(key, kwargs = {'label': 'Choose'}):
+    survey = kwargs.get('survey')
+    # return survey.checkbox(kwargs.get('label', ''), key=key)
+    return
 
 def create_equaliser(key, kwargs={}):
     survey = kwargs.get('survey')
