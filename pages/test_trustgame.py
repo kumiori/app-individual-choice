@@ -15,6 +15,29 @@ from streamlit import rerun as rerun  # type: ignore
 import streamlit.components.v1 as components
 
 
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Trust Game aka Fuck HSBC",
+        page_icon="✨",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+        [data-testid="stHeader"] {
+            display: none
+            }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
 class _Modal(Modal):
     def open(self, **kwargs):
         print(kwargs)
