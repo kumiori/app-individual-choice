@@ -6,7 +6,6 @@ import string
 import hashlib
 
 # Initialize read_texts set in session state if not present
-st.write(st.session_state)
 
 if 'read_texts' not in st.session_state:
     st.session_state['read_texts'] = set()

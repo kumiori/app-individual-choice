@@ -16,9 +16,17 @@ import datetime
 from streamlit_extras.mandatory_date_range import date_range_picker 
 import re
 import json
+import webcolors
 
 import streamlit_survey as ss
 
+
+def get_color_name(hex_color):
+    try:
+        color_name = webcolors.hex_to_name(hex_color)
+        return color_name
+    except ValueError:
+        return None
 
 def check_existence(conn, key, table="access_keys", index = 'key'):
     if key == "":
@@ -35,13 +43,32 @@ def check_existence(conn, key, table="access_keys", index = 'key'):
 
 
 def insert_or_update_data(conn, signature, response_data, data_label:str ='path_001'):
+    from lib.survey import date_decoder
+    # Iterate over the key-value pairs in response_data
+    serialised_dates = [date_decoder(date_obj) for date_obj in response_data['athena-range-dates']['value']]
+    # print(serialised_dates)
+    response_data['athena-range-dates'] = serialised_dates
+    # print(response_data)
+    # st.write(response_data['athena-range-dates'])
+    
+    json.dumps(response_data, indent=2)
+    
     try:
+        st.json(response_data, expanded=False)
+        # __import__('pdb').set_trace()
+        # st.write((response_data))
         data = {
             data_label: json.dumps(response_data)
         }
-        # st.write(data)
+        
+        if not signature:
+            st.error("Please provide a signature.")
+            return
+        
         # user_exists = check_existence(conn, signature)
+        st.write(f"Checking existence of {signature}")
         preferences_exists = check_existence(conn, signature, table="discourse-data", index='signature')
+        st.info(f"Preferences exist: {preferences_exists}")
         
         if preferences_exists:
             # signature exists, update the existing record
@@ -57,8 +84,11 @@ def insert_or_update_data(conn, signature, response_data, data_label:str ='path_
                 'signature': signature,
                 data_label: json.dumps(response_data)
             }
+            st.json(data, expanded=False)
+            
             insert_result = conn.table('discourse-data').upsert(data).execute()
-            st.info("Preferences did not exist, yet. Accounted for preferences")
+            st.info("Preferences did not exist yet. Accounted for preferences")
+            st.write(insert_result)
             
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
@@ -78,9 +108,6 @@ def is_valid_phone(phone):
     for regex in phone_regexes:
         if re.match(regex, phone):
             return True
-            
-    # if re.match(phone_regex, phone):
-    #     return True
 
     return False
 
@@ -394,20 +421,29 @@ def main():
                     phone = personal_data.text_input("Phone Number (starting with +)", id="phone", key="phone")
                     default_start = datetime.datetime(2024, 9, 24)
                     default_end = default_start + timedelta(days=5)
-                    # date_range = personal_data.mandatory_date_range("Which days to stay in Athena?", id='athena-range-dates', 
-                    #                                              default_start=default_start, default_end=default_end)
-                    date_range = date_range_picker("Which days to stay in Athena?", 
-                                                #    id='athena-range-dates', 
-                                                    default_start=default_start, default_end=default_end)
+                    date_range = personal_data.mandatory_date_range(name = "Which days to stay in Athena?",
+                                                                 label = "athena-dates", 
+                                                                 id='athena-range-dates', 
+                                                                 default_start=default_start, 
+                                                                 default_end=default_end
+                                                                 )
+                    # date_range = date_range_picker("Which days to stay in Athena?", 
+                    #                             #    id='athena-range-dates', 
+                    #                                 default_start=default_start, default_end=default_end)
+                    color = st.color_picker('Favourite colour?', '#00f900')
+                    
                 additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
             
-            color = st.color_picker('Favourite colour?', '#00f900')
 
             if st.button("Review preferences"):
 
                 num_nights = abs((date_range[0] - date_range[1]).days)
                 
                 col1, col2 = st.columns(2)
+                # if email is empty show a toast asking to input a valid email
+                if not email:
+                    st.toast("Please provide a valid email address", icon="⚠️")
+                    
                 with col2:
                     st.title(f"{num_nights} nights in Athena")
                     if phone:
@@ -415,26 +451,40 @@ def main():
                             st.success("✅ Seems a valid phone number")
                         else:
                             st.error("❌ We failed to check, seems an invalid phone number?")
+                    color_name = get_color_name(color)
+                    if color_name:
+                        st.write(f"This is a {color_name} color!")
+                    else:
+                        st.write("Could not determine the color name. This look like your favourite colour!")
+                    square_html = f'<div style="width: 330px; height: 10px; background-color: {color};"></div>'
+                    st.markdown(square_html, unsafe_allow_html=True)                        
 
                 # Displaying review information in two columns
                 with col1:
                     st.subheader("Personal Information:")
                     st.write(f"- Name: {name}\n- Email: {email}\n- Phone Number: {phone if phone else 'not provided'}")
-
+                        
                 st.markdown("### All the personal data")
                 st.json(personal_data.data, expanded=False)
 
-            # if st.button("Clear Session"):
-            #     # Clear session state
-            #     st.session_state.clear()
-
             if st.button("Save preferences"):
-                signature_exists = check_existence(conn, key)
+                # Check if key is non-empty, otherwise check the next condition
+                if key:
+                    _key = key
+                # Check if authenticator.credentials["access_key"] is non-empty, otherwise check the next condition
+                elif authenticator.credentials["access_key"]:
+                    _key = authenticator.credentials["access_key"]
+                # If none of the above conditions are met, assign the value of signature
+                else:
+                    _key = signature
+                    
+                signature_exists = check_existence(conn, _key)
+                
                 st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
                 try:
                     # response_data_json = json.loads(personal_data.data)
                     response_data_json = personal_data.data
-                    insert_or_update_data(conn, key, response_data_json, data_label='personal_data')
+                    insert_or_update_data(conn, _key, response_data_json, data_label='personal_data')
                 except json.JSONDecodeError:
                     st.error("Invalid JSON format. Please provide a valid JSON string.")
 
