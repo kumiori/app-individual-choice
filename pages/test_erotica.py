@@ -21,7 +21,7 @@ from streamlit_elements import elements
 import streamlit_shadcn_ui as ui
 
 from streamlit_image_select import image_select
-
+import hashlib
 
 import pandas as pd
 from PIL import Image
@@ -229,6 +229,100 @@ def energy_mix():
     create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
     
     
+
+def showcase():
+    st.markdown("## Showcase")
+    url_base = "https://individual-choice.streamlit.app/images/cards/"
+    def SwipeableTextMobileStepper():
+        # Define the images and other necessary variables
+        images = [
+            {
+                "label": "Bird",
+                "imgPath": "https://ibb.co/nRZHhgd",
+            },
+            {
+                "label": "Bali, Indonesia",
+                "imgPath": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&h=250",
+            },
+            {
+                "label": "Goč, Serbia",
+                "imgPath": "https://images.unsplash.com/photo-1512341689857-198e7e2f3ca8?auto=format&fit=crop&w=400&h=250&q=60",
+            },
+        ]
+        session_state = st.session_state
+
+        # Initialize activeStep variable in session state
+        if 'activeStep' not in session_state:
+            session_state.activeStep = 0
+
+        maxSteps = len(images)
+
+        # Initialize session state
+        if "direction" not in st.session_state:
+            st.session_state.direction = "ltr"  # Default direction is left-to-right
+
+        # Define the function to handle next step
+        def handleNext():
+            session_state.activeStep = (session_state.activeStep + 1) % maxSteps
+
+        # Define the function to handle previous step
+        def handleBack():
+            session_state.activeStep = (session_state.activeStep - 1) % maxSteps
+
+        # Display the component
+        with elements("stepper"):
+            mui.Paper(
+                square=True,
+                elevation=0,
+                sx={
+                    "display": "flex",
+                    "alignItems": "center",
+                    "height": 50,
+                    "pl": 2,
+                    "bgcolor": "background.default",
+                },
+            )(images[session_state.activeStep]["label"])
+
+            mui.Box(sx={"maxWidth": 400, "flexGrow": 1})(
+                mui.Box(
+                    component="img",
+                    sx={
+                        # "height": 255,
+                        "display": "block",
+                        "minWidth": 700,
+                        "overflow": "hidden",
+                        "width": "100%",
+                    },
+                    src=images[session_state.activeStep]["imgPath"],
+                    alt=images[session_state.activeStep]["label"],
+                ),
+            )
+
+            mui.MobileStepper(
+                variant="progress",
+                steps=maxSteps,
+                position="static",
+                activeStep=session_state.activeStep,
+                nextButton=mui.Button(
+                    size="small",
+                    onClick=handleNext,
+                    disabled=session_state.activeStep == maxSteps - 1,
+                )(
+                    "Next",
+                    mui.icon.KeyboardArrowLeft() if st.session_state.direction == "rtl" else mui.icon.KeyboardArrowRight(),
+                ),
+                backButton=mui.Button(
+                    size="small", onClick=handleBack, disabled=session_state.activeStep == 0
+                )(
+                    mui.icon.KeyboardArrowRight() if st.session_state.direction == "rtl" else mui.icon.KeyboardArrowLeft(),
+                    "Back",
+                ),
+            )
+
+    # Display the SwipeableTextMobileStepper component
+    SwipeableTextMobileStepper()
+
+
 def intro_eros():
     st.write("Eros as an Energy.")
     
@@ -354,23 +448,46 @@ We set silence aside, to honor a speech without words, the rustle of spirits awa
 """)
     
 def main():
-    st.markdown("# <center>• Welcome •</center>", unsafe_allow_html=True)
+    st.markdown(" <center>`• Welcome •`</center>", unsafe_allow_html=True)
     st.title("Eros speaks: images in expression")
     st.write("## Eros as an Energy.")
+    
+    """`Hello..
+    is this Eros reading?`
+    
+Eros is energy that permeates,
 
+Eros is energy that Springs,
 
+`Who embodies Eros and the erotic light?`
 
+Eros is expression and identity,
 
+We are exploring the concept of Eros 
+and its embodiment in various forms.
+
+How would you like to be called?
+
+    """
+
+    
+    name = personal_data.text_input("Eros speaks through", "Your name")
+    if name: _name = name+','
+    else: _name = ''
+    st.write(f"We wish to dig deeper, {_name} would you like to play?")
+    # survey.       
+    create_yesno_row("Would you like to play?", kwargs = {"survey": survey})
+    
     # Define the content for the card
     def render_card():
         with mui.Card(sx={"width": 300}):
             with mui.CardContent:
-                mui.Typography("Forgotten Idea", sx={"fontSize": 14}, color="text.secondary", gutterBottom=True)
-                mui.Typography("erotica, n.", variant="h5", component="div")
-                mui.Typography("/ ɪˈrɒtɪkə/")
+                mui.Typography("Basic biased source", sx={"fontSize": 14}, color="text.secondary", gutterBottom=True)
+                mui.Typography("Eros, n.", variant="h5", component="div")
+                mui.Typography("| ˈɪərɒs |")
                 mui.Typography("n.", sx={"mb": 1.5}, color="text.secondary")
                 mui.Typography(
-                    "Matters of love; erotic literature or art (frequently as a heading in catalogues).")
+                    "Love, the god of love, or a representation of him: = Cupid, n.")
                 mui.Typography(
                     'Oxford English Dictionary',
                     variant="body2",
@@ -388,15 +505,15 @@ def main():
             render_card()
 
     with col2:
-        st.markdown("## Erotica • (Eροσ)")
-        st.markdown("/ ɪˈrɒtɪkə/")
+        st.markdown("## Eros • (Ἔρως)")
+        st.markdown("/ plays /")
         st.markdown("### E • as in Energy")
         st.markdown("### R • as in ______")
         st.markdown("### O • as in ______")
         st.markdown("### S • as in ______")
 
     """
-In philosophy, eros often represents a primal and powerful force, driving individuals towards fulfillment and connection. It encompasses desires for love, beauty, and transcendence, influencing human thoughts and actions.
+Eros represents a primal and powerful force, driving individuals towards fulfillment and connection. It encompasses desires for love, beauty, and transcendence, influencing human thoughts and actions.
 
 Eros inspires every day experience from within ordinary details.
 But who speaks the voice of eros?
@@ -473,6 +590,7 @@ Thinking as an exploration, expression, and manifestation.
     
     invitation()
     
+    showcase()
     
     st.divider()
 
