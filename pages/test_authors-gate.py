@@ -19,6 +19,8 @@ import json
 import webcolors
 
 import streamlit_survey as ss
+from streamlit.elements.utils import _shown_default_value_warning
+_shown_default_value_warning = True
 
 
 def get_color_name(hex_color):
@@ -435,7 +437,7 @@ def main():
         st.success('🐉 Wonderful, we made it work!')
         st.markdown("### _Known issues:_")
         st.info(""" 
-                1. The date picker is often picky. If it shows an error message (`TypeError: list indices must be integers or slices, not str`), try reloading the page.
+                1. The date picker for the stay in Athens (in the section 'personal informations') is often picky. If it shows an error message (`TypeError: list indices must be integers or slices, not str`), try reloading the page.
                 """)
         
         st.divider()
@@ -563,21 +565,35 @@ def main():
             """)
 
         st.title('Step 2: A first mission estimate')
-        """ ## The rationale:
-            (contributors + support) * days * perdiem[0] * days
-    
-    Where: contributors = 14, support = 3, perdiem[0]* = 167, days = 5
-    
-    *: cf. Direction générale des Finances publiques, frais de mission.
-        https://www.economie.gouv.fr/dgfip/mission_taux_chancellerie/frais_resultat/GR
-        """
         
         contributors = 14
         support = 3
         perdiem = [167, 167, 167, 152, 152]
         days = 5
         ub = (contributors + support ) * days * perdiem[0] * days
+
+        """ ## The rationale:
+
+To estimate the financial resources required for our collective scientific mission, we can adopt a straightforward approach based on the publicly available standard rates provided by CNRS (Centre National de la Recherche Scientifique). 
+
+Because two members of the authors collective are CNRS agents, it is reasonable to extend the same rates to the other participants.
+
+By multiplying the number of participants expected to attend the mission by the estimated number of days they will stay times the official perdiem rate, we derive an initial estimate of the total cost. It's important to note that this calculation serves as an upper bound and is intended for simplicity and transparency. 
+
+Our subsequent challenge will be to carefully devote the allocation of resources to ensure efficient and effective utilization throughout the mission.
+
+The formula is simple: ```(contributors + support) * days * perdiem[0] = upper bound```
+    
+Where: contributors = 14, support = 3, perdiem[0]* = 167 EUR, days = 5
+
+This is a rough estimate that will be refined aggregating _our_ preferences.
+"""
         st.markdown(f"## Estimate: {ub} EUR")
+
+        """    
+> Ref: cf. Direction générale des Finances publiques, frais de mission.
+        https://www.economie.gouv.fr/dgfip/mission_taux_chancellerie/frais_resultat/GR
+"""
         st.write("`Remark: this is an upper bound, excluding flights.`")
         authenticator.logout('(Save my preferences &) Disconnect', 'main', key='save-disconnect')
         authenticator.logout('Disconnect', 'main', key='disconnect')

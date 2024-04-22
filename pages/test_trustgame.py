@@ -98,12 +98,14 @@ def plot_random_matrix_matplotlib_binary(matrix):
     fig, ax = plt.subplots()
     for i in range(matrix.shape[0]):
         for j in range(matrix.shape[1]):
-            if matrix[i, j] > 0.5:
+            if matrix[i, j] > 0.6:
                 color = 'red'
+            elif 0.5 < matrix[i, j] < 0.6:
+                color = 'green'
             elif matrix[i, j] < 0.5:
                 color = 'black'
             else:
-                color = 'green'
+                color = 'white'
             polygon = Polygon([[i, j], [i+1, j], [i+1, j+1], [i, j+1]], closed=True, facecolor=color, edgecolor='none')
             ax.add_patch(polygon)
     ax.set_xlim(0, matrix.shape[0])

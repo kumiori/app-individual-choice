@@ -321,10 +321,10 @@ class QuestionnaireDatabase:
 
 
     def fetch_data(self, kwargs = {}):
-        # Fetch all data from the "questionnaire" table
+        # Fetch all data from the table
         if kwargs.get('verbose', False):
             st.write(f"Fetching data from the {self.table_name} table.")
-        response = self.conn.table(self.table_name).select("*").execute()
+        response = self.conn.table(self.table_name).select("*").eq('webapp', 'discourse-authors').execute()
         # st.write(response)
         if response and response.data:
             data = response.data
