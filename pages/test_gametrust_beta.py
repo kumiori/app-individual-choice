@@ -241,30 +241,31 @@ And, more importantly, to foresee what are the outcomes.
     
     st.header("Gameplay:")
     # st.write("0. Are you happy to pay? Save your preferences.")
-    st.write("1. Choose a level of trust (α) between 0 and 1 using the slider.")
+    st.write("1. Choose a level of trust (α) between 0 and 1 using the slider. Save your preference.")
     # st.write("2. Allocate an initial capital (C) to the bank.")
     st.write("2. The bank, (or someone on their behalf), will decide whether to 'move' or 'betray'.")
-    st.write("3. Click `I play`, if you play as an Investor, click `Betray` if ..., click `Move` to allocate assets. Click `I bet` to bet against the investor or against the Bank.")
+    st.write("3. Click `I play`, if you play as an Investor. Click `I Betray I` if you play as the Trustee. Click `Move` to allocate assets. Click `I bet` to bet against the investor or against the Bank.")
     st.write("4. Rember: you can adjust your trust level at any time, increase is free - decrease leaves a trace.")
     
     
     st.divider()
+    
     survey = CustomStreamlitSurvey()
-    create_dichotomy(key = 'trust', kwargs={'survey': survey, 
-                                            'name': 'investor', 
-                                           'label': 'Trust Level', 
-                                           'question': 'How much do you trust the Trustee?', 
-                                           'rotationAngle': 0, 
-                                           'gradientWidth': 60,
-                                           "inverse_choice": lambda x: 'full 🫧' if x == 1 else 'none 🕳️' if x == 0 else 'midway ✨' if x == 0.5 else 'partial 💩' if x < 0.5 else 'partial 🥀',  
-                                           'messages': ["⛈️🔔🎐", "Sounds great!", "Going up or down?"],
-                                           'height': 220, 
-                                           'title': 'I trust',
-                                           'invert': False, 
-                                           'shift': 30})
+    # create_dichotomy(key = 'trust', kwargs={'survey': survey, 
+    #                                         'name': 'investor', 
+    #                                        'label': 'Trust Level', 
+    #                                        'question': 'What is your current trust level?', 
+    #                                        'rotationAngle': 0, 
+    #                                        'gradientWidth': 100,
+    #                                        "inverse_choice": lambda x: 'full 🫧' if x == 1 else 'none 🕳️' if x == 0 else 'midway ✨' if x == 0.5 else 'partial 💩' if x < 0.5 else 'partial 🥀',  
+    #                                        'messages': ["⛈️🔔🎐", "Sounds great!", "Going up or down?"],
+    #                                        'height': 220, 
+    #                                        'title': 'I trust',
+    #                                        'invert': False, 
+    #                                        'shift': 30})
     
 
-    st.header("Trust Level:")
+    st.header("Trust Level")
     trust_level = st.slider("Select your trust level:", min_value=0.0, max_value=1.0, step=0.01)
     st.write("Your current trust level: ", trust_level)
     
