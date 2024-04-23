@@ -30,6 +30,8 @@ from lib.sound import recorder
 import yaml
 from yaml.loader import SafeLoader
 import datetime
+import random
+
 with open('data/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
@@ -399,12 +401,12 @@ perspective from Eros on the erotic energy.
 
 """)
     img = image_select(
-        label="Select a cat",
+        label="Eros, draw a cat",
         return_value="index",
-        images=get_images(),
+        images = get_images(),
         # captions=["A cat"],
     )
-    
+    st.button("reshuffle")
     st.write("Speak through...", img)
     
     duration = st.slider("Duration", min_value=1, max_value=3, value=1, step=1)
@@ -416,24 +418,31 @@ perspective from Eros on the erotic energy.
     if st.button("Save", key="save_recording"):
         st.toast("Recording saved! / preferences updated", icon="🚀")
 
-@st.cache_data    
+# @st.cache_data    
 def get_images():
-    return [
-            "https://bagongkia.github.io/react-image-picker/0759b6e526e3c6d72569894e58329d89.jpg",
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
-            np.array(Image.open("images/APC_3171.jpg")),
+    images = [
+        np.array(Image.open("images/cards/crop/share-24471311083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24041611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24061711083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24081611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24121711083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24131611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24171611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24191711083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24231611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24271611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24281711083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24331711083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24381611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24391511083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24551611083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24561511083.jpg")),
+        np.array(Image.open("images/cards/crop/share-24561511083.jpg")),
         ]
+    
+    random.shuffle(images)
+    
+    return images
 
 def invitation():
     st.markdown("## What is the game?")
@@ -569,7 +578,7 @@ Thinking as an exploration, expression, and manifestation.
     with cols[2]:
         ui.metric_card(title="Pending invites", content="13", description="This is an art", key="card3")
     with cols[3]:
-        st.markdown("### Εροσ • Erotic")
+        st.markdown("### (Ἔρως) • Erotic")
         ui.badges(badge_list=[("experimental", "secondary")], class_name="flex gap-2", key="viz_badges2")
         ui.badges(badge_list=[("explicit", "primary")], class_name="flex gap-2", key="viz_badges3")
         
