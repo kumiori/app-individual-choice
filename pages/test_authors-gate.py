@@ -16,9 +16,19 @@ import datetime
 from streamlit_extras.mandatory_date_range import date_range_picker 
 import re
 import json
+import webcolors
 
 import streamlit_survey as ss
+from streamlit.elements.utils import _shown_default_value_warning
+_shown_default_value_warning = True
 
+
+def get_color_name(hex_color):
+    try:
+        color_name = webcolors.hex_to_name(hex_color)
+        return color_name
+    except ValueError:
+        return None
 
 def check_existence(conn, key, table="access_keys", index = 'key'):
     if key == "":
@@ -33,15 +43,79 @@ def check_existence(conn, key, table="access_keys", index = 'key'):
 
     return len(user_exists[1]) == 1
 
+def fetch_and_display_personal_data(conn, kwargs):
+    # Fetch all data from the "questionnaire" table
+    table_name = kwargs.get('database')
+    signature = kwargs.get('key')
+    # st.write(f"Fetching data from the {table_name} table.")
+    response = conn.table(table_name).select("*").eq('signature', signature).execute()
+
+    # Check if there is any data in the response
+    if response and response.data:
+        data = response.data
+        _data = []
+        # Display each row of data
+        # st.json(data, expanded=False)
+        # Display the dataset
+        for item in data:
+            # st.write(f"ID: {item['id']}")
+            updated_at = datetime.datetime.fromisoformat(item['updated_at'][:-6])
+            st.write(f"Preferences updated at: {updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            # st.write(f"Updated At: {item['updated_at']}")
+            st.write(f"Signature: {item['signature']}")
+
+            # Parse and display personal data
+            personal_data = json.loads(item['personal_data'])
+            st.write("Personal Data:")
+            for key, value in personal_data.items():
+                if key == "athena-range-dates":
+                    continue  # Skip displaying this key-value pair
+                if isinstance(value, dict):
+                    st.write(f"- {key}: {value['value']}")
+                else:
+                    st.write(f"- {key}: {value}")
+
+            # Convert and display datetime objects
+            if 'athena-range-dates' in personal_data:
+                st.write("Athena stay - range dates:")
+                for date_obj in personal_data['athena-range-dates']:
+                    date = datetime.datetime(date_obj['year'], date_obj['month'], date_obj['day'])
+                    st.write(date.strftime("%Y-%m-%d"))
+
+            # st.write("Path 001:", item['path_001'])
+            st.write("Created At:", item['created_at'])
+    else:
+        st.write(f"No data found in the {table_name} table.")
+    return _data
+
 
 def insert_or_update_data(conn, signature, response_data, data_label:str ='path_001'):
+    from lib.survey import date_decoder
+    # Iterate over the key-value pairs in response_data
+    serialised_dates = [date_decoder(date_obj) for date_obj in response_data['athena-range-dates']['value']]
+    # print(serialised_dates)
+    response_data['athena-range-dates'] = serialised_dates
+    # print(response_data)
+    # st.write(response_data['athena-range-dates'])
+    
+    json.dumps(response_data, indent=2)
+    
     try:
+        st.json(response_data, expanded=False)
+        # __import__('pdb').set_trace()
+        # st.write((response_data))
         data = {
             data_label: json.dumps(response_data)
         }
-        # st.write(data)
+        
+        if not signature:
+            st.error("Please provide a signature.")
+            return
+        
         # user_exists = check_existence(conn, signature)
+        st.write(f"Checking existence of {signature}")
         preferences_exists = check_existence(conn, signature, table="discourse-data", index='signature')
+        st.info(f"Preferences exist: {preferences_exists}")
         
         if preferences_exists:
             # signature exists, update the existing record
@@ -57,8 +131,11 @@ def insert_or_update_data(conn, signature, response_data, data_label:str ='path_
                 'signature': signature,
                 data_label: json.dumps(response_data)
             }
+            st.json(data, expanded=False)
+            
             insert_result = conn.table('discourse-data').upsert(data).execute()
-            st.info("Preferences did not exist, yet. Accounted for preferences")
+            st.info("Preferences did not exist yet. Accounted for preferences")
+            st.write(insert_result)
             
     except Exception as e:
         st.error(f"Error inserting or updating data in the database: {str(e)}")
@@ -78,9 +155,6 @@ def is_valid_phone(phone):
     for regex in phone_regexes:
         if re.match(regex, phone):
             return True
-            
-    # if re.match(phone_regex, phone):
-    #     return True
 
     return False
 
@@ -361,6 +435,10 @@ def main():
         no_key = 'unknown'
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         st.success('🐉 Wonderful, we made it work!')
+        st.markdown("### _Known issues:_")
+        st.info(""" 
+                1. The date picker for the stay in Athens (in the section 'personal informations') is often picky. If it shows an error message (`TypeError: list indices must be integers or slices, not str`), try reloading the page.
+                """)
         
         st.divider()
         st.title('Step 0: What is this all about?')
@@ -394,18 +472,29 @@ def main():
                     phone = personal_data.text_input("Phone Number (starting with +)", id="phone", key="phone")
                     default_start = datetime.datetime(2024, 9, 24)
                     default_end = default_start + timedelta(days=5)
-                    # date_range = personal_data.mandatory_date_range("Which days to stay in Athena?", id='athena-range-dates', 
-                    #                                              default_start=default_start, default_end=default_end)
-                    date_range = date_range_picker("Which days to stay in Athena?", 
-                                                #    id='athena-range-dates', 
-                                                    default_start=default_start, default_end=default_end)
+                    date_range = personal_data.mandatory_date_range(name = "Which days to stay in Athena?",
+                                                                 label = "athena-dates", 
+                                                                 id='athena-range-dates', 
+                                                                 default_start=default_start, 
+                                                                 default_end=default_end
+                                                                 )
+                    # date_range = date_range_picker("Which days to stay in Athena?", 
+                    #                             #    id='athena-range-dates', 
+                    #                                 default_start=default_start, default_end=default_end)
+                    color = st.color_picker('Favourite colour?', '#00f900')
+                    
                 additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
-        
+            
+
             if st.button("Review preferences"):
 
                 num_nights = abs((date_range[0] - date_range[1]).days)
                 
                 col1, col2 = st.columns(2)
+                # if email is empty show a toast asking to input a valid email
+                if not email:
+                    st.toast("Please provide a valid email address", icon="⚠️")
+                    
                 with col2:
                     st.title(f"{num_nights} nights in Athena")
                     if phone:
@@ -413,30 +502,55 @@ def main():
                             st.success("✅ Seems a valid phone number")
                         else:
                             st.error("❌ We failed to check, seems an invalid phone number?")
+                    color_name = get_color_name(color)
+                    if color_name:
+                        st.write(f"This is a {color_name} color!")
+                    else:
+                        st.write("Could not determine the color name. This look like your favourite colour!")
+                    square_html = f'<div style="width: 330px; height: 10px; background-color: {color};"></div>'
+                    st.markdown(square_html, unsafe_allow_html=True)                        
 
                 # Displaying review information in two columns
                 with col1:
                     st.subheader("Personal Information:")
                     st.write(f"- Name: {name}\n- Email: {email}\n- Phone Number: {phone if phone else 'not provided'}")
-
+                        
                 st.markdown("### All the personal data")
                 st.json(personal_data.data, expanded=False)
 
-            # if st.button("Clear Session"):
-            #     # Clear session state
-            #     st.session_state.clear()
-
             if st.button("Save preferences"):
-                signature_exists = check_existence(conn, key)
+                # Check if key is non-empty, otherwise check the next condition
+                if key:
+                    _key = key
+                # Check if authenticator.credentials["access_key"] is non-empty, otherwise check the next condition
+                elif authenticator.credentials["access_key"]:
+                    _key = authenticator.credentials["access_key"]
+                # If none of the above conditions are met, assign the value of signature
+                else:
+                    _key = signature
+                
+                st.session_state["access_key"] = _key
+                signature_exists = check_existence(conn, _key)
+                
                 st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
                 try:
                     # response_data_json = json.loads(personal_data.data)
                     response_data_json = personal_data.data
-                    insert_or_update_data(conn, key, response_data_json, data_label='personal_data')
+                    insert_or_update_data(conn, _key, response_data_json, data_label='personal_data')
                 except json.JSONDecodeError:
                     st.error("Invalid JSON format. Please provide a valid JSON string.")
 
                 pass
+            
+            
+            with st.expander("Show personal data", expanded=False):
+                
+                signature = st.text_input("Signature", key="fetch-signature", value=st.session_state["access_key"])
+                if st.button("Fetch preferences"):
+                    fetch_and_display_personal_data(conn,
+                                                    kwargs = {"key" : signature, 
+                                                              "database": "discourse-data", 
+                                                              "index": 'signature'})
 
             st.divider()
             st.write("Next steps")
@@ -450,13 +564,45 @@ def main():
             
             """)
 
-
+        st.title('Step 2: A first mission estimate')
         
+        contributors = 14
+        support = 3
+        perdiem = [167, 167, 167, 152, 152]
+        days = 5
+        ub = (contributors + support ) * days * perdiem[0] * days
+
+        """ ## The rationale:
+
+To estimate the financial resources required for our collective scientific mission, we can adopt a straightforward approach based on the publicly available standard rates provided by CNRS (Centre National de la Recherche Scientifique). 
+
+Because two members of the authors collective are CNRS agents, it is reasonable to extend the same rates to the other participants.
+
+By multiplying the number of participants expected to attend the mission by the estimated number of days they will stay times the official perdiem rate, we derive an initial estimate of the total cost. It's important to note that this calculation serves as an upper bound and is intended for simplicity and transparency. 
+
+Our subsequent challenge will be to carefully devote the allocation of resources to ensure efficient and effective utilization throughout the mission.
+
+The formula is simple: ```(contributors + support) * days * perdiem[0] = upper bound```
+    
+Where: contributors = 14, support = 3, perdiem[0]* = 167 EUR, days = 5
+
+This is a rough estimate that will be refined aggregating _our_ preferences.
+"""
+        st.markdown(f"## Estimate: {ub} EUR")
+
+        """    
+> Ref: cf. Direction générale des Finances publiques, frais de mission.
+        https://www.economie.gouv.fr/dgfip/mission_taux_chancellerie/frais_resultat/GR
+"""
+        st.write("`Remark: this is an upper bound, excluding flights.`")
         authenticator.logout('(Save my preferences &) Disconnect', 'main', key='save-disconnect')
         authenticator.logout('Disconnect', 'main', key='disconnect')
         # add_vertical_space(13)
         st.divider()
-
+        
+    st.title('Step 3: Display information')
+    
+    st.markdown('https://t.me/+upPANq0yNnBmMzhk')
 
     if st.session_state["authentication_status"] is None:
         st.markdown("## <center>...otherwise, let's create one</center>", unsafe_allow_html=True)
