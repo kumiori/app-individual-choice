@@ -221,7 +221,6 @@ def main():
     # streamwrite(_stream_once(intro_text, 0))
     # st.markdown()
     now = datetime.datetime.now()
-
     st.markdown(f"# _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
     st.markdown("_Now_ is time for `Pleasure & Growth >` be welcome: brought to you by ______")
 
