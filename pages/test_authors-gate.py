@@ -16,7 +16,6 @@ import datetime
 from streamlit_extras.mandatory_date_range import date_range_picker 
 import re
 import json
-import webcolors
 
 import streamlit_survey as ss
 from streamlit.elements.utils import _shown_default_value_warning
