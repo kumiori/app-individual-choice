@@ -257,7 +257,7 @@ def create_map(key, kwargs = {}):
 def create_connection(key, kwargs = {}):
     authenticator = kwargs.get('authenticator')
     survey = kwargs.get('survey')
-    _location = survey.data['location?']['value']
+    _location = survey.data['location']['value']
 
     if st.session_state["authentication_status"] is None:
         try:
@@ -310,9 +310,6 @@ panel_1 = """ ## We contemplate an international landscape characterised by simu
  ## They emerge as facets of a deeper `_________` crisis.
 
 
-## Does this resonate with you? 
- 
-
 """ 
 
 
@@ -325,8 +322,6 @@ panel_2 = """
 ## Our panel springs at the intersection of Social Sciences, Natural Sciences, Philosophy, and Arts, offering an opportunity to build a concrete perspective in addressing uncertainty, confusion, and risk.
 
 ## ..._to bring forward_ an emancipatory vision of change.
-
-## Want to hear more?
 
 """
 
@@ -343,8 +338,8 @@ panel_3 = """
 
 ## _"These are not easy times for multilateral cooperation_ and _there is more than a list of policies to be considered."*_
 
-##### • `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_...in the context of international cooperation.
-## <center> ...  🧶 </center> 
+##### *: `Development Cooperation Review  Vol. 6 - Special Issue` - opening to _new hopes_ in the context of international cooperation.
+## <center>  🧶 </center> 
 
 ### _That issue_ was timely. We decide to engage in a conversation in which you participate.
 
@@ -407,7 +402,7 @@ panel_7 = """
 
 ## Let's map this out together.
 
-### What is your...
+### What is your location?
 """
 
 
@@ -572,20 +567,25 @@ challenges = [
 widget_info = [
     {"type": None, "key": None},
     {"type": "yesno", "key": "button_0", "kwargs": 
-        {"survey": survey, "callback": (yes_forward, no_clicked)}},
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, tell me more", "Not really, you don't make sense."]}},
     {"type": "yesno", "key": "button_1", "kwargs": 
-        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":[":honey_pot: Yes, please!", ":ticket: No, thank you."]}},
+        {"survey": survey, "callback": (yes_forward, no_clicked), "labels":[":honey_pot: I wish to know more", ":ticket: No, I am not concerned."]}},
     {"type": "yesno", "key": "button_1", "kwargs": 
         {"survey": survey, "callback": (yes_forward, no_clicked), "labels":["Yes, indeed!", "Not really, I'm not sure."]}},
     # {"type": "checkbox", "key": "opinion_counts", "kwargs": {"survey": survey, "label": 'Yes, my opinion counts.'}},
-    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'both ✨', "name": 'there', 'question': 'Click on the visual below to indicate the rate: the slowest is on the light end of the spectrum.','messages': ["A Quantum leap", "Smooth evolution", "This and *that*"] }},
+    {"type": "dichotomy", "key": "dichotomy_1", "kwargs": {"label": "transition_rate", "survey": survey, 
+                                                           "inverse_choice": lambda x: 'slow 🐌' if x == 1 else 'fast 💨' if x == 0 else 'both ✨', 
+                                                           "name": 'there', 
+                                                           'question': 'Click on the visual below to indicate the rate: the slowest is on the light end of the spectrum.',
+                                                           'messages': ["A Quantum leap", "Smooth evolution", "This and *that*"],
+                                                           'response': '## You can always change your mind. Now, step forward.'}},
     # {"type": "button", "key": "Let's...", "kwargs": {"survey": survey}},
     {"type": None, "key": None},
     {"type": "equaliser", "key": "equaliser", "kwargs": {"data": challenges[0:5], "survey": survey}},
     {"type": "textinput", 
-        "key": "location?",
+        "key": "location",
         "kwargs": {"survey": survey},
-        "callback": enter_location("location?")
+        "callback": enter_location("location")
      },
     {"type": "projectionmap", "key": "map", "kwargs": {"survey": survey}},
     {"type": "openconnection", "key": "`Here` • `Now`", "kwargs": {"survey": survey, "authenticator": authenticator}},
@@ -674,7 +674,7 @@ def main():
     with col2:
         matrix_size = 5
         matrix_placeholder = st.empty()
-        seconds = 30
+        seconds = 3
 
         start_time = time.time()
 
@@ -718,6 +718,7 @@ def main():
     
     # with tab1:
     st.markdown(f'# A long story short: 🤳🧶🕸️🦚💫✨🍵🫖🧊🍸🥣🎺💻⚙️🪞📨🗞️🧮📍📝💗🌀🔊🔉💭🏁😀🤔👏🫰✋🤚🗣️👥🧑🏿‍🎤👩🏻‍🎤')
+    st.markdown("### We are testing this digital platform as a support to coordinate and interact.")
     st.markdown("### This is _this_ and that, and _that_ is whence.")
     st.image("images/APC_3171.jpg", use_column_width=True)
     add_vertical_space(13)
@@ -862,19 +863,21 @@ def contributions():
     
 
     booklet_dict = {
-        "# Power to W•rds": {"### Amir Issaa \n ### Rap as both a form and content"},
+        "# Power to Words": {"### Amir Issaa \n ### Rap both as a form and as a content"},
         "# Moon Module": {"### Hugues Genevois, Laurence White-Bouckaert \n ### An improvisational electroacoustic music duo"},
         "# Le Gai Savoir": {"### Ariane Ahmadi \n ### Crises as vectors for emancipation"},
         "# The Aftermath Of Political Violence": {"### Sophie Wahnich \n ### Fragilité et manque de confiance, en mars 1794..."},
         "# Engagement with the Sea": {"### Antonia Taddei \n ### Proposals for personhood as a defense strategy"},
-        "## tba": {"Gabrielle Dyson"},
+        "# Retribution and Reform": {"### Gabrielle Dyson \n ### The interconnected impacts of European Agricultural Policy on our microbial and human selves "},
         "# Âmes de Paname": {"### Bianca Apollonio \n ### The city as a living organism"},
         "# Pulse": {"### Giorgio Funaro \n ### An electronic impulse through an immersive voyage"},
         "# We Are Enough": {"### Roger Niyigena Karera \n ### Arts and introspection of contemporary society"},
         "# Rethinking Solutions": {"### Graziano Mazza \n ### Polysemic nature of religion as the ancestor of economics"},
         "# Je Suis l'Eau": {"### Alessandra Carosi \n ### Emotional landscapes that lie beneath the surface of our world"},
-        "## A Fantasy Of Stochastic Moral Guardians ": {"## Claire Glanois \n ### Aligning Automated Decision Making with European Values⁠ "},
-        "## tba": {"### Andrés León Baldelli"},
+        "# A Fantasy Of Stochastic Moral Guardians ": {"## Claire Glanois \n ### Aligning Automated Decision Making with European Values⁠ "},
+        "# Encoded in Writing": {"### Andrés León Baldelli"},
+        "# The Anarchist Banker": {"### Nils Andersen \n ### A 2024 play"},
+        "# TBA": {"### Roberto Raneri"},
     }
     sorted_items = sorted(booklet_dict.items(), key=lambda x: list(x[1])[0])
     st.markdown(f"# Contributions are {len(booklet_dict)} so far...")
@@ -882,7 +885,7 @@ def contributions():
     # Create a new dictionary from the sorted list
     booklet_dict = dict(sorted_items)
     
-    paged_container = _PagedContainer(booklet_dict, items_per_page=2, show_pagination = False)
+    paged_container = _PagedContainer(booklet_dict, items_per_page=3, show_pagination = False)
 
     with st.container():
         col1, _, col2 = st.columns([2, 10, 2])

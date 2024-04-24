@@ -241,11 +241,12 @@ And, more importantly, to foresee what are the outcomes.
     
     st.header("Gameplay:")
     # st.write("0. Are you happy to pay? Save your preferences.")
-    st.write("1. Choose a level of trust (α) between 0 and 1 using the slider. Save your preference.")
-    # st.write("2. Allocate an initial capital (C) to the bank.")
-    st.write("2. The bank, (or someone on their behalf), will decide whether to 'move' or 'betray'.")
-    st.write("3. Click `I play`, if you play as an Investor. Click `I Betray I` if you play as the Trustee. Click `Move` to allocate assets. Click `I bet` to bet against the investor or against the Bank.")
-    st.write("4. Rember: you can adjust your trust level at any time, increase is free - decrease leaves a trace.")
+    st.write("1. Indicate your current level of trust between 0 and 1 using the slider. Commit to your preference.")
+    # st.write("2. Allocate an initial capital (C) to the bank.") (α)
+    st.write("2. The bank, `or someone on their behalf`, will decide whether to 'move' or 'betray'.")
+    st.write("3. Click `I play`, if you play as an Investor. Click `I Betray I` if you play as the Trustee. Click `Move` to allocate assets and kick the game. Click `I bet` to so against the investor or against the Bank.")
+    st.write("4. Observe how trust moves and shifts, at all times.")
+    st.markdown("## `The game is on.` \n ## `The game is real.` \n ## `The game is now.`")
     
     
     st.divider()
@@ -303,12 +304,10 @@ And, more importantly, to foresee what are the outcomes.
         key="betray",
     )
     
-    """### Steps:
+    """### Overview:
 1. **Players**: The game involves two players: the investor and the bank (HSBC). The investor is a collective player, each of its elements decides how much trust to invest in the Trustee, while the bank determines its response on their cost-opportunity.
 
 2. **Trust Variable**: The investor's decision is represented by a trust variable (α), ranging from zero (no trust) to one (full trust), reflecting the level of trust invested in HSBC.
-
-3. **Impact of Investment**: The investor's trust investment (α) is multiplied by their capital (C), determining the resources allocated to HSBC.
 
 4. **Trustee's Decision**: the Trustee (or an entity on their behalf) chooses to "move" or "betray." Moving implies positive action towards allocating funds to transparently address challenges such as climate change, while betraying maintains the status quo, the bank gains - business as usual - at the investor's expense.
 
@@ -321,11 +320,11 @@ And, more importantly, to foresee what are the outcomes.
     col1, col2, col3 = st.columns([1, 1, 1])
     placeholder = st.empty()                
     with col2:
-        if stateful_button("3", key="button1", type="primary", use_container_width = True):
-            if stateful_button("2", key="button2", use_container_width = True):
-                if stateful_button("1", key="button3", use_container_width = True):
+        if stateful_button("I wish to know more", key="button1", type="primary", use_container_width = True):
+            if stateful_button("consequences are real", key="button2", use_container_width = True):
+                if stateful_button("I understand", key="button3", use_container_width = True):
                     st.markdown("<center>Let's go...</center>", unsafe_allow_html=True)
-                    st.toast('Consent granted/Preferences saved!', icon="🚀")
+                    st.toast('Consent granted!', icon="🚀")
                     
                     open_play = st.button("I play", use_container_width=True, key="play")
 
@@ -336,45 +335,45 @@ And, more importantly, to foresee what are the outcomes.
     def foo():
         st.toast("Button clicked!")
 
-    with stylable_container(key="payment_button",css_styles="""
-    {
-        [data-testid="baseButton-primary"] {
-            box-shadow: 0px 10px 14px -7px #3e7327;
-            background-image:url("data/qrcode_1.png") fixed center;
-            border-radius:4px;
-            border:1px solid #4b8f29;
-            display:inline-block;
-            cursor:pointer;
-            color:#ffffff;
-            font-family:Arial;
-            font-size:13px;
-            font-weight:bold;
-            padding:14px 31px;
-            height: 100px;
-            text-decoration:none;
-            text-shadow:0px 1px 0px #5b8a3c;
-        }
-        [data-testid="baseButton-primary"]:hover {
-            # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
-            background-color:#72b352;
-            background-color: red;
-            cursor: arrow;
-        }
-        [data-testid="baseButton-primary"]:active {
-            position:relative;
-            background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-            top:1px;
-        }
-    }
-    """,):
-        st.button("button", type='primary', on_click=foo, use_container_width=True, key="payment")
+    # with stylable_container(key="payment_button",css_styles="""
+    # {
+    #     [data-testid="baseButton-primary"] {
+    #         box-shadow: 0px 10px 14px -7px #3e7327;
+    #         background-image:url("data/qrcode_1.png") fixed center;
+    #         border-radius:4px;
+    #         border:1px solid #4b8f29;
+    #         display:inline-block;
+    #         cursor:pointer;
+    #         color:#ffffff;
+    #         font-family:Arial;
+    #         font-size:13px;
+    #         font-weight:bold;
+    #         padding:14px 31px;
+    #         height: 100px;
+    #         text-decoration:none;
+    #         text-shadow:0px 1px 0px #5b8a3c;
+    #     }
+    #     [data-testid="baseButton-primary"]:hover {
+    #         # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
+    #         background-color:#72b352;
+    #         background-color: red;
+    #         cursor: arrow;
+    #     }
+    #     [data-testid="baseButton-primary"]:active {
+    #         position:relative;
+    #         background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
+    #         top:1px;
+    #     }
+    # }
+    # """,):
+    #     st.button("button", type='primary', on_click=foo, use_container_width=True, key="payment")
 
     st.divider()
     
-    open_play = st.button("I play", use_container_width=True)
+    # open_play = st.button("I play", use_container_width=True)
 
-    if open_play:
-        modal.open(src=src_101)
+    # if open_play:
+    #     modal.open(src=src_101)
 
     st.header("Bank's Decision:")
     # Implement bank's decision logic and display here
@@ -383,12 +382,13 @@ And, more importantly, to foresee what are the outcomes.
     open_move = st.button("I move I", use_container_width=True)
 
     if open_move:
-        modal.open(src=src_100K)
+        # modal.open(src=src_100K)
+        st.snow()
 
-    if modal.is_open():
-        with modal.container():
-            components.iframe(st.session_state[f'{modal.key}-src'], height=1500)
-            # st.snow()
+    # if modal.is_open():
+    #     with modal.container():
+    #         # components.iframe(st.session_state[f'{modal.key}-src'], height=1500)
+    #         st.snow()
 
     if open_betray:
         betray.open()
