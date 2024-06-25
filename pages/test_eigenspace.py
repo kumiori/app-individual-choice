@@ -161,7 +161,7 @@ def book_of_the_numbers():
     return {"a": a, "b": b, "c": c}
 
 def main():
-    st.title("A Fundamental problem, which we solve(d)")
+    st.title("A Fundamental problem, solve(d)")
     
     st.markdown(f'# <center>$\min \mathcal R(v, \\beta)$ in $V$ and $K^+_0$</center>', unsafe_allow_html=True)
     # st.markdown(f'# <center>$\mathcal R(v, \\beta):=\int_0^1$</center>', unsafe_allow_html=True)
