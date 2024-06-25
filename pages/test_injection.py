@@ -6,7 +6,7 @@ import random
 
 _qualitative_selector = components.declare_component(
     "qualitative",
-    url='http://localhost:3000'
+    url='http://localhost:3001'
 )
 
 def _dichotomy(name, question, label, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):

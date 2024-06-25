@@ -45,7 +45,6 @@ st.title('Dietary Preferences Polar Plots')
 st.markdown("""## This app displays the macronutrient splits for different dietary preferences. \n
 
 ## The hidden label is `Carbohydrates`
-
             """)
 # Create a grid layout
 for row in range(num_rows):

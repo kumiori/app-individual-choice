@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit_tags as st_tags
 
 # Function to retrieve autocomplete suggestions based on the query
 def get_autocomplete_suggestions(query):
@@ -31,3 +32,10 @@ if st.button("Add"):
 st.write("Selected Ingredients:")
 for ingredient in selected_ingredients:
     st.write(f"- {ingredient}")
+
+
+tags = st_tags.st_tags(label = "## Food items",
+    text="Food items",
+    suggestions=autocomplete_suggestions,)
+if tags:
+    st.write(f"`{tags}`")

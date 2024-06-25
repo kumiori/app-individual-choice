@@ -194,8 +194,7 @@ Eros plays a role in every process of awakening,
         st.write(f"Understanding: {value}")
 
 
-        
-st.write('Understanding', st.session_state['checked'])
+st.write(f'Understanding{st.session_state["checked"]}' if st.session_state['checked'] else 'Not understood.')
 if st.session_state['checked']:
     st.write("Consent is granted.")
     
@@ -325,12 +324,157 @@ def showcase():
     SwipeableTextMobileStepper()
 
 
+def intro_eros0():
+    """
+    Who is Eros?
+
+    """
+    
+    st.markdown("""
+
+# Who is Eros? Google cannot know.
+
+# We have experienced Eros in many ways
+
+# and I have seen Eros a few times...
+
+<center> ❀ ❀ ❀ ❀ ❀ ❀ ❀ ❀ </center>
+
+# In a photograph I may have caught
+
+# a glance of its spirit or appearence,
+
+# for you to say: `erotic signs?`
+
+
+<center> ❀ ❀ ❀ ❀ ❀ ❀ ❀ ❀ </center>
+
+# Help me pick a selection of images
+
+# that go out to the next issue
+# of the beautiful EKI magazine, 
+
+
+# due soon: it's dedicated to the 
+
+
+
+                """, unsafe_allow_html=True)
+    
+    
+    cols = st.columns([2, 1, 1])
+    
+    with cols[0]:
+        st.markdown(
+"""
+
+> #      ✨ Erotic Light.
+
+""", unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown("")
+        st.page_link("https://www.instagram.com/eki.magazine/", label="by EKI Magazine", icon="📚")
+        st.page_link("https://www.instagram.com/kumiori3/", label="some other shots by me", icon="📷")
+
+
+    st.image("images/share-21073500323.jpg", use_column_width=True)
+    
+    st.divider()
+
+
+    st.markdown("""
+
+# I wish this to be a chance to develop a rich and inclusive dialogue, with unique insights and experiences as a collaborative discovery. Like a treasure hunt game...
+# What is the prize?
+
+# I don't want to play / I am happy to play
+
+                
+                """)
+
+    st.divider()
+    
+    
+    st.markdown("""
+
+# By which name Eros may call you?
+It may or may not be your name
+but it should be `just` you    
+    
+    
+    
+                """)
+    st.divider()
+    
+    st.markdown("""
+
+# Yes, this is a game, indeed, a collective game.
+
+### In contrast to a dominating and dominant view of Eros, which often oversimplifies and underestimates its richness and complexity, this collaborative project seeks to amplify diverse voices and perspectives on the subject. In patriarchal societies, Eros is frequently confined to narrow and predefined roles, reinforcing rigid gender norms and power dynamics.  
+    
+                """)    
+    st.divider()
+    st.markdown("""
+    
+### What to do with outdated paradigms? Let's ask Eros.
+# Allowing Eros to speak will offer many hints.
+
+### Participating in this exploration is a challenge to the constraints placed on Eros and celebration of its multifaceted nature.
+
+# What is the prize? 
+
+### It may be Eros itself, it may be the game just for the sake of playing, or it may be a deeper understanding of Eros as a universal energy, transcending normative constructs and embracing the full spectrum of human experience.
+
+                """)    
+    
+    st.divider()
+    
+    st.markdown("""
+# Anything against going forward?
+
+### Anything concerning us going forward?
+
+Please, share your intention joining in.
+
+
+[ I have major concerns / Count me in! ]
+
+                """)    
+    st.divider()
+    
+    st.markdown("""
+# Long story short.
+
+# Would you like to go straight to the images, or you are ready to play with perceptions?
+                """)    
+
+    st.divider()
+    
+    st.markdown("""
+# Before we proceed, let's save your preferences.
+### `We checkpoint the game here.`
+
+            [ save ]
+
+# Everything smooth, please receive an access key
+and a link to the image gallery. 
+
+
+# After you enjoyed the shots, let's reconnect at step 1. 
+                """)    
+
+
+    st.divider()
+
+
+def intro_eros1():
+    st.markdown("""
+    [ AUTH ] • [ PLAY ] • [ SAVE ] • [ VIEW ] • [ CONNECT ]
+                """)    
+
 def intro_eros():
     st.write("Eros as an Energy.")
     
-
-
-
 
     st.markdown("""
 Eros is a powerful force with us, isn’t it clearest crystallisation that which speaks through the mind?
@@ -457,6 +601,10 @@ We set silence aside, to honor a speech without words, the rustle of spirits awa
 """)
     
 def main():
+    
+    intro_eros0()
+    
+    st.divider()
     st.markdown(" <center>`• Welcome •`</center>", unsafe_allow_html=True)
     st.title("Eros speaks: images in expression")
     st.write("## Eros as an Energy.")
@@ -478,7 +626,13 @@ and its embodiment in various forms.
 How would you like to be called?
 
     """
+    
+    st.divider()
+    st.page_link("https://adobe.ly/3Wa7lka", label=" Gallery ", icon="💭")
+    st.page_link("pages/test_discourse.py", label=" Internal link ", icon="✨")
+    st.page_link("pages/test_discourse.py", label=" Go back ", icon="✨", disabled=True)
 
+    st.divider()
     
     name = personal_data.text_input("Eros speaks through", "Your name")
     if name: _name = name+','

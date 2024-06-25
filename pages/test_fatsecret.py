@@ -20,9 +20,14 @@ if st.button("Search"):
     try:
         # Perform the food search
         search_results = fs.foods_search(food_query)
+        
+        # if search_results is empty, raise an exception
+        if not search_results:
+            raise Exception("No results found")
+        
         generic_foods = [food for food in search_results if food.get("food_type") == "Generic"]
 
-        # st.json(generic_foods)
+        st.json(generic_foods)
         
         # Display the first result
         if generic_foods:
@@ -58,3 +63,38 @@ if st.button("Search"):
 
     except Exception as e:
         st.error(f"Error: {e}")
+
+def get_nutrient_info(food_item):
+    # Perform food search to get food_id
+    search_results = fs.foods_search(food_item)
+    generic_foods = [food for food in search_results if food.get("food_type") == "Generic"]
+    if not generic_foods:
+        return {"Error": "No generic food found"}
+
+    food_id = generic_foods[0]['food_id']
+    
+    # Get detailed nutritional info by food_id
+    food_details = fs.food_get(food_id)
+    servings = food_details['servings']['serving']
+    if isinstance(servings, dict):  # If there's only one serving, it's returned as a dict
+        servings = [servings]
+    # Find the serving with metric_serving_amount of 100 and metric_serving_unit of 'g'
+    target_serving = next(
+        (serving for serving in servings 
+            if serving.get('metric_serving_amount') == "100.000" and serving.get('metric_serving_unit') == 'g'), 
+        None
+    )
+    
+    if target_serving:
+        return target_serving
+    else:
+        return {"Error": "No serving size of 100g found"}
+
+
+food_item = food_query
+
+# Button to perform nutrient lookup for all food items
+if st.button("Get Nutrient Info"):
+    with st.spinner("Fetching nutrient information..."):
+        nutrient_info = get_nutrient_info(food_item)
+        # st.write(nutrient_info)
