@@ -162,7 +162,9 @@ def main():
         st.write(f"`Juste le temps de connecter une base de données...`")
         st.write(f"`{tags}`")
         st.button("Ajouter les mots clés dans la queue")
-
+# Multiscale modeling of ice deformation behavior
+# Authors
+# Maurine Montagnat, Olivier Castelnau, PD Bons, SH Faria, O Gagliardini, F Gillet-Chaulet, Fanny Grennerat, A Griera, Ricardo A Lebensohn, Hervé Moulinec, J Roessiger, Pierre Suquet
 def naq():
     naq_dictionary = {
         "### Antarctic Ice and Sea Level Rise": {
