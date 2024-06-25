@@ -80,8 +80,8 @@ Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 Button = ss.SurveyComponent.from_st_input(st.button)
-# MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker, decoder=date_decoder)
-MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker)
+MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker, decoder=date_decoder)
+# MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
