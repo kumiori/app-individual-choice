@@ -21,7 +21,7 @@ class _Authenticate(Authenticate):
     if "access_key" not in st.session_state:
         print('access_key not in session state')
         st.session_state['access_key'] = ''
-        print(st.session_state['access_key'])
+        # print(st.session_state['access_key'])
         
     def login(self, form_name: str, location: str='main', key: str='') -> tuple:
         """
