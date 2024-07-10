@@ -19,7 +19,7 @@ import json
 import webcolors
 
 import streamlit_survey as ss
-from streamlit.elements.utils import _shown_default_value_warning
+# from streamlit.elements.utils import _shown_default_value_warning
 _shown_default_value_warning = True
 
 

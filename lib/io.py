@@ -223,6 +223,7 @@ def create_equaliser(key, kwargs={}):
     survey = kwargs.get('survey')
     rows = 1
     dimensions = kwargs["data"]
+    default_values = kwargs.get('default_values', [0]*len(dimensions))
     split_len = len(dimensions) // rows
     bottom_cols = st.columns(split_len)
 
@@ -235,7 +236,7 @@ def create_equaliser(key, kwargs={}):
                     label=dimensions[i + j*split_len][0],
                     height=200,
                     key=f"cat_{i}_{j}",
-                    default_value = 0,
+                    default_value = default_values[i + j*split_len],
                     step=1,
                     min_value=0,
                     slider_color=('red','white'),
@@ -244,6 +245,26 @@ def create_equaliser(key, kwargs={}):
                     value_always_visible=True,
                 )
 
+def create_equaliser_rescaler(key, kwargs={}):
+    
+    dimensions = kwargs["data"]
+    # data = [kwargs.get('survey').data[d[0]] for d in dimensions]
+    if st.button("Rescale", use_container_width=True):
+        # total = sum(item['value'] for item in data)
+        # rescaled_data = [{"label": item["label"], "value": int(item["value"] * 100 / total)} for item in data]
+        # kwargs['default_values'] = [0] * len(dimensions)
+        st.info('Not yet implemented')
+        # # kwargs["default_values"] = [item[0] for item in rescaled_data]
+        # st.write(data)
+        # # st.write(rescaled_data)
+        # st.write([item for item in rescaled_data])
+        # kwargs.get('survey').data["Analysis"]["value"]=99
+        # print(kwargs.get('survey').data["Analysis"])
+        # st.write(kwargs.get('survey').data)
+        # kwargs['default_values'] = rescaled_data
+
+    create_equaliser(key, kwargs)
+    
 def fetch_and_display_data(conn, kwargs):
     # Fetch all data from the "questionnaire" table
     table_name = kwargs.get('database')
@@ -251,9 +272,9 @@ def fetch_and_display_data(conn, kwargs):
     response = conn.table(table_name).select("*").execute()
     # st.write(response)
     # Check if there is any data in the response
+    _data = []
     if response and response.data:
         data = response.data
-        _data = []
         # Display each row of data
         for row in data:
             # st.write(row)
@@ -262,7 +283,7 @@ def fetch_and_display_data(conn, kwargs):
             _data.append({"lat": row["latitude"], "lng": row["longitude"], "luckynumber": row["luckynumber"]+1})
             # st.write("------------")
     else:
-        st.write(f"No data found in the {table_name} table.")
+        print(f"No data found in the {table_name} table.")
     return _data
 
 import streamlit as st

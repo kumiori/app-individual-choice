@@ -129,13 +129,14 @@ class _Authenticate(Authenticate):
         if preauthorization:
             if not self.preauthorized:
                 raise ValueError("preauthorization argument must not be None")
-        if location not in ['main', 'sidebar']:
-            raise ValueError("Location must be one of 'main' or 'sidebar'")
-        if location == 'main':
-            register_user_form = st.form('Register user')
+        # # if location not in ['main', 'sidebar']:
+        # #     raise ValueError("Location must be one of 'main' or 'sidebar'")
+        # if location == 'main':
+        #     register_user_form = st.form('Register user')
+        # elif location == 'sidebar':
+        #     register_user_form = st.sidebar.form('Register user')
 
-        elif location == 'sidebar':
-            register_user_form = st.sidebar.form('Register user')
+        register_user_form = st.form('Register user')
 
         col1, _, col2 = st.columns([2, .1, 2])
         
@@ -148,7 +149,7 @@ class _Authenticate(Authenticate):
         new_password = ''
         new_password_repeat = ''
 
-        if register_user_form.form_submit_button('`Here` • `Now`'):
+        if register_user_form.form_submit_button('`Here` • `Now`', use_container_width=True):
             now = datetime.now()
             st.write(now)   
             if len(_location) > 0:
