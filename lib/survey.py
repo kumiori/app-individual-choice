@@ -4,6 +4,8 @@ from streamlit_vertical_slider import vertical_slider
 import streamlit_survey as ss
 import os 
 from streamlit_extras.mandatory_date_range import date_range_picker 
+import datetime
+
 
 if st.secrets["runtime"]["STATUS"] == "Production":
     st.write(os.path.basename(__file__))
@@ -43,7 +45,7 @@ def _qualitative(name, question, label, areas, key=None):
     question = question)
 
 def _date_range_picker(name,
-                       label,
+                       label = "",
                         default_start = None, 
                         default_end = None,
                         min_date = None,
@@ -52,28 +54,34 @@ def _date_range_picker(name,
                         id=None, key=None):
         
     return date_range_picker(
-        name = name,
-        default_start = None,
-        default_end = None,
+        name,
+        default_start = default_start,
+        default_end = default_end,
         min_date = None,
         max_date = None,
         error_message = "",
         key=key,
         )
-        
-# (title: str, 
-# default_start: date | None = None, 
-# default_end: date | None = None, 
-# min_date: date | None = None, 
-# max_date: date | None = None, 
-# error_message: str = "Please select start and end date", 
-# key: str | None = None) -> Tuple[date, date]
+
+date_encoder = lambda obj: obj.isoformat()
+# date_decoder = lambda obj: datetime.datetime.fromisoformat(obj)
+def date_decoder(date_obj):
+    if isinstance(date_obj, datetime.date):
+        return {
+            "__type__": "datetime.date",
+            "year": date_obj.year,
+            "month": date_obj.month,
+            "day": date_obj.day
+        }
+    else:
+        raise TypeError("Input must be a datetime.date object")
 
 Dichotomy = ss.SurveyComponent.from_st_input(_dichotomy)
 VerticalSlider = ss.SurveyComponent.from_st_input(vertical_slider)
 ParametricQualitative = ss.SurveyComponent.from_st_input(_qualitative)
 Button = ss.SurveyComponent.from_st_input(st.button)
-MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker)
+MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker, decoder=date_decoder)
+# MandatoryDateRange = ss.SurveyComponent.from_st_input(_date_range_picker)
 
 class CustomStreamlitSurvey(ss.StreamlitSurvey):
     shape_types = ["circle", "square", "pill"]
@@ -91,5 +99,5 @@ class CustomStreamlitSurvey(ss.StreamlitSurvey):
         return Button(self, label, id, **kwargs).display()
     
     def mandatory_date_range(self, name: str = "", id: str = None, **kwargs) -> str:
-        return MandatoryDateRange(self, name, id, **kwargs).display()
+        return MandatoryDateRange(self, name=name, id=id, **kwargs).display()
     
