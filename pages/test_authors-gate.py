@@ -16,9 +16,10 @@ import datetime
 from streamlit_extras.mandatory_date_range import date_range_picker 
 import re
 import json
+import webcolors
 
 import streamlit_survey as ss
-from streamlit.elements.utils import _shown_default_value_warning
+# from streamlit.elements.utils import _shown_default_value_warning
 _shown_default_value_warning = True
 
 
@@ -206,20 +207,20 @@ contributions = [
     "Le Gai Savoir", "The Aftermath Of Political Violence", "Engagement with the Sea",
     "Retribution and Reform", "Âmes de Paname", "Pulse", "We Are Enough", "Rethinking Solutions", "Je Suis l'Eau", 
     "A Fantasy Of Stochastic Moral Guardians", "Encoded in Writing",
-    "Moon Module", "Navigating Social Interactions", "The Anarchist Banker", "TBA"
+    "Moon Module", "Navigating Social Interactions"
 ]
 
 authors = [
     "Ariane Ahmadi", "Sophie Wahnich", "Antonia Taddei", "Gabrielle Dyson",
     "Bianca Apollonio", "Giorgio Funaro", "Roger Niyigena Karera", "Graziano Mazza",
     "Alessandra Carosi", "Claire Glanois", "Andrés León Baldelli",
-    "H. Genevois, L. White-Bouckaert", "FLCALB", "Nils Andersen", "Roberto Raneri"
+    "H. Genevois, L. White-Bouckaert", "FLCALB"
 ]
 
 questions = [
     "Philosophy Street?", "Revolution au présent?", "Contract with the Elements?",
     "Damage Claim?", "Generation?", "Immersive?", "Art and Society?", "Shamans speak?", "Experimental?",
-    "Sub•Super-Liminal?", "Writing where?", "Moon Performance?", "Games Understood?", "The Anarchist Banker", "TBA"
+    "Sub•Super-Liminal?", "Writing where?", "Moon Performance?", "Games Understood?"
 ]
 
 
@@ -599,13 +600,13 @@ This is a rough estimate that will be refined aggregating _our_ preferences.
         # add_vertical_space(13)
         st.divider()
         
-        st.title('Step 3: Display information')
-        
-        st.markdown('https://t.me/+upPANq0yNnBmMzhk')
+    st.title('Step 3: Display information')
+    
+    st.markdown('https://t.me/+upPANq0yNnBmMzhk')
 
     if st.session_state["authentication_status"] is None:
         st.markdown("## <center>...otherwise, let's create one</center>", unsafe_allow_html=True)
-        st.title("Just connect...")
+        st.title("You connect (yourself) to a Title")
         if st.button("To reset choice, clear the memory", use_container_width=True):
             clear_session_state()
             st.info("Forgot names and titles.", icon="🫧")
