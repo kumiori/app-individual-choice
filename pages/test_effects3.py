@@ -1,10 +1,7 @@
 import streamlit as st
 
 # Set page configuration
-st.set_page_config(page_title="Cool CSS/JS Effect",
-  page_icon="✨",
-  # layout="wide"
-  )
+
 
 # Title of the app
 # st.title("Cool CSS/JS Effect in Streamlit")
@@ -119,6 +116,10 @@ def blurscape():
 
 # Run the Streamlit app
 if __name__ == "__main__":
+  # st.set_page_config(page_title="Cool CSS/JS Effect",
+  #   page_icon="✨",
+  #   # layout="wide"
+  #   )
   blurscape()
   
   from streamlit_extras.stylable_container import stylable_container
