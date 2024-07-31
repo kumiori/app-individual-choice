@@ -54,8 +54,7 @@ def fetch_and_display_personal_data(conn, kwargs):
     if response and response.data:
         data = response.data
         _data = []
-        # Display each row of data
-        # st.json(data, expanded=False)
+
         # Display the dataset
         for item in data:
             # st.write(f"ID: {item['id']}")
@@ -88,7 +87,44 @@ def fetch_and_display_personal_data(conn, kwargs):
         st.write(f"No data found in the {table_name} table.")
     return _data
 
+def fetch_personal_data(conn, kwargs):
+    # Fetch all data from the "questionnaire" table
+    table_name = kwargs.get('database')
+    signature = kwargs.get('key')
+    response = conn.table(table_name).select("*").eq('signature', signature).execute()
 
+    if response and response.data:
+        return response.data
+    else:
+        st.write(f"No data found in the {table_name} table.")
+        return None
+
+def display_personal_data(data):
+    if data:
+        for item in data:
+            updated_at = datetime.datetime.fromisoformat(item['updated_at'][:-6])
+            st.write(f"Preferences updated at: {updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            st.write(f"Signature: {item['signature']}")
+
+            personal_data = json.loads(item['personal_data'])
+            st.write("Personal Data:")
+            for key, value in personal_data.items():
+                if key == "athena-range-dates":
+                    continue  # Skip displaying this key-value pair
+                if isinstance(value, dict):
+                    st.write(f"- {key}: {value['value']}")
+                else:
+                    st.write(f"- {key}: {value}")
+
+            if 'athena-range-dates' in personal_data:
+                st.write("Athena stay - range dates:")
+                for date_obj in personal_data['athena-range-dates']:
+                    date = datetime.datetime(date_obj['year'], date_obj['month'], date_obj['day'])
+                    st.write(date.strftime("%Y-%m-%d"))
+
+            st.write("Created At:", item['created_at'])
+            
+            
 def insert_or_update_data(conn, signature, response_data, data_label:str ='path_001'):
     from lib.survey import date_decoder
     # Iterate over the key-value pairs in response_data
@@ -443,9 +479,21 @@ def main():
         st.divider()
         st.title('Step 0: What is this all about?')
         
+        """
+        
+        ### The social contract is a foundational concept in political philosophy, suggesting that individuals consent, either `implicitly` or _explicitly_, to form a society and abide by its rules, norms, and laws _for mutual benefit_. 
+        
+        ### In exchange for giving up `certain` _freedoms_, individuals receive protection and order provided by the governance structure. This _is the idea..._
+        
+        # _historically_ articulated by philosophers, we address
+        ## _in the social contract_ questions of `legitimacy`, _authority_, and `the origins` of societal organisation. We articulate this discourse `with you` because, right now, 
+        # _who else's voice is to be heard_?
+        
+        """
+        
         """_🎊 Booklet download_
         
-        🧾 Discover more about our panel discussions, download the latest booklet. 
+        🧾 Discover more about our panel discussions, download the temporary booklet. 
         """
         
         download_pdf()
@@ -455,116 +503,174 @@ def main():
 
         st.title('Step 1: Share preferences and some details')
             
-        switch_value = ui.switch(default_checked=False, label="I am happy to share some extra details", key="switch1")
+        switch_value = ui.switch(default_checked=False, label="Account for my preferences", key="switch1")
         
         
         if switch_value:
             """
             Some explaination is in order...
             """
-            with st.expander("Personal Details", expanded=False):
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    signature = personal_data.text_input("Signature", id='signature', key="signature", value=key)
-                    name = personal_data.text_input("Name", id="name", key="name")
-                    email = personal_data.text_input("Email", id="email", key="email")
-                with col2:
-                    phone = personal_data.text_input("Phone Number (starting with +)", id="phone", key="phone")
-                    default_start = datetime.datetime(2024, 9, 24)
-                    default_end = default_start + timedelta(days=5)
-                    date_range = personal_data.mandatory_date_range(name = "Which days to stay in Athena?",
-                                                                 label = "athena-dates", 
-                                                                 id='athena-range-dates', 
-                                                                 default_start=default_start, 
-                                                                 default_end=default_end
-                                                                 )
-                    # date_range = date_range_picker("Which days to stay in Athena?", 
-                    #                             #    id='athena-range-dates', 
-                    #                                 default_start=default_start, default_end=default_end)
-                    color = st.color_picker('Favourite colour?', '#00f900')
-                    
-                additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
-            
-
-            if st.button("Review preferences"):
-
-                num_nights = abs((date_range[0] - date_range[1]).days)
+        with st.expander("Personal Details", expanded=True):
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                signature = personal_data.text_input("Signature", id='signature', key="signature", value=key)
+                name = personal_data.text_input("Name", id="name", key="name")
+                email = personal_data.text_input("Email", id="email", key="email")
+            with col2:
+                phone = personal_data.text_input("Phone Number (starting with +)", id="phone", key="phone")
+                default_start = datetime.datetime(2024, 9, 24)
+                default_end = default_start + timedelta(days=5)
+                date_range = personal_data.mandatory_date_range(name = "Which days to stay in Athena?",
+                                                                label = "athena-dates", 
+                                                                id='athena-range-dates', 
+                                                                default_start=default_start, 
+                                                                default_end=default_end
+                                                                )
+                # date_range = date_range_picker("Which days to stay in Athena?", 
+                #                             #    id='athena-range-dates', 
+                #                                 default_start=default_start, default_end=default_end)
+                color = st.color_picker('Favourite colour?', '#00f900')
                 
-                col1, col2 = st.columns(2)
-                # if email is empty show a toast asking to input a valid email
-                if not email:
-                    st.toast("Please provide a valid email address", icon="⚠️")
-                    
-                with col2:
-                    st.title(f"{num_nights} nights in Athena")
-                    if phone:
-                        if is_valid_phone(phone):
-                            st.success("✅ Seems a valid phone number")
-                        else:
-                            st.error("❌ We failed to check, seems an invalid phone number?")
-                    color_name = get_color_name(color)
-                    if color_name:
-                        st.write(f"This is a {color_name} color!")
+            additional_comments = personal_data.text_area("Any additional comments or preferences?", id="extra", key="extra")
+        
+
+        if st.button("Review preferences"):
+
+            num_nights = abs((date_range[0] - date_range[1]).days)
+            
+            col1, col2 = st.columns(2)
+            # if email is empty show a toast asking to input a valid email
+            if not email:
+                st.toast("Please provide a valid email address", icon="⚠️")
+                
+            with col2:
+                st.title(f"{num_nights} nights in Athena")
+                if phone:
+                    if is_valid_phone(phone):
+                        st.success("✅ Seems a valid phone number")
                     else:
-                        st.write("Could not determine the color name. This look like your favourite colour!")
-                    square_html = f'<div style="width: 330px; height: 10px; background-color: {color};"></div>'
-                    st.markdown(square_html, unsafe_allow_html=True)                        
-
-                # Displaying review information in two columns
-                with col1:
-                    st.subheader("Personal Information:")
-                    st.write(f"- Name: {name}\n- Email: {email}\n- Phone Number: {phone if phone else 'not provided'}")
-                        
-                st.markdown("### All the personal data")
-                st.json(personal_data.data, expanded=False)
-
-            if st.button("Save preferences"):
-                # Check if key is non-empty, otherwise check the next condition
-                if key:
-                    _key = key
-                # Check if authenticator.credentials["access_key"] is non-empty, otherwise check the next condition
-                elif authenticator.credentials["access_key"]:
-                    _key = authenticator.credentials["access_key"]
-                # If none of the above conditions are met, assign the value of signature
+                        st.error("❌ We failed to check, seems an invalid phone number?")
+                color_name = get_color_name(color)
+                if color_name:
+                    st.write(f"This is a {color_name} color!")
                 else:
-                    _key = signature
-                
-                st.session_state["access_key"] = _key
-                signature_exists = check_existence(conn, _key)
-                
-                st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
-                try:
-                    # response_data_json = json.loads(personal_data.data)
-                    response_data_json = personal_data.data
-                    insert_or_update_data(conn, _key, response_data_json, data_label='personal_data')
-                except json.JSONDecodeError:
-                    st.error("Invalid JSON format. Please provide a valid JSON string.")
+                    st.write("Could not determine the color name. This look like your favourite colour!")
+                square_html = f'<div style="width: 330px; height: 10px; background-color: {color};"></div>'
+                st.markdown(square_html, unsafe_allow_html=True)                        
 
-                pass
+            # Displaying review information in two columns
+            with col1:
+                st.subheader("Personal Information:")
+                st.write(f"- Name: {name}\n- Email: {email}\n- Phone Number: {phone if phone else 'not provided'}")
+                    
+            st.markdown("### All the personal data")
+            st.json(personal_data.data, expanded=False)
+
+        if st.button("Save preferences"):
+            # Check if key is non-empty, otherwise check the next condition
+            if key:
+                _key = key
+            # Check if authenticator.credentials["access_key"] is non-empty, otherwise check the next condition
+            elif authenticator.credentials["access_key"]:
+                _key = authenticator.credentials["access_key"]
+            # If none of the above conditions are met, assign the value of signature
+            else:
+                _key = signature
             
+            st.session_state["access_key"] = _key
+            signature_exists = check_existence(conn, _key)
             
-            with st.expander("Show personal data", expanded=False):
+            st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
+            try:
+                # response_data_json = json.loads(personal_data.data)
+                response_data_json = personal_data.data
+                insert_or_update_data(conn, _key, response_data_json, data_label='personal_data')
+            except json.JSONDecodeError:
+                st.error("Invalid JSON format. Please provide a valid JSON string.")
+
+            pass
+        
+    
+        with st.expander("Show personal data", expanded=False):
+            
+            signature = st.text_input("Signature", key="fetch-signature", value=st.session_state["access_key"])
+            if st.button("Fetch preferences"):
+                fetch_and_display_personal_data(conn,
+                                                kwargs = {"key" : signature, 
+                                                            "database": "discourse-data", 
+                                                            "index": 'signature'})
+
+        st.divider()
+        
+        travel_expense_text = """
+        ## Travelling smooth 
                 
-                signature = st.text_input("Signature", key="fetch-signature", value=st.session_state["access_key"])
-                if st.button("Fetch preferences"):
-                    fetch_and_display_personal_data(conn,
-                                                    kwargs = {"key" : signature, 
-                                                              "database": "discourse-data", 
-                                                              "index": 'signature'})
+Traveling to Athens is coming. Let's estimate the cost of the travel. Make a rough estimate and enter it below. This will include flights, trains, or any other modes of transportation you'll be using to get to the conference.
+"""
+        st.markdown(travel_expense_text)
+        personal_data.number_input("Travel expenses", key="travel_expenses", min_value=0, help=travel_expense_text)    
+        
+        travel_type_text = """
+How will you be traveling to Athens? Select the type of travel you prefer. Whether it's by air, rail, road, or sea, knowing this helps us find options.
+"""
+        st.markdown(travel_type_text)
 
-            st.divider()
-            st.write("Next steps")
-            st.write("""
-            - [X] Download the booklet
-            - [X] Save your preferences
-            - [?] Disconnect
-            - [ ] Display information
-            - [ ] Update data
-            - [ ] Overview of the mission
+        
+        travel_type = personal_data.multiselect("Travel type", 
+                                     id = 'travel_preferences', options= ["Air", "Rail", "Road", "Sea"])
+        
+        
+        food_preferences_text = """
+Everyone has different tastes and dietary needs. Please select your food preferences from the options below. This will help us ensure that we find delicious choices.
+"""
+        st.markdown(food_preferences_text)
+        
+        food_preferences = personal_data.multiselect("Food preferences", id = 'food_preferences', options = ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free"], key="food_preferences", help=food_preferences_text)
+        st.json(personal_data.data, expanded=True)
+
+        if st.button("Fetch preferences", key="fetch_preferences_extra"):
+            st.write(f'sig {signature}')
+            _data = fetch_personal_data(conn, kwargs = {"key" : signature,
+                                                "database": "discourse-data",
+                                                "index": 'signature'})
+            st.json(_data, expanded=True)
+
+        if st.button("Save preferences", key="save_preferences_extra"):
+            if key:
+                _key = key
+            # Check if authenticator.credentials["access_key"] is non-empty, otherwise check the next condition
+            elif authenticator.credentials["access_key"]:
+                _key = authenticator.credentials["access_key"]
+            # If none of the above conditions are met, assign the value of signature
+            else:
+                _key = signature
             
-            """)
+            st.session_state["access_key"] = _key
+            signature_exists = check_existence(conn, _key)
+            
+            st.write('`Wonderful.`' if signature_exists else 'The key does not correspond to a locked door.')
+            try:
+                response_data_json = personal_data.data
+                st.json(response_data_json, expanded=True)
+                insert_or_update_data(conn, _key, response_data_json, data_label='personal_data')
+            except json.JSONDecodeError:
+                st.error("Invalid JSON format. Please provide a valid JSON string.")
 
-        st.title('Step 2: A first mission estimate')
+            pass
+        
+
+        st.write("Next steps")
+        st.write("""
+        - [X] Download the booklet
+        - [X] Save your preferences
+        - [?] Disconnect
+        - [ ] Display information
+        - [ ] Update data
+        - [ ] Overview of the mission
+        
+        """)
+
+        st.title('Step 2: A first estimate')
         
         contributors = 14
         support = 3
@@ -572,7 +678,7 @@ def main():
         days = 5
         ub = (contributors + support ) * days * perdiem[0] * days
 
-        """ ## The rationale:
+        fast_estimate = """ ## The rationale:
 
 To estimate the financial resources required for our collective scientific mission, we can adopt a straightforward approach based on the publicly available standard rates provided by CNRS (Centre National de la Recherche Scientifique). 
 
@@ -588,7 +694,7 @@ Where: contributors = 14, support = 3, perdiem[0]* = 167 EUR, days = 5
 
 This is a rough estimate that will be refined aggregating _our_ preferences.
 """
-        st.markdown(f"## Estimate: {ub} EUR")
+        st.markdown(f"## Fast estimate (upper bound): {ub} EUR")
 
         """    
 > Ref: cf. Direction générale des Finances publiques, frais de mission.
@@ -599,6 +705,64 @@ This is a rough estimate that will be refined aggregating _our_ preferences.
         authenticator.logout('Disconnect', 'main', key='disconnect')
         # add_vertical_space(13)
         st.divider()
+
+
+        # Title
+        st.title("Budget Estimator for Conference Trip")
+
+        """
+### Planning our upcoming conference trip to Athens just got easier. 
+
+# This tool helps us calculate the estimated budget for travel, accommodation, and delicious food expenses. Make an estimate: input the daily costs for accommodation and food, along with the approximate travel expenses. The tool will then calculate the total estimated budget for our group.
+
+We can ensure that we have a clear understanding of the financial requirements and make necessary arrangements. 
+
+## Thank you for your participation!
+        
+        """
+        
+        # Input fields for per diem and travel expenses
+        accommodation_per_day = st.number_input("Accommodation cost per day (EUR):", min_value=0)
+        food_per_day = st.number_input("Food cost per day (EUR):", min_value=0)
+        travel_cost_per_person = st.number_input("Approximate travel cost per person (EUR):", min_value=0)
+        conference_fee_per_person = 250  # Fixed conference fee per person
+
+        # Number of participants and days of stay
+        num_participants = 17
+        average_days_of_stay = 5
+
+        # Print number of participants and average days of stay
+        st.write(f"Number of Participants: {num_participants}")
+        st.write(f"Average Days of Stay: {average_days_of_stay}")
+        
+        # Calculate total expenses
+        total_accommodation = num_participants * average_days_of_stay * accommodation_per_day
+        total_food = num_participants * average_days_of_stay * food_per_day
+        total_travel = num_participants * travel_cost_per_person
+        total_conference_fees = num_participants * conference_fee_per_person
+        total_expenses = total_accommodation + total_food + total_travel + total_conference_fees
+
+        # Display the budget estimate
+        st.subheader("Budget Estimate")
+        st.write(f"Total Accommodation Cost: EUR {total_accommodation}")
+        st.write(f"Total Food Cost: EUR {total_food}")
+        st.write(f"Total Travel Cost: EUR {total_travel}")
+        st.write(f"Total Conference Fees: EUR {total_conference_fees}")
+        st.write(f"**Total Estimated Budget: EUR {total_expenses}**")
+
+        # add button to submit estimate 
+        if st.button("Submit Estimate"):
+            st.success("Estimate submitted successfully!")
+            st.toast("Thank you for submitting the estimate.")
+
+
+
+
+
+
+
+
+
         
     st.title('Step 3: Display information')
     

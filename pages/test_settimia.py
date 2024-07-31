@@ -48,8 +48,8 @@ from yaml.loader import SafeLoader
 
 
 # Initialize read_texts set in session state if not present
-# if 'read_texts' not in st.session_state:
-#     st.session_state["read_texts"] = set()
+if 'read_texts' not in st.session_state:
+    st.session_state["read_texts"] = set()
 
 def check_existence(conn, signature):
     if signature == "":
@@ -122,8 +122,6 @@ authenticator = GateAuthenticate(
     config['preauthorized'],
     webapp='settimia'
 )
-
-
 
 survey = CustomStreamlitSurvey()
             

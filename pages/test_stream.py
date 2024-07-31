@@ -9,7 +9,7 @@ import string
 
 # Initialize read_texts set in session state if not present
 if 'read_texts' not in st.session_state:
-    st.session_state.read_texts = set()
+    st.session_state['read_texts'] = set()
 
 def hash_text(text):
     return hashlib.sha256(text.encode()).hexdigest()
@@ -26,7 +26,7 @@ def _stream_once(text, damage):
     # st.write(sleep_lengths.values() * (1+damage))
 
     # Check if the text has already been read
-    if text_hash not in st.session_state.read_texts:
+    if text_hash not in st.session_state['read_texts']:
         # st.write(text)
     
         for i, word in enumerate(text.split()):
@@ -44,15 +44,15 @@ def _stream_once(text, damage):
             else:
                 time.sleep(0.3)
             
-        st.session_state.read_texts.add(text_hash)  # Marking text as read
+        st.session_state['read_texts'].add(text_hash)  # Marking text as read
 
 def main():
     # once usage:
-    st.write(st.session_state.read_texts)
+    st.write(st.session_state['read_texts'])
     streamwrite(_stream_once("This is some initial text that should only be displayed once.", 0))
-    st.write(st.session_state.read_texts)
+    st.write(st.session_state['read_texts'])
     streamwrite(_stream_once("Additional text that should only be displayed once.", 0))
-    st.write(st.session_state.read_texts)
+    st.write(st.session_state['read_texts'])
     st.text_input("Text Input")
 
 
