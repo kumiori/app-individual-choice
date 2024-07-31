@@ -270,7 +270,7 @@ html_code = f"""
 <div id="globeViz"></div>
 <div id="time"></div>
 
-<script>
+<script type="module">
     { javascript_code }
 </script>
 </body>
