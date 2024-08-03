@@ -161,6 +161,10 @@ def _shuffle_display(data):
 
     st.write("--------------------")
 
+
+with open('data/credentials.yml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
 def main():
     _data = None
     
