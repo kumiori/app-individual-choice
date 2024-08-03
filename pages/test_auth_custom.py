@@ -2,7 +2,8 @@ import streamlit as st
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Authenticate
 from lib.io import conn as auth_database
-
+import hashlib
+import random
 from datetime import datetime, timedelta
 
 import os
@@ -33,7 +34,7 @@ from typing import Callable, Dict, List, Optional
 from streamlit_authenticator.controllers import AuthenticationController, CookieController
 
 from streamlit_authenticator.models import AuthenticationModel
-from streamlit_authenticator.utilities import Validator
+from streamlit_authenticator.utilities import Helpers, Validator, RegisterError
 
 class _AuthenticationModel(AuthenticationModel):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
@@ -137,6 +138,15 @@ class _AuthenticationController(AuthenticationController):
                                                         auto_hash)
         self.validator = Validator()
 
+    def register_user(self, access_key: str, pre_authorization: bool,
+                      domains: Optional[List[str]]=None, callback: Optional[Callable]=None,
+                      captcha: bool=False, entered_captcha: Optional[str]=None, webapp: Optional[List[str]]=None) -> tuple:
+        if captcha:
+            if not entered_captcha:
+                raise RegisterError('Captcha not entered')
+            entered_captcha = entered_captcha.strip()
+            self._check_captcha('register_user_captcha', RegisterError, entered_captcha)
+
 class AuthenticateWithKey(Authenticate):
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str,
                  cookie_expiry_days: float=30.0, pre_authorized: Optional[List[str]]=None,
@@ -197,7 +207,72 @@ class AuthenticateWithKey(Authenticate):
                     self.cookie_controller.set_cookie()
 
         return st.session_state['name'], st.session_state['authentication_status'], st.session_state['username']
-    
+    def register_user(self, data = True, pre_authorization: bool=True,
+                      domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
+                      captcha: bool=True, clear_on_submit: bool=False, key: str='Register user',
+                      callback: Optional[Callable]=None) -> tuple:
+        """
+        Creates a register new user widget.
+
+        Parameters
+        ----------
+        location: str
+            Location of the register new user widget i.e. main or sidebar.
+        pre-authorization: bool
+            Pre-authorization requirement, 
+            True: user must be pre-authorized to register, 
+            False: any user can register.
+        domains: list, optional
+            Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
+            list: required list of domains, 
+            None: any domain is allowed.
+        fields: dict, optional
+            Rendered names of the fields/buttons.
+        captcha: bool
+            Captcha requirement for the register user widget, 
+            True: captcha required,
+            False: captcha removed.
+        clear_on_submit: bool
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
+        key: str
+            Unique key provided to widget to avoid duplicate WidgetID errors.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
+
+        Returns
+        -------
+        str
+            Email associated with the new user.
+        str
+            Username associated with the new user.
+        str
+            Name associated with the new user.
+        """
+        if fields is None:
+            fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
+                      'Password':'Password', 'Repeat password':'Repeat password',
+                      'Register':'Register', 'Captcha':'Captcha'}
+
+        register_user_form = st.form(key=key, clear_on_submit=clear_on_submit)
+        register_user_form.subheader('Register user' if 'Form name' not in fields
+                                     else fields['Form name'])
+
+        entered_captcha = None
+        if captcha:
+            entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
+                                                            else fields['Captcha']).strip()
+            register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
+
+        access_key_hash = hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest()
+
+        if register_user_form.form_submit_button('`Here` • `Now`' if 'Register' not in fields
+                                                 else fields['Register']):
+            return self.authentication_controller.register_user(access_key_hash,
+                                                                pre_authorization, domains,
+                                                                callback, captcha, entered_captcha)
+        return None, None, None
 authenticator = AuthenticateWithKey(
     config['credentials'],
     config['cookie']['name'],
@@ -215,3 +290,14 @@ elif st.session_state['authentication_status'] is False:
 elif st.session_state['authentication_status'] is None:
     authenticator.login('Connect', 'main')
     st.warning('Please use your access key')
+    try:
+        match = True
+        fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
+                  'Password':'Password', 'Repeat password':'Repeat password',
+                  'Register':' Check • Point ', 'Captcha':'Captcha'}
+        if authenticator.register_user(data = match,  pre_authorization=False, fields = fields):
+            st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
+                💨 Here is one for your access ✨ <` `> ✨.        \
+                Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')
+    except Exception as e:
+        st.error(e)
