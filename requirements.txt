@@ -158,7 +158,7 @@ st-annotated-text==4.0.1
 st-supabase-connection==1.2.0
 stack-data==0.6.3
 storage3==0.6.1
-streamlit==1.36.0
+streamlit==1.37.0
 streamlit-authenticator==0.2.3
 streamlit-camera-input-live==0.2.0
 streamlit-card==0.0.61
