@@ -28,7 +28,6 @@ st.json(config)
 # st.json(config)
     
 class AuthenticateWithKeys(Authenticate):
-
     def login(self, form_name: str, location: str='main') -> tuple:
         """
         Creates a login widget.
