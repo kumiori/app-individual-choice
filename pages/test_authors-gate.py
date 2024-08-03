@@ -670,7 +670,7 @@ Everyone has different tastes and dietary needs. Please select your food prefere
         
         """)
 
-        st.title('Step 2: A first estimate')
+        st.title('Step 2: An upper bound estimate')
         
         contributors = 14
         support = 3
@@ -694,7 +694,7 @@ Where: contributors = 14, support = 3, perdiem[0]* = 167 EUR, days = 5
 
 This is a rough estimate that will be refined aggregating _our_ preferences.
 """
-        st.markdown(f"## Fast estimate (upper bound): {ub} EUR")
+        # st.markdown(f"## Fast estimate (upper bound): {ub} EUR")
 
         """    
 > Ref: cf. Direction générale des Finances publiques, frais de mission.
