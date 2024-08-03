@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Authenticate
+
 from datetime import datetime, timedelta
 
 import os
@@ -26,9 +27,14 @@ st.json(config)
 # with open('pages/credentials.yml') as file:
 #     config = yaml.load(file, Loader=SafeLoader)
 # st.json(config)
-    
-class AuthenticateWithKeys(Authenticate):
-    def login(self, form_name: str, location: str='main') -> tuple:
+
+from typing import Callable, Dict, List, Optional
+
+class AuthenticateWithKey(Authenticate):
+    def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
+              max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
+              captcha: bool=False, clear_on_submit: bool=False, key: str='Login',
+              callback: Optional[Callable]=None, sleep_time: Optional[float]=None) -> tuple:
         """
         Creates a login widget.
 
@@ -48,24 +54,33 @@ class AuthenticateWithKeys(Authenticate):
         str
             Username of the authenticated user.
         """
+        if fields is None:
+            fields = {'Form name':'Connect', 'Key': 'Access key', 
+                      'Login':'Login', 'Captcha':'Captcha'}
+
         if not st.session_state['authentication_status']:
             token = self.cookie_controller.get_cookie()
             st.write(f"token: {token}")
             if token:
                 self.authentication_controller.login(token=token)
             login_form = st.form('Connect')
-            login_form.subheader(form_name)
+            login_form.subheader(fields['Form name'])
             
-            self.username = login_form.text_input('Username').lower()
-            st.session_state['username'] = self.username
-            self.password = login_form.text_input('Password', type='password')
+            self.access_key = login_form.text_input('Access key').lower()
+            st.session_state['access_key'] = self.access_key
 
-            if login_form.form_submit_button('Login'):
-                self._check_credentials()
+            if login_form.form_submit_button('Open with key 🔑'):
+                # self._check_credentials()
+                if self.authentication_controller.login(username, password,
+                                                        max_concurrent_users,
+                                                        max_login_attempts,
+                                                        callback=callback, captcha=captcha,
+                                                        entered_captcha=False):
+                    self.cookie_controller.set_cookie()
 
         return st.session_state['name'], st.session_state['authentication_status'], st.session_state['username']
     
-authenticator = AuthenticateWithKeys(
+authenticator = AuthenticateWithKey(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
@@ -74,4 +89,13 @@ authenticator = AuthenticateWithKeys(
 )
 
 
-authenticator.login('Connect', 'main')
+
+if st.session_state['authentication_status']:
+    authenticator.logout()
+    st.write(f'Welcome *{st.session_state["name"]}*')
+    st.title('Some content')
+elif st.session_state['authentication_status'] is False:
+    st.error('Username/password is incorrect')
+elif st.session_state['authentication_status'] is None:
+    authenticator.login('Connect', 'main')
+    st.warning('Please enter your username and password')
