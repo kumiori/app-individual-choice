@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 import yaml
 from lib.authentication import _Authenticate
-from streamlit_authenticator.exceptions import RegisterError
+from streamlit_authenticator import RegisterError
 from streamlit_extras.row import row
 from yaml.loader import SafeLoader
 from lib.survey import CustomStreamlitSurvey
@@ -165,6 +165,16 @@ def _shuffle_display(data):
 with open('data/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+authenticator = _Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['cookie']['expiry_minutes'],
+    config['preauthorized'],
+    webapp = 'discourse-authors'
+)
+
 def main():
     _data = None
     
@@ -181,7 +191,24 @@ def main():
         with st.expander("Display Data", expanded=True):  
             _shuffle_display(_data)
     survey = CustomStreamlitSurvey()
+
+    if st.session_state["authentication_status"] is None:
+        st.write("Please authenticate to access the survey.")
         
+        res = authenticator.login('🎶 • Do you have an access key?', key='author_access')
+        st.toast(res)
+    else:
+        st.write("You are authenticated.")        
+        st.write(f"{authenticator.cookie_name}")
+        st.write(f"username: {st.session_state['username']}")
+        authenticator._check_cookie()
+        st.write(f"token: {authenticator._token_decode()}")
+        st.write(f"{authenticator.credentials}")
+        st.write(f"{dir(authenticator)}")
+        authenticator.logout('Disconnect', 'main', key='disconnect')
+        
+    st.write(st.__version__)
+    st.write(st.context.cookies)   
     col3.download_button(
         label="Download raw",
         data=survey.to_json(),

@@ -4,7 +4,7 @@ from streamlit_authenticator import Authenticate
 from lib.io import conn as supabase
 from datetime import datetime, timedelta
 import hashlib
-from streamlit_authenticator.exceptions import CredentialsError, ForgotError, RegisterError, ResetError, UpdateError
+from streamlit_authenticator import CredentialsError, ForgotError, RegisterError, ResetError, UpdateError
 
 from lib.geo import get_coordinates
 import random
@@ -15,7 +15,7 @@ class _Authenticate(Authenticate):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.cookie_expiry_minutes = cookie_expiry_minutes
         self.supabase = supabase
-        self.credentials['access_key'] = None
+        # self.credentials['access_key'] = None
         self.webapp = webapp
 
     if "access_key" not in st.session_state:
@@ -45,23 +45,22 @@ class _Authenticate(Authenticate):
         """
         # if location not in ['main', 'sidebar']:
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
+        self._check_cookie()
         if not st.session_state['authentication_status']:
-            self._check_cookie()
-            if not st.session_state['authentication_status']:
-                _key = 'Connect' if not key else key
-                if location == 'main':
-                    login_form = st.form(_key)
-                elif location == 'sidebar':
-                    login_form = st.sidebar.form(_key)
+            _key = 'Connect' if not key else key
+            if location == 'main':
+                login_form = st.form(_key)
+            elif location == 'sidebar':
+                login_form = st.sidebar.form(_key)
 
-                login_form.subheader(form_name)
-                
-                self.access_key = login_form.text_input('Access key').lower()
-                st.session_state['access_key'] = self.access_key
-                # self.password = login_form.text_input('Password', type='password')
+            login_form.subheader(form_name)
+            
+            self.access_key = login_form.text_input('Access key').lower()
+            st.session_state['access_key'] = self.access_key
+            # self.password = login_form.text_input('Password', type='password')
 
-                if login_form.form_submit_button('Open with key 🔑'):
-                    self._check_credentials()
+            if login_form.form_submit_button('Open with key 🔑'):
+                self._check_credentials()
 
         return st.session_state['name'], st.session_state['authentication_status'], st.session_state['access_key']
 
@@ -79,29 +78,21 @@ class _Authenticate(Authenticate):
         bool
             Validity of entered credentials.
         """
-        existing_access_key = self.get_existing_access_key(self.access_key)
+        existing_access_key = self._access_key_exists(self.access_key)
         st.write(existing_access_key)
         
         if existing_access_key:
-            # try:
-            if existing_access_key:
-                if inplace:
-                    # st.session_state['name'] = self.credentials['access_key'][self.username]['name']
-                    self.exp_date = self._set_exp_date()
-                    self.token = self._token_encode()
-                    self.cookie_manager.set(self.cookie_name, self.token,
-                        expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days, minutes=self.cookie_expiry_minutes))
-                    st.session_state['authentication_status'] = True
-                    st.info('Cookie set')
-                else:
-                    return True
+            if inplace:
+                st.session_state['username'] = self.access_key
+                # st.session_state['name'] = self.credentials['access_key'][self.username]['name']
+                self.exp_date = self._set_exp_date()
+                self.token = self._token_encode()
+                self.cookie_manager.set(self.cookie_name, self.token,
+                    expires_at=datetime.now() + timedelta(days=self.cookie_expiry_days, minutes=self.cookie_expiry_minutes))
+                st.session_state['authentication_status'] = True
+                st.info(f'Cookie set, token {self.token}, cookie name {self.cookie_name}')
             else:
-                if inplace:
-                    st.session_state['authentication_status'] = False
-                else:
-                    return False
-            # except Exception as e:
-                # print(e)
+                return True
         else:
             if inplace:
                 st.session_state['authentication_status'] = False
@@ -196,11 +187,14 @@ class _Authenticate(Authenticate):
         # if not self.validator.validate_email(email):
         #     raise RegisterError('Email is not valid')
         
-        existing_access_key = self.get_existing_access_key(access_key)
+        existing_access_key = self._access_key_exists(access_key)
         
         if existing_access_key:
             st.write("Access key already exists. Choose a different location or try again later.")
             return False
+
+        # self.credentials['usernames'][username] = {'name': name, 
+        #     'password': Hasher([password]).generate()[0], 'email': email}
         
         data = {'key': access_key}
         response = self.supabase.table('access_keys').insert(data).execute()
@@ -208,7 +202,7 @@ class _Authenticate(Authenticate):
         if response:
             return True
         
-    def get_existing_access_key(self, access_key):
+    def _access_key_exists(self, access_key):
         # Query the 'access_keys' table to check if the access key already exists
         query = self.supabase.table('access_keys').select('*').eq('key', access_key)
         response = query.execute()
@@ -373,7 +367,7 @@ class GateAuthenticate(_Authenticate):
         # if not self.validator.validate_email(email):
         #     raise RegisterError('Email is not valid')
         
-        existing_access_key = self.get_existing_access_key(access_key)
+        existing_access_key = self._access_key_exists(access_key)
         
         if existing_access_key:
             st.info(f"Access key {access_key} already exists.")

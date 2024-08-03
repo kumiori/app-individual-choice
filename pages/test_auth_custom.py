@@ -18,7 +18,17 @@ st.write('hashed_passwords', hashed_passwords)
 st.subheader('config')
 st.json(config, expanded=False)
 
-class _Authenticate(Authenticate):
+st.markdown("## Custom authentication")
+
+with open('data/credentials.yml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+st.json(config)
+# with open('pages/credentials.yml') as file:
+#     config = yaml.load(file, Loader=SafeLoader)
+# st.json(config)
+    
+class AuthenticateWithKeys(Authenticate):
+
     def login(self, form_name: str, location: str='main') -> tuple:
         """
         Creates a login widget.
@@ -41,6 +51,7 @@ class _Authenticate(Authenticate):
         """
         if not st.session_state['authentication_status']:
             token = self.cookie_controller.get_cookie()
+            st.write(f"token: {token}")
             if token:
                 self.authentication_controller.login(token=token)
             login_form = st.form('Connect')
@@ -54,8 +65,8 @@ class _Authenticate(Authenticate):
                 self._check_credentials()
 
         return st.session_state['name'], st.session_state['authentication_status'], st.session_state['username']
-
-authenticator = _Authenticate(
+    
+authenticator = AuthenticateWithKeys(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
@@ -63,35 +74,5 @@ authenticator = _Authenticate(
     config['preauthorized']
 )
 
+
 authenticator.login('Connect', 'main')
-
-if st.session_state["authentication_status"]:
-    authenticator.logout('Disconnect', 'main', key='logout')
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    st.title('Some content')
-elif st.session_state["authentication_status"] is False:
-    st.error('Username/password is incorrect')
-elif st.session_state["authentication_status"] is None:
-    st.warning('Please enter your username and password')
-
-st.divider()
-try:
-    email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False)
-    if email_of_registered_user:
-        st.success('User registered successfully')
-except Exception as e:
-    st.error(e)
-    
-st.divider()
-    
-try:
-    username_of_forgotten_password, email_of_forgotten_password, new_random_password = authenticator.forgot_password()
-    if username_of_forgotten_password:
-        st.success('New password to be sent securely')
-        # The developer should securely transfer the new password to the user.
-    elif username_of_forgotten_password == False:
-        st.error('Username not found')
-except Exception as e:
-    st.error(e)
-    
-st.json(config)
