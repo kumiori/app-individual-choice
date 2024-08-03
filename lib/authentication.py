@@ -15,7 +15,7 @@ class _Authenticate(Authenticate):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.cookie_expiry_minutes = cookie_expiry_minutes
         self.supabase = supabase
-        self.credentials['access_key'] = None
+        # self.credentials['access_key'] = None
         self.webapp = webapp
 
     if "access_key" not in st.session_state:
@@ -228,13 +228,11 @@ class _Authenticate(Authenticate):
         location: str
             The location of the logout button i.e. main or sidebar.
         """
-        if location not in ['main', 'sidebar']:
-            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             if st.button(button_name, key, use_container_width=use_container_width):
                 self.cookie_manager.delete(self.cookie_name)
                 st.session_state['logout'] = True
-                st.session_state['name'] = None
+                # st.session_state['name'] = None
                 st.session_state['username'] = None
                 st.session_state['authentication_status'] = None
 

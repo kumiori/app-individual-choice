@@ -467,7 +467,7 @@ def main():
             ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
             
         # st.error('🐉 Some content is new')
-        key = st.session_state["access_key"] if st.session_state["access_key"] else authenticator.credentials["access_key"]
+        key = st.session_state["access_key"] if st.session_state["access_key"] else ''
         no_key = 'unknown'
         st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         st.success('🐉 Wonderful, we made it work!')
