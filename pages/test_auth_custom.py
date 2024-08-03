@@ -39,6 +39,7 @@ class _AuthenticationModel(AuthenticationModel):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
         self.credentials = credentials
+        self.participants = {}
         if 'authentication_status' not in st.session_state:
             st.session_state['authentication_status'] = None
         if 'username' not in st.session_state:
@@ -57,7 +58,7 @@ class _AuthenticationModel(AuthenticationModel):
         # st.toast('Initialised login logic')
         
         if username:
-            st.toast(f'username: {username}')
+            st.toast(f'Access key: {username}')
             if self.check_credentials(username, password, max_concurrent_users, max_login_attempts):
                 st.session_state['username'] = username
                 st.session_state['authentication_status'] = True
@@ -70,13 +71,15 @@ class _AuthenticationModel(AuthenticationModel):
             st.session_state['authentication_status'] = False
             return False
         if token:
-            if not token['username'] in self.credentials['usernames']:
+            st.write(f"token: {token}")
+            # if not token['username'] in self.credentials['usernames']:
+            if not self._valid_access_key(token['username']):
                 st.info('User not authorized')
                 # raise LoginError('User not authorized')
             st.session_state['username'] = token['username']
-            st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
+            # st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
             st.session_state['authentication_status'] = True
-            self.credentials['usernames'][token['username']]['logged_in'] = True
+            # self.credentials['usernames'][token['username']]['logged_in'] = True
         return None
 
     def check_credentials(self, username: str, password: str,
@@ -96,10 +99,18 @@ class _AuthenticationModel(AuthenticationModel):
         response = query.execute()
         
         if response.data:
-            st.info('Access key exists')
             return response.data[0]
         else:
             return None
+    def logout(self):
+        """
+        Clears the cookie and session state variables associated with the logged in user.
+        """
+        # self.credentials['usernames'][st.session_state['username']]['logged_in'] = False
+        st.session_state['logout'] = True
+        st.session_state['name'] = None
+        st.session_state['username'] = None
+        st.session_state['authentication_status'] = None
 class _AuthenticationController(AuthenticationController):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
@@ -197,7 +208,7 @@ authenticator = AuthenticateWithKey(
 
 if st.session_state['authentication_status']:
     authenticator.logout()
-    st.write(f'Welcome *{st.session_state["name"]}*')
+    st.write(f'Welcome *{st.session_state["username"]}*')
     st.title('Some content')
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
