@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Authenticate
+from lib.io import conn as auth_database
 
 from datetime import datetime, timedelta
 
@@ -47,11 +48,58 @@ class _AuthenticationModel(AuthenticationModel):
         if 'name' not in st.session_state:
             st.session_state['name'] = None
         self.credentials['usernames'] = {}
+        self.auth_database = auth_database
+        st.toast('Initialised authentication model')
+        
     def login(self, username: str, password: str, max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, token: Optional[Dict[str, str]]=None,
               callback: Optional[Callable]=None) -> bool:
-        st.write('login')
+        # st.toast('Initialised login logic')
         
+        if username:
+            st.toast(f'username: {username}')
+            if self.check_credentials(username, password, max_concurrent_users, max_login_attempts):
+                st.session_state['username'] = username
+                st.session_state['authentication_status'] = True
+                # self._record_failed_login_attempts(username, reset=True)
+                # self.credentials['usernames'][username]['logged_in'] = True
+                if callback:
+                    callback({'username': username})
+                return True
+            st.info('Incorrect credentials')
+            st.session_state['authentication_status'] = False
+            return False
+        if token:
+            if not token['username'] in self.credentials['usernames']:
+                st.info('User not authorized')
+                # raise LoginError('User not authorized')
+            st.session_state['username'] = token['username']
+            st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
+            st.session_state['authentication_status'] = True
+            self.credentials['usernames'][token['username']]['logged_in'] = True
+        return None
+
+    def check_credentials(self, username: str, password: str,
+                          max_concurrent_users: Optional[int]=None,
+                          max_login_attempts: Optional[int]=None) -> bool:
+        st.write(self.credentials)
+        try:
+            if self._valid_access_key(username):
+                return True
+        except Exception as e:
+            st.error(e)
+        return None
+
+    def _valid_access_key(self, access_key):
+        # Query the 'access_keys' table to check if the access key already exists
+        query = self.auth_database.table('access_keys').select('*').eq('key', access_key)
+        response = query.execute()
+        
+        if response.data:
+            st.info('Access key exists')
+            return response.data[0]
+        else:
+            return None
 class _AuthenticationController(AuthenticationController):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
