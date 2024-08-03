@@ -15,7 +15,6 @@ class _Authenticate(Authenticate):
         super().__init__(credentials, cookie_name, cookie_key, cookie_expiry_days, preauthorized)
         self.cookie_expiry_minutes = cookie_expiry_minutes
         self.supabase = supabase
-        # self.credentials['access_key'] = None
         self.webapp = webapp
 
     if "access_key" not in st.session_state:
