@@ -103,6 +103,10 @@ class _AuthenticationModel(AuthenticationModel):
             return response.data[0]
         else:
             return None
+
+    def _access_key_exists(self, access_key: str) -> bool:
+        return self._valid_access_key(access_key)
+    
     def logout(self):
         """
         Clears the cookie and session state variables associated with the logged in user.
@@ -112,6 +116,25 @@ class _AuthenticationModel(AuthenticationModel):
         st.session_state['name'] = None
         st.session_state['username'] = None
         st.session_state['authentication_status'] = None
+    def register_user(self, access_key: str, pre_authorization: bool,
+                      callback: Optional[Callable]=None) -> tuple:
+        if callback:
+            callback({'access_key': access_key})
+        self._register_credentials(access_key)
+
+    def _register_credentials(self, access_key: str):
+        existing_access_key = self._access_key_exists(access_key)
+        st.toast(f'Existing access key: {existing_access_key}')
+        if existing_access_key:
+            return False
+        
+        data = {'key': access_key}
+        response = self.auth_database.table('access_keys').insert(data).execute()
+        # st.write(data, response)
+        if response:
+            return True
+
+
 class _AuthenticationController(AuthenticationController):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
@@ -146,7 +169,8 @@ class _AuthenticationController(AuthenticationController):
                 raise RegisterError('Captcha not entered')
             entered_captcha = entered_captcha.strip()
             self._check_captcha('register_user_captcha', RegisterError, entered_captcha)
-
+        return self.authentication_model.register_user(access_key, pre_authorization,
+                                                       callback)
 class AuthenticateWithKey(Authenticate):
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str,
                  cookie_expiry_days: float=30.0, pre_authorized: Optional[List[str]]=None,
@@ -266,7 +290,7 @@ class AuthenticateWithKey(Authenticate):
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
 
         access_key_hash = hashlib.sha256(str(random.getrandbits(256)).encode()).hexdigest()
-
+        st.toast(f'Created access key: {access_key_hash}, waiting for participant to authorise')
         if register_user_form.form_submit_button('`Here` • `Now`' if 'Register' not in fields
                                                  else fields['Register']):
             return self.authentication_controller.register_user(access_key_hash,
@@ -294,10 +318,10 @@ elif st.session_state['authentication_status'] is None:
         match = True
         fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
                   'Password':'Password', 'Repeat password':'Repeat password',
-                  'Register':' Check • Point ', 'Captcha':'Captcha'}
-        if authenticator.register_user(data = match,  pre_authorization=False, fields = fields):
-            st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
-                💨 Here is one for your access ✨ <` `> ✨.        \
-                Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')
+                  'Register':' Here • Now ', 'Captcha':'Captcha'}
+        authenticator.register_user(data = match, captcha=False, pre_authorization=False, fields = fields)
+            # st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
+            #     💨 Here is one for your access ✨ <` `> ✨.        \
+            #     Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')
     except Exception as e:
         st.error(e)
