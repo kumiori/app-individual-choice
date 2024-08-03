@@ -11,16 +11,6 @@ import os
 import yaml
 from yaml.loader import SafeLoader
 
-with open('pages/credentials.yml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-    
-hashed_passwords = stauth.Hasher(['abc', 'def']).generate()
-
-st.write('hashed_passwords', hashed_passwords)
-
-st.subheader('config')
-st.json(config, expanded=False)
-
 st.markdown("## Custom authentication")
 
 with open('data/credentials.yml') as file:
@@ -40,6 +30,7 @@ class _AuthenticationModel(AuthenticationModel):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
         self.credentials = credentials
+        st.toast(f'Webapp {self.credentials["webapp"]}')
         self.participants = {}
         if 'authentication_status' not in st.session_state:
             st.session_state['authentication_status'] = None
@@ -120,7 +111,7 @@ class _AuthenticationModel(AuthenticationModel):
                       callback: Optional[Callable]=None) -> tuple:
         if callback:
             callback({'access_key': access_key})
-        self._register_credentials(access_key)
+        return self._register_credentials(access_key)
 
     def _register_credentials(self, access_key: str):
         existing_access_key = self._access_key_exists(access_key)
@@ -128,11 +119,13 @@ class _AuthenticationModel(AuthenticationModel):
         if existing_access_key:
             return False
         
-        data = {'key': access_key}
+        data = {'key': access_key, 'webapp': self.credentials['webapp']}
+        # st.info(f'Inserting data: {data}')
         response = self.auth_database.table('access_keys').insert(data).execute()
-        # st.write(data, response)
+        # update logged-in remote session state
         if response:
-            return True
+            return True, access_key, response
+        
 
 
 class _AuthenticationController(AuthenticationController):
@@ -319,9 +312,10 @@ elif st.session_state['authentication_status'] is None:
         fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
                   'Password':'Password', 'Repeat password':'Repeat password',
                   'Register':' Here • Now ', 'Captcha':'Captcha'}
-        authenticator.register_user(data = match, captcha=False, pre_authorization=False, fields = fields)
-            # st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
-            #     💨 Here is one for your access ✨ <` `> ✨.        \
-            #     Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')
+        success, access_key, response = authenticator.register_user(data = match, captcha=True, pre_authorization=False, fields = fields)
+        if success:
+            st.success('Registered successfully')
+            st.toast(f'Access key: {access_key}')
+            st.write(response)
     except Exception as e:
         st.error(e)
