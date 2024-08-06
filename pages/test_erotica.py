@@ -711,7 +711,7 @@ Thinking as an exploration, expression, and manifestation.
         webapp = 'erotica-players'
     )
     
-    authenticator.login('🎶 • Do you have an access key?', key='author_access')
+    # authenticator.login('🎶 • Do you have an access key?', key='author_access')
     if st.session_state["authentication_status"]:
         now = datetime.datetime.now()
         st.markdown(f"# _Today_ is {now.strftime('%A')}, {now.strftime('%d')} {now.strftime('%B')} {now.strftime('%Y')}")
@@ -737,7 +737,7 @@ Thinking as an exploration, expression, and manifestation.
         ui.badges(badge_list=[("explicit", "primary")], class_name="flex gap-2", key="viz_badges3")
         
     # st.error('🐉 Some content is new')
-    key = st.session_state["access_key"] if st.session_state["access_key"] else authenticator.credentials["access_key"]
+    key = st.session_state["access_key"]
     no_key = 'unknown'
     st.write(f'Welcome, your key is `<{ key }>` 💭 keep it safe.')
         

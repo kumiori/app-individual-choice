@@ -106,6 +106,8 @@ def match_input(input_text, translation_dict):
     else:
         return False
 
+def stream_text(text):
+    return streamwrite(_stream_example(text, 0))
 
 def friendly_time(timestamp):
     from datetime import datetime

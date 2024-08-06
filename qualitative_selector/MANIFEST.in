@@ -1,0 +1,3 @@
+recursive-include qualitative_selector/frontend/build *
+include README.md
+include LICENSE

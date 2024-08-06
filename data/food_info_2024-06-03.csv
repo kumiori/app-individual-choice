@@ -1,0 +1,9 @@
+Food Item,Quantity,Unit,Multiplicity,calcium,calories,carbohydrate,cholesterol,fat,fiber,iron,measurement_description,monounsaturated_fat,number_of_units,polyunsaturated_fat,potassium,protein,saturated_fat,sodium,sugar,vitamin_a,vitamin_c,Error
+red tomatoes,520.0,grams,4.0,1,18,3.92,0,0.20,1.2,2,g,0.051,100.000,0.135,237,0.88,0.046,5,2.63,5,14,
+broccoli,611.0,grams,1.0,4,34,6.64,0,0.37,2.6,4,g,0.011,100.000,0.038,316,2.82,0.039,33,1.70,3,99,
+peaches,1121.0,grams,8.0,0,39,9.54,0,0.25,1.5,1,g,0.067,100.000,0.086,190,0.91,0.019,0,8.39,2,7,
+bananas,674.0,grams,5.0,0,89,22.84,0,0.33,2.6,1,g,0.032,100.000,0.073,358,1.09,0.112,1,12.23,0,10,
+dill,111.0,grams,1.0,16,43,7.02,0,1.12,2.1,37,g,0.802,100.000,0.095,738,3.46,0.060,61,,43,94,
+mint,70.0,grams,1.0,,,,,,,,,,,,,,,,,,,Error 12: User is performing too many actions: please try again later
+potatoes,1171.0,grams,4.0,,,,,,,,,,,,,,,,,,,Error 12: User is performing too many actions: please try again later
+celery,370.0,grams,1.0,,,,,,,,,,,,,,,,,,,Error 12: User is performing too many actions: please try again later

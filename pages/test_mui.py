@@ -1,5 +1,6 @@
 from streamlit_elements import elements
 from streamlit_elements import mui, html
+import extra_streamlit_components as stx
 import streamlit as st
 
 
@@ -66,20 +67,21 @@ with elements("vertical_stepper"):
                     mui.StepLabel(step["label"])
                     with mui.StepContent:
                         mui.Typography(step["description"])
-                        # with mui.Box(sx={"mb": 2}):
-                        #     with mui.Typography:
-                        #         mui.Button(
-                        #             variant="contained",
-                        #             onclick=handle_next,
-                        #             disabled=index == len(steps) - 1,
-                        #             sx={"mt": 1, "mr": 1}
-                        #         )
-                        #         mui.Button(
-                        #             "Back",
-                        #             onclick=handle_back,
-                        #             disabled=index == 0,
-                        #             sx={"mt": 1, "mr": 1}
-                        #         )
+                        with mui.Box(sx={"mb": 2}):
+                            with mui.Typography:
+                                mui.Button(
+                                    "Follow",
+                                    variant="contained",
+                                    onclick=handle_next,
+                                    disabled=index == len(steps) - 1,
+                                    sx={"mt": 1, "mr": 1}
+                                )
+                                mui.Button(
+                                    "Back",
+                                    onclick=handle_back,
+                                    disabled=index == 0,
+                                    sx={"mt": 1, "mr": 1}
+                                )
 
 # Display completion message and reset button
 if st.session_state.active_step == len(steps):
@@ -243,3 +245,16 @@ def basic_tooltip():
 
 # st.write(mui)
 # basic_tooltip()
+
+
+chosen_id = stx.tab_bar(data=[
+    stx.TabBarItemData(id=1, title="ToDo", description="Tasks to take care of"),
+    stx.TabBarItemData(id=2, title="Done", description="Tasks taken care of"),
+    stx.TabBarItemData(id=3, title="Overdue", description="Tasks missed out"),
+    stx.TabBarItemData(id=4, title="Overdue", description="Tasks missed out"),
+    stx.TabBarItemData(id=5, title="Overdue", description="Tasks missed out"),
+], default=1)
+st.info(f"{chosen_id=}")
+
+val = stx.stepper_bar(steps=["Ready", "Set", "Go"])
+st.info(f"Phase #{val}")

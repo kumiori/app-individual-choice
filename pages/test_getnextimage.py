@@ -45,7 +45,7 @@ image_urls = [f"{image_dir}/{file}" for file in image_files][0:3]
 current_index = 0
 displayed_image_url = None
 
-def handle_button_click(image_index, wrapper, choice):
+def handle_button_click(image_index, choice):
     st.toast(f"Idea {image_index} classified as {choice}")
     st.session_state["removed_images"].append(image_index)
     st.session_state["choices"][image_index] = choice
@@ -54,6 +54,8 @@ def get_next_image(image_urls):
     remaining_images = [img for idx, img in enumerate(image_urls) if idx not in st.session_state["removed_images"]]
     if remaining_images:
         idx = image_urls.index(remaining_images[0])
+        st.write(f"remaining_images {remaining_images}")
+        st.write(f"idx {idx}")
         return remaining_images[0], idx
     else:
         return None, None
@@ -78,11 +80,11 @@ wrapper = col2.empty()
 
 current_image_url, current_index = get_next_image(image_urls)
 
-st.write(current_image_url)
-
 if current_image_url is None:
     wrapper.write("No more images to display.")
 else:
+    st.write(f"current_index {current_index}")
+    wrapper.image(current_image_url, width=300, caption=f"Idea {current_index}")
     st.session_state["current_index"] = current_index
     alignment = create_dichotomy(key = "alignment", kwargs={'survey': survey,
                                 'label': 'resonance', 
@@ -91,9 +93,8 @@ else:
                                 'height': 100,
                                 'inverse_choice': lambda x: '',
                                 'callback': handle_button_click,
-                                'args': (current_index, wrapper)}
+                                'args': (current_index,)}
                 )
-    wrapper.image(current_image_url, width=300, caption=f"Idea {current_index}")
 
 st.write(f'removed {st.session_state["removed_images"]}')
 st.write(f'choices {st.session_state["choices"]}')

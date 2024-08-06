@@ -126,8 +126,6 @@ class _AuthenticationModel(AuthenticationModel):
         if response:
             return True, access_key, response
         
-
-
 class _AuthenticationController(AuthenticationController):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
@@ -297,6 +295,10 @@ authenticator = AuthenticateWithKey(
     config['cookie']['expiry_days'],
     config['preauthorized']
 )
+fields = {'Form name':'Forge access key', 'Email':'Email', 'Username':'Username',
+            'Password':'Password', 'Repeat password':'Repeat password',
+            'Register':' Here • Now ', 'Captcha':'Captcha'}
+
 
 if st.session_state['authentication_status']:
     authenticator.logout()
@@ -305,13 +307,10 @@ if st.session_state['authentication_status']:
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:
-    authenticator.login('Connect', 'main')
+    authenticator.login('Connect', 'main', fields = fields)
     st.warning('Please use your access key')
     try:
         match = True
-        fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
-                  'Password':'Password', 'Repeat password':'Repeat password',
-                  'Register':' Here • Now ', 'Captcha':'Captcha'}
         success, access_key, response = authenticator.register_user(data = match, captcha=True, pre_authorization=False, fields = fields)
         if success:
             st.success('Registered successfully')

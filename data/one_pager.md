@@ -1,0 +1,1 @@
+/Users/kumiori3/Library/CloudStorage/GoogleDrive-a.leon.baldelli@gmail.com/.shortcut-targets-by-id/1L7c0rhuAFDdW1-GffLMAyLCnsCK3DogA/Freedom of choice/Athens_Conference/FUNDING/one_pager.md

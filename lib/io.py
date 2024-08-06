@@ -19,6 +19,8 @@ def create_dichotomy(key, kwargs = {}):
     question = kwargs.get('question', 'Dychotomies, including time...')
     messages = kwargs.get('messages', ["🖤", "Meh. Balloons?", "... in between ..."])
     inverse_choice = kwargs.get('inverse_choice', lambda x: x)
+    callable = kwargs.get('callback')
+
     _response = kwargs.get('response', '## You can always change your mind. Now, to the next step.')
     col1, col2, col3 = st.columns([3, .1, 1])
     with col1:    
@@ -44,7 +46,10 @@ def create_dichotomy(key, kwargs = {}):
             st.markdown(f'## Take your time:', unsafe_allow_html=True)
     if response:
         st.markdown(_response)
-    
+            
+        if callable:
+            callable(*kwargs.get('args', []), response)
+
     return response
 
 def create_dichotomy_with3cols(key, kwargs = {}):

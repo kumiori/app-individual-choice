@@ -1,0 +1,146 @@
+/* Base styles */
+body {
+    background-color: #ffffff;
+    color: #262730;
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #262730;
+    margin: 0;
+    padding: 0;
+}
+
+/* Paragraphs */
+p {
+    color: #4a4a4a;
+    line-height: 1.6;
+}
+
+/* Links */
+a {
+    color: #1f77b4;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+button {
+    background-color: #1f77b4;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:hover {
+    background-color: #1a5b8c;
+}
+
+/* Inputs */
+input[type="text"], input[type="email"], input[type="password"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus {
+    border-color: #1f77b4;
+    outline: none;
+}
+
+/* Select dropdown */
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+table, th, td {
+    border: 1px solid #cccccc;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
+}
+
+/* Cards */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Labels */
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #4a4a4a;
+}
+
+/* Containers */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #1f77b4;
+    padding: 10px 20px;
+    color: #ffffff;
+}
+.navbar a {
+    color: #ffffff;
+    margin-right: 20px;
+    text-decoration: none;
+}
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+    background-color: #f2f2f2;
+    padding: 10px 20px;
+    color: #4a4a4a;
+    text-align: center;
+}
+
+/* Misc */
+hr {
+    border: 1px solid #dddddd;
+}
+
+pre, code {
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
