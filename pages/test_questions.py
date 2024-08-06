@@ -7,11 +7,18 @@ from lib.io import (
     create_globe, create_next, create_qualitative, create_textinput,
     create_yesno, create_yesno_row, fetch_and_display_data, conn
 )
-
+from lib.texts import stream_text
 import os
 import random
 
 # from pages.test_alignment import get_next_image
+
+
+@st.dialog('Cast your preferences')
+def _submit():
+    st.write('Thanks, expand below to see your data')    
+    st.json(survey.data, expanded=False)
+    # st.rerun()
 
 # =============================================================================
 # Image classification
@@ -72,9 +79,11 @@ def display_images_in_grid(image_urls):
 survey = CustomStreamlitSurvey('Question map')
 
 with st.expander("Questions, expanded", expanded=True):
-    pages_total = 4
+    pages_total = 10
     pages = survey.pages(pages_total, 
-            on_submit=lambda: st.success("Thank you!"))
+            # on_submit=lambda: st.success("Thank you!")
+            on_submit=lambda: _submit
+            )
 
     st.markdown("### Welcome to the Question Map")
     st.progress(float((pages.current + 1) / pages_total))
@@ -117,6 +126,7 @@ with st.expander("Questions, expanded", expanded=True):
                             )
                 wrapper.image(current_image_url, width=300, caption=f"Idea {current_index}")
 
+            st.write(image_urls)
             st.write(f'removed {st.session_state["removed_images"]}')
             st.write(f'choices {st.session_state["choices"]}')
         elif pages.current == 3:
@@ -134,8 +144,20 @@ with st.expander("Questions, expanded", expanded=True):
             st.markdown("Let's think _energetically..._")
             st.markdown("### Using an _energy_ mixer, where energy _comes from_?")
             create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
-            
-            
-st.write(image_urls)
+        elif pages.current == 4:
+            st.markdown("## How are you feeling today?")
+            st.write('hi / low : positive \ negative')
+        elif pages.current == 5:
+            st.markdown('## $\mathcal{Q}$uestion:')
+            stream_text('### context: EID, suggestion of ..., upsert results ina plenary session')
+            stream_text('### solution: R.~P., panelist, title and background')
+            stream_text('### ask: good idea or not?')
+            experience = create_dichotomy(key = "plenary", kwargs={'survey': survey,
+                                            'label': 'plenary', 
+                                            'question': 'White, go forward; black, go back.',
+                                            'gradientWidth': 25,
+                                            'height': 300,
+                                            'inverse_choice': lambda x: '',
+                                            'callback': lambda x: st.write(x),}
+                            )
 display_images_in_grid(image_urls)
-st.json(survey.data)
