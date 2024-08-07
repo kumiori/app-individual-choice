@@ -40,7 +40,8 @@ def _stream_example(text, damage):
         last_char = word[-1] if word[-1] in string.punctuation else None
 
         # Yield the word with appropriate sleep length
-        if last_char == '.' or last_char == '?' or last_char == '^':
+        # if last_char == '.' or last_char == '?' or last_char == '^':
+        if last_char == '^':
             yield word + " \n "
         else:
             yield word + " "

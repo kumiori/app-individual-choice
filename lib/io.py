@@ -11,7 +11,7 @@ conn = st.connection("supabase", type=SupabaseConnection)
 def create_button(key, kwargs = {}):
     return st.button(label=key)
 
-def create_dichotomy(key, kwargs = {}):
+def create_dichotomy(key, id = None, kwargs = {}):
     survey = kwargs.get('survey')
     label = kwargs.get('label', 'Confidence')
     name = kwargs.get('name', 'there')
@@ -25,6 +25,7 @@ def create_dichotomy(key, kwargs = {}):
     col1, col2, col3 = st.columns([3, .1, 1])
     with col1:    
         response = survey.dichotomy(name=name, 
+                                id = id,
                                 label=label,
                                 question=question,
                                 height = kwargs.get('height', 100),
@@ -224,7 +225,7 @@ def create_date_range(key, kwargs = {'label': 'Choose'}):
     # return survey.checkbox(kwargs.get('label', ''), key=key)
     return
 
-def create_equaliser(key, kwargs={}):
+def create_equaliser(key, id = None, kwargs={}):
     survey = kwargs.get('survey')
     rows = 1
     dimensions = kwargs["data"]
@@ -238,6 +239,7 @@ def create_equaliser(key, kwargs={}):
         for i, column in enumerate(bottom_cols):
             with column:
                 survey.equaliser(
+                    id = id+f'_{i + j*split_len}',
                     label=dimensions[i + j*split_len][0],
                     height=200,
                     key=f"cat_{i}_{j}",
