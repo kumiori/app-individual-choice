@@ -4,6 +4,7 @@ import requests
 import json
 import string
 import random
+import streamlit.components.v1 as components
 
 def generate_checkout_reference(length=6):
     # Define the characters to choose from for the random string
@@ -217,6 +218,12 @@ def get_sumup_accounts():
         
 def main():
 
+
+    src_101 = "https://pay.sumup.com/b2c/QDJLWO13"
+    src_100K = 'https://pay.sumup.com/b2c/Q8F8EX3C'
+    src_free = "https://pay.sumup.com/b2c/Q2RYJEC8"
+    src_bet = 'https://pay.sumup.com/b2c/QDEYTAA2'
+
     st.write(st.secrets["sumup"])
 
     redirect_uri = "https://individual-choice.streamlit.app/"
@@ -372,6 +379,16 @@ def main():
     if st.button('Retrieve SumUp Accounts'):
         # Call the function to get the SumUp accounts
         get_sumup_accounts()
+
+    st.title('SumUp widget')
+    
+    @st.dialog('SumUp Checkout Creator')
+    def sumup_pay(src):
+        components.iframe(src, height=500)
+
+    st.button('SumUp Pay', on_click=sumup_pay, args=(src_101,))
+    
+    
 
 
 if __name__ == '__main__':

@@ -70,7 +70,7 @@ def main():
 
             return_value = survey.equaliser(label="Equaliser Dim 1",
                 height=200,
-                key="test_1",
+                id="test_1",
                 default_value=55,
                 step=1,
                 min_value=0,
@@ -80,7 +80,7 @@ def main():
 
             return_value = survey.equaliser(label="Equaliser Dim 2",
                 height=200,
-                key="test_3",
+                key="test_2",
                 default_value=55,
                 step=1,
                 min_value=0,
@@ -120,6 +120,6 @@ def main():
     st.markdown("## after double injection")
     survey._add_component(_qualitative_selector)
     st.write(survey._components)
-
+    st.write(survey.data)
 if __name__ == "__main__":
     main()
