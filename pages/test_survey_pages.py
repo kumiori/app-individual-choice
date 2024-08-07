@@ -19,7 +19,7 @@ DEFAULT_SUBMIT_BUTTON = lambda pages: st.button(
 pages_total = 2
 # Instantiate the survey with a debug lambda
 pages = survey.pages(pages_total, 
-        on_submit= DEFAULT_SUBMIT_BUTTON
+        # on_submit= DEFAULT_SUBMIT_BUTTON
         # lambda pages: _submit(pages)
         )
 with pages:
