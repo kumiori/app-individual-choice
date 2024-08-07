@@ -97,7 +97,8 @@ with st.expander("Questions, expanded", expanded=True):
             )
         elif pages.current == 1:
             st.write('Share something about your preferences tonight...')
-            experience = create_dichotomy(key = "steering", kwargs={'survey': survey,
+            experience = create_dichotomy(key = "steering", id= "Steering",
+                                          kwargs={'survey': survey,
                                             'label': 'resonance', 
                                             'question': 'White, go forward; black, go back.',
                                             'gradientWidth': 50,
@@ -115,14 +116,16 @@ with st.expander("Questions, expanded", expanded=True):
                 wrapper.write("No more images to display.")
             else:
                 st.session_state["current_index"] = current_index
-                alignment = create_dichotomy(key = "alignment", kwargs={'survey': survey,
-                                            'label': 'resonance', 
-                                            'question': 'Like it or not, 🤔 hit White or Black, if resonates - or not.',
-                                            'gradientWidth': 10,
-                                            'height': 100,
-                                            'inverse_choice': lambda x: '',
-                                            'callback': handle_button_click,
-                                            'args': (current_index,)}
+                alignment = create_dichotomy(key = "Alignment", 
+                                             kwargs={'survey': survey,
+                                                'label': 'resonance', 
+                                                'question': 'Like it or not, 🤔 hit White or Black, if resonates - or not.',
+                                                'gradientWidth': 10,
+                                                'height': 100,
+                                                'inverse_choice': lambda x: '',
+                                                'callback': handle_button_click,
+                                                'args': (current_index,)
+                                            }
                             )
                 wrapper.image(current_image_url, width=300, caption=f"Idea {current_index}")
 
@@ -143,7 +146,7 @@ with st.expander("Questions, expanded", expanded=True):
             # st.write(survey)
             st.markdown("Let's think _energetically..._")
             st.markdown("### Using an _energy_ mixer, where energy _comes from_?")
-            create_equaliser(key = "equaliser", kwargs={"survey": survey, "data": equaliser_data})
+            create_equaliser(key = "equaliser", id = "Alignment", kwargs={"survey": survey, "data": equaliser_data})
         elif pages.current == 4:
             st.markdown("## How are you feeling today?")
             st.write('hi / low : positive \ negative')
@@ -161,3 +164,4 @@ with st.expander("Questions, expanded", expanded=True):
                                             'callback': lambda x: st.write(x),}
                             )
 display_images_in_grid(image_urls)
+st.json(survey.data, expanded=True)
