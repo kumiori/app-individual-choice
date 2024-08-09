@@ -203,22 +203,29 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
             from lib.survey import date_decoder
             
             st.markdown("### Thank you for your participation!")
-            stream_once_then_write("### We have collected preferences and will analyse it to make the best decisions.")
+            stream_once_then_write("### You have collected your preferences and will analyse it to make the best decisions.")
             # review your responses, download the data for safe record
-            st.markdown("### Here are your responses")
+            st.markdown("### Here are your responses. Download them - if anything happens - you will be able to upload them and resume the exchange.")
             # st.json(survey.data, expanded=True)
             current_date = datetime.now().strftime("%Y-%m-%d")
             raw_data = survey.data
             serialised_dates = [date_decoder(date_obj) for date_obj in raw_data['athena-range-dates']['value']]
             serialised_data = {**raw_data, 'athena-range-dates': serialised_dates}
-            # st.write(serialised_data)
+            st.json(serialised_data, expanded=False)
             # survey.download_button("Export Survey Data", use_container_width=True)
             csv_filename = f"my_responses_question_map_1_{current_date}.csv"
 
             if st.download_button(label=f"Download data for reference {current_date}", use_container_width=True, data=json.dumps(serialised_data), file_name='my_responses_question_map_1.csv', mime='text/csv'):
                 st.success(f"Saved {csv_filename}")
-                
-
+        elif pages.current == 9:
+            st.markdown("### Thank you again! ")
+            stream_once_then_write("### Time now to integrate your preferences with the others.")
+            stream_once_then_write("### Submit your raw preferences and let's see if we can make sense of all ours.")
+            st.divider()
+            stream_once_then_write("### _In the next episode..._")
+            stream_once_then_write("### We will share more _general_ questions and perspectives.")
+            
+            
 general = CustomStreamlitSurvey('General map')
 with st.expander("Questions, general perspectives", expanded=False, icon=":material/recenter:"):
     pages_total = 10
