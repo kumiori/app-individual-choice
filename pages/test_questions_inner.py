@@ -11,17 +11,20 @@ from lib.io import (
 from datetime import datetime, timedelta
 from streamlit_extras.stateful_button import button as stateful_button 
 from streamlit_extras.stylable_container import stylable_container
-
+import pandas as pd
 import philoui as ph
 from philoui.texts import hash_text, stream_text, _stream_once
+from philoui.geo import get_coordinates, reverse_lookup
 
 import os
 import random
 
 # from pages.test_alignment import get_next_image
+import streamlit_shadcn_ui as ui
 
 import time
 import string
+from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IODatabase
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
@@ -42,20 +45,41 @@ def stream_once_then_write(text):
         st.markdown(text)
         
 
-with st.expander("Questions, practical philosophy", expanded=False, icon=":material/step_over:"):
+
+cols = st.columns(4)
+db = IODatabase(conn, "discourse-data")
+
+data = db.fetch_data()
+df = pd.DataFrame(data)
+
+item_count = len(df)
+
+with cols[0]:
+    ui.metric_card(title="Total count", content=item_count, description="Participants, so far.", key="card1")
+with cols[1]:
+    ui.metric_card(title="Total GAME", content="0.1 €", description="Since  _____ we start", key="card2")
+with cols[2]:
+    ui.metric_card(title="Pending invites", content="14", description="...", key="card3")
+with cols[3]:
+    st.markdown("### Questions")
+    ui.badges(badge_list=[("experimental", "secondary")], class_name="flex gap-2", key="viz_badges2")
+    ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
+    
+
+with st.expander("Questions, practical philosophy", expanded=True, icon=":material/step_over:"):
     pages_total = 10
     pages = survey.pages(pages_total, 
             # on_submit=lambda: st.success("Thank you!")
             on_submit=lambda: _submit,
             )
-    st.markdown("### Welcome to the Question Map")
+    st.markdown("### $\mathcal{W}$elcome to the $\mathcal{Q}$uestion Map")
     st.progress(float((pages.current + 1) / pages_total))
     with pages:
         if pages.current == 0:
             stream_once_then_write('### Asking questions is a difficult business...')
             stream_once_then_write('### Questions are like problems, sometimes they do not seem to have an answer, or a solution.')
             
-            st.write(st.session_state["read_texts"])
+            # st.write(st.session_state["read_texts"])
 
             st.markdown("### Are you happy to go forward?")
 
@@ -63,6 +87,13 @@ with st.expander("Questions, practical philosophy", expanded=False, icon=":mater
                 "go_forward", options=["Neither Yes nor No", "Yes", "No"], index=0,
                 label_visibility="collapsed", horizontal=True
             )
+            if go_forward == "Yes":
+                st.balloons()
+            elif go_forward == "No":
+                st.info("Wonderful, we'll meet another time.")
+            elif go_forward == "Neither Yes nor No":
+                st.warning("Please, take your time to choose.")
+                
         elif pages.current == 1:
             st.markdown("### Can we align?")
             stream_once_then_write("### To ensure everyone’s travel preferences are accommodated, we need to know how you plan to get to Athens.")
@@ -73,8 +104,17 @@ with st.expander("Questions, practical philosophy", expanded=False, icon=":mater
             st.markdown("### Departure Location")
             stream_once_then_write("### Knowing your departure point helps us coordinate travel logistics and support.")
             stream_once_then_write("Where will you be departing from to reach Athens?")
-            survey.text_input("Departure location:")
+            location = survey.text_input("Departure location", id='departure_location', help="My departure location.")
 
+            if location:
+                coordinates = get_coordinates(st.secrets.opencage["OPENCAGE_KEY"], location)
+                with st.spinner():
+                    _lookup = reverse_lookup(st.secrets.opencage["OPENCAGE_KEY"], coordinates)
+                if _lookup:
+                    st.write(f"Oh! We think we understand where you will be coming from: {_lookup[0][0]['annotations']['flag']}@{coordinates}")
+                    # st.write(f"Coordinates: {coordinates}")
+                survey.data["departure_location_coordinates"] = {"label": "departure_location_coordinates", "value": coordinates}
+                
         elif pages.current == 3:
             st.markdown("### Financial Support Needs")
             stream_once_then_write("### We all have different conditions and arrangements. To provide assistance where needed, we need to know if you require financial support for the trip.")
@@ -100,15 +140,35 @@ with st.expander("Questions, practical philosophy", expanded=False, icon=":mater
         elif pages.current == 5:
             st.markdown("### Accommodation Preferences")
             stream_once_then_write("### We've compiled a list of potential accommodations and want to ensure everyone's preferences are accounted for and everyone is comfortable with the options.")
-            stream_once_then_write("How much do you like each of them? (Please rate from 0 to 1.)")
+            # stream_once_then_write("How much do you like each of them? (Please rate from 0 to 1.)")
+            st.page_link("https://www.airbnb.com/wishlists/1557728571",
+                         label="> Open accommodation options wishlist (external link)", icon="🌎")
+            st.markdown("### Is there anything you liked?") 
+            sentiment_mapping = ["one", "two", "three", "four", "five"]
+            selected = st.feedback("faces")
+            responses = [
+                "Great insight! Let's move forward.",
+                "Lovely, thanks for sharing! Let's take the next step.",
+                "Glad to hear it! Onward to the next step.",
+                "Perfect, that’s helpful! Let's continue our journey.",
+                "Thank you for feedback! Ready to proceed?"
+            ]
+            if selected is not None:
+                random.shuffle(responses)
+                st.markdown(f"{responses[selected]}")
+                # st.markdown(f"You selected: {sentiment_mapping[selected]}")            
+                survey.data["accommodation_feedback"] = {"label": "accommodation_feedback", "value": selected}
+            
         elif pages.current == 6:
             st.markdown("### Session Participation")
             stream_once_then_write("### This may be the most difficult question today. We can carve an opportunity to present our results in a parallel session talk by Ruth Wodak. Your opinion matters.")
             stream_once_then_write("Do you think it is a good idea to connect and propose to present some of our results in the parallel session entitled:")
             stream_once_then_write("### _\"Coping with crises, fear, and uncertainty. Analyzing appeals to “normality” and “common-sense”\"_?")
 
+st.json(survey.data)
+
 general = CustomStreamlitSurvey('General map')
-with st.expander("Questions, general perspectives", expanded=False, icon=":material/step_over:"):
+with st.expander("Questions, general perspectives", expanded=False, icon=":material/recenter:"):
     pages_total = 10
     pages = general.pages(pages_total, 
             # on_submit=lambda: st.success("Thank you!")
