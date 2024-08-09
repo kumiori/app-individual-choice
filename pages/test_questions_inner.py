@@ -15,7 +15,7 @@ import pandas as pd
 import philoui as ph
 from philoui.texts import hash_text, stream_text, _stream_once
 from philoui.geo import get_coordinates, reverse_lookup
-
+import json
 import os
 import random
 
@@ -96,7 +96,7 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
                 
         elif pages.current == 1:
             st.markdown("### Can we align?")
-            stream_once_then_write("### To ensure everyone’s travel preferences are accommodated, we need to know how you plan to get to Athens.")
+            stream_once_then_write("### To ensure everyone\'s travel preferences are accommodated, we need to know how you plan to get to Athens.")
             stream_once_then_write("What type of transportation do you wish to use to travel to Athens? (e.g., plane, train, bus, car)")
             options = ["Plane", "Train", "Bus", "Car", "Bike", "Other"]
             survey.multiselect("Travel modes:", options=options)
@@ -150,7 +150,7 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
                 "Great insight! Let's move forward.",
                 "Lovely, thanks for sharing! Let's take the next step.",
                 "Glad to hear it! Onward to the next step.",
-                "Perfect, that’s helpful! Let's continue our journey.",
+                "Perfect, that\'s helpful! Let's continue our journey.",
                 "Thank you for feedback! Ready to proceed?"
             ]
             if selected is not None:
@@ -160,12 +160,64 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
                 survey.data["accommodation_feedback"] = {"label": "accommodation_feedback", "value": selected}
             
         elif pages.current == 6:
-            st.markdown("### Session Participation")
-            stream_once_then_write("### This may be the most difficult question today. We can carve an opportunity to present our results in a parallel session talk by Ruth Wodak. Your opinion matters.")
-            stream_once_then_write("Do you think it is a good idea to connect and propose to present some of our results in the parallel session entitled:")
-            stream_once_then_write("### _\"Coping with crises, fear, and uncertainty. Analyzing appeals to “normality” and “common-sense”\"_?")
+            st.markdown("### Session Participation 1/2")
+            stream_once_then_write("### This may be the most difficult question today. Your opinion matters...")
+            stream_once_then_write("""### to find alignment and testing a tangible way to coordinate.""")
+            
+            with st.spinner("Let's phrase this properly..."):
+                time.sleep(3)
+            txt_1 = """We\'ve been presented with the opportunity to integrate our work into a plenary session during the conference. Specifically, Ruth Wodak\'s talk on _“Coping with crises, fear, and uncertainty. Analyzing appeals to \'normality\' and \'common-sense\'_” aligns strikingly with our discussions and ideas."""
+            txt_2 = """Ruth Wodak is a renowned linguist and professor, and bringing our “results” into her plenary could significantly amplify our exposure and trace. This requires enthusiasm and collaboration to connect with Ruth Wodak and the University’s Provost, Themis P. Kaniklidou, to present our ideas compellingly."""
+            stream_once_then_write(txt_1)
+            stream_once_then_write(txt_2)
+            stream_once_then_write("#### Let's find out together whether this is a good idea...")
+            st.markdown("Here are a few references, if you want to have more elements, before going _Next_:")
+            st.page_link("https://en.wikipedia.org/wiki/Ruth_Wodak",
+                label="> Ruth Wodak on wikipedia (external link)", icon="📣")
+            st.page_link("https://www.youtube.com/results?search_query=Ruth+Wodak",
+                label="> Ruth Wodak on youtube (external link)", icon="📺")
+            st.page_link("https://www.youtube.com/results?search_query=Ruth+Wodak",
+                label="> University\'s Provost, Themis P. Kaniklidou (external link)", icon="🎓")
 
-st.json(survey.data)
+        elif pages.current == 7:
+            st.markdown("### Session Participation 2/2")
+            txt_1 = """### $\mathcal{Q}$uestion: Do you feel confident about pursuing this opportunity, and do you think it\'s a good idea?"""
+            stream_once_then_write(txt_1)
+            with st.spinner("Use this new strange interface below to tell..."):
+                time.sleep(5)
+                stream_once_then_write("### Black or White - plus all the shades of gray.")
+            executive = create_dichotomy(key = "executive", id= "executive",
+                                          kwargs={'survey': survey,
+                                            'label': 'resonance', 
+                                            'question': 'Click to express your viewpoint: the gray area represents uncertainty, the extremes: clarity.',
+                                            'gradientWidth': 50,
+                                            'height': 250,
+                                            'title': 'I think',
+                                            'name': 'intuition',
+                                            'messages': ["Yes, it's a good idea", "No, it's not a good idea", "I'm not sure"],
+                                            'inverse_choice': lambda x: '',
+                                            'callback': lambda x: ''}
+            )
+        elif pages.current == 8:
+            # we have collected the data
+            from lib.survey import date_decoder
+            
+            st.markdown("### Thank you for your participation!")
+            stream_once_then_write("### We have collected preferences and will analyse it to make the best decisions.")
+            # review your responses, download the data for safe record
+            st.markdown("### Here are your responses")
+            # st.json(survey.data, expanded=True)
+            current_date = datetime.now().strftime("%Y-%m-%d")
+            raw_data = survey.data
+            serialised_dates = [date_decoder(date_obj) for date_obj in raw_data['athena-range-dates']['value']]
+            serialised_data = {**raw_data, 'athena-range-dates': serialised_dates}
+            # st.write(serialised_data)
+            # survey.download_button("Export Survey Data", use_container_width=True)
+            csv_filename = f"my_responses_question_map_1_{current_date}.csv"
+
+            if st.download_button(label=f"Download data for reference {current_date}", use_container_width=True, data=json.dumps(serialised_data), file_name='my_responses_question_map_1.csv', mime='text/csv'):
+                st.success(f"Saved {csv_filename}")
+                
 
 general = CustomStreamlitSurvey('General map')
 with st.expander("Questions, general perspectives", expanded=False, icon=":material/recenter:"):
@@ -180,7 +232,7 @@ with st.expander("Questions, general perspectives", expanded=False, icon=":mater
         if pages.current == 0:
             stream_once_then_write('### Understanding how the collective feels about global questions can shape our discussions and presentations.')
             stream_once_then_write('### A birds\' eye view of our views can help us warm up and get ready for the journey ahead.')
-            stream_once_then_write('### Please, pardon the generality of the question ^ Without going into the details, how do you feel about what’s happening in the world today?.')
+            stream_once_then_write('### Please, pardon the generality of the question ^ Without going into the details, how do you feel about what\'s happening in the world today?.')
             options = ["Positive", "Neutral", "Negative", "Hopeful", "Anxious", "Indifferent", "Other"]
             general.multiselect("Feeling mode:", options=options)
         if pages.current == 1:
