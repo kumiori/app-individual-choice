@@ -15,12 +15,18 @@ import pandas as pd
 import philoui as ph
 from philoui.texts import hash_text, stream_text, _stream_once
 from philoui.geo import get_coordinates, reverse_lookup
+from philoui.authentication_v2 import AuthenticateWithKey
+
 import json
 import os
 import random
+# from streamlit_authenticator import Authenticate
+from philoui.authentication_v2 import AuthenticateWithKey
 
 # from pages.test_alignment import get_next_image
 import streamlit_shadcn_ui as ui
+import yaml
+from yaml import SafeLoader
 
 import time
 import string
@@ -28,6 +34,28 @@ from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IOData
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
+    
+    
+# ============================== AUTH ===========================
+with open('data/credentials.yml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+
+authenticator = AuthenticateWithKey(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+fields_connect = {'Form name':'Connect', 'Email':'Email', 'Username':'Username',
+            'Password':'Password', 'Repeat password':'Repeat password',
+            'Register':' Here • Now ', 'Captcha':'Captcha'}
+fields_forge = {'Form name':'Forge access key', 'Email':'Email', 'Username':'Username',
+            'Password':'Password', 'Repeat password':'Repeat password',
+            'Register':' Here • Now ', 'Captcha':'Captcha'}
+
+# ===============================================================
 
 @st.dialog('Cast your preferences')
 def _submit():
@@ -44,7 +72,6 @@ def stream_once_then_write(text):
     else:
         st.markdown(text)
         
-
 
 cols = st.columns(4)
 db = IODatabase(conn, "discourse-data")
@@ -65,6 +92,29 @@ with cols[3]:
     ui.badges(badge_list=[("experimental", "secondary")], class_name="flex gap-2", key="viz_badges2")
     ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
     
+
+
+
+if st.session_state['authentication_status']:
+    authenticator.logout()
+    st.write(f'Welcome *{st.session_state["username"]}*')
+    st.title('Some content')
+elif st.session_state['authentication_status'] is False:
+    st.error('Access key does not open')
+elif st.session_state['authentication_status'] is None:
+    authenticator.login('Connect', 'main', fields = fields_connect)
+    st.warning('Please use your access key')
+    # # try:
+    # #     match = True
+    # #     success, access_key, response = authenticator.register_user(data = match, captcha=True, pre_authorization=False, 
+    # #                                                                 fields = fields_forge)
+    # #     if success:
+    # #         st.success('Registered successfully')
+    # #         st.toast(f'Access key: {access_key}')
+    # #         st.write(response)
+    # except Exception as e:
+    #     st.error(e)
+
 
 with st.expander("Questions, practical philosophy", expanded=True, icon=":material/step_over:"):
     pages_total = 10
@@ -203,20 +253,21 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
             from lib.survey import date_decoder
             
             st.markdown("### Thank you for your participation!")
-            stream_once_then_write("### You have collected your preferences and will analyse it to make the best decisions.")
-            # review your responses, download the data for safe record
-            st.markdown("### Here are your responses. Download them - if anything happens - you will be able to upload them and resume the exchange.")
-            # st.json(survey.data, expanded=True)
+            stream_once_then_write("### _You_ have collected _your_ preferences, to be  integrated for the best _collective_ decisions.")
             current_date = datetime.now().strftime("%Y-%m-%d")
             raw_data = survey.data
             serialised_dates = [date_decoder(date_obj) for date_obj in raw_data['athena-range-dates']['value']]
             serialised_data = {**raw_data, 'athena-range-dates': serialised_dates}
+            stream_once_then_write("### Below are your responses. Download them - if anything happens, they are in a safe place.")
             st.json(serialised_data, expanded=False)
             # survey.download_button("Export Survey Data", use_container_width=True)
-            csv_filename = f"my_responses_question_map_1_{current_date}.csv"
+            csv_filename = f"my_responses_question_map_1_{current_date}.data"
 
-            if st.download_button(label=f"Download data for reference {current_date}", use_container_width=True, data=json.dumps(serialised_data), file_name='my_responses_question_map_1.csv', mime='text/csv'):
+            if st.download_button(label=f"Download datafile", use_container_width=True, data=json.dumps(serialised_data), file_name='my_responses_question_map_1.csv', mime='text/csv', type='primary'):
+            # if st.download_button(label=f"Download: {csv_filename}", use_container_width=True, data=json.dumps(serialised_data), file_name='my_responses_question_map_1.csv', mime='text/csv', type='primary'):
                 st.success(f"Saved {csv_filename}")
+                stream_once_then_write("The file may not be friendly to read, but it's there ;)")
+                
         elif pages.current == 9:
             st.markdown("### Thank you again! ")
             stream_once_then_write("### Time now to integrate your preferences with the others.")
@@ -225,7 +276,7 @@ with st.expander("Questions, practical philosophy", expanded=True, icon=":materi
             stream_once_then_write("### _In the next episode..._")
             stream_once_then_write("### We will share more _general_ questions and perspectives.")
             
-            
+
 general = CustomStreamlitSurvey('General map')
 with st.expander("Questions, general perspectives", expanded=False, icon=":material/recenter:"):
     pages_total = 10
