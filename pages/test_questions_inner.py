@@ -95,6 +95,22 @@ with cols[3]:
     ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
 
 
+def create_flag_ui(pages, survey):
+    # Checkbox to flag the question
+    flag_question = st.checkbox(f"This question (Q{pages.current + 1}) is inappropriate, misplaced, ill-formed, abusive, unfit, or unclear")
+
+    # If the question is flagged, show a text input for the user to provide details
+    flag_reason = ""
+    
+    if "flagged_questions" not in survey.data:
+        survey.data["flagged_questions"] = {}
+
+    if flag_question:
+        flag_reason = st.text_area("Let me specify why I think this question is inappropriate or unclear...")
+        survey.data["flagged_questions"][f"Question {pages.current + 1}"] = {
+                        "reason": flag_reason
+                    }
+        
 def mask_string(s):
     return f"{s[0:4]}***{s[-4:]}"
 
@@ -155,7 +171,7 @@ def practical_questions():
                 stream_once_then_write('### Asking questions is a real challenge...')
                 stream_once_then_write('### Questions are like problems. \
                                        Like problems, they sometimes lack answers or solutions. But why? \
-                                           Are you ready to move forward?')
+                                       Maybe, they are not well-formed, or they are not clear enough...')
                 
                 # st.write(st.session_state["read_texts"])
 
@@ -200,12 +216,18 @@ def practical_questions():
                         
                     elif go_forward == "Neither Yes nor No":
                         st.warning("Please, take your time to choose.")
-                        
+
+                    st.divider()
+                    create_flag_ui(pages, survey)
+                    
             elif pages.current == 1:
                 stream_once_then_write("### To ensure everyone\'s travel preferences are accommodated, we need to know how you plan to get to Athens.")
                 stream_once_then_write("What type of transportation do you wish to use to travel to Athens? (e.g., plane, train, bus, car)")
                 options = ["Plane", "Train", "Bus", "Car", "Bike", "Other"]
                 survey.multiselect("Travel modes:", options=options)
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 2:
                 st.markdown("### Departure Location")
                 stream_once_then_write("### Knowing your departure point helps us coordinate travel logistics and support.")
@@ -222,6 +244,9 @@ def practical_questions():
                         # st.write(f"Coordinates: {coordinates}")
                     survey.data["departure_location_coordinates"] = {"label": "departure_location_coordinates", "value": coordinates}
                     
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 3:
                 st.markdown("### Financial Support Needs")
                 stream_once_then_write("### We all have different conditions and arrangements. To provide assistance where needed, we need to know if you require financial support for the trip.")
@@ -232,6 +257,9 @@ def practical_questions():
                     # travel, accommodation, or food
                     options = ["Travel", "Accommodation", "Food", "Other"]
                     survey.multiselect("Financial Support:", options=options, key = "kind_financial_support")
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 4:
                 st.markdown("### Stay Duration")
                 stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, we need to know our travel dates.")
@@ -244,6 +272,9 @@ def practical_questions():
                                                                     default_start=default_start, 
                                                                     default_end=default_end
                                                                     )
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 5:
                 st.markdown("### Accommodation Preferences")
                 stream_once_then_write("### We've compiled a list of potential accommodations and want to ensure everyone's preferences are accounted for and everyone is comfortable with the options.")
@@ -266,6 +297,9 @@ def practical_questions():
                     # st.markdown(f"You selected: {sentiment_mapping[selected]}")            
                     survey.data["accommodation_feedback"] = {"label": "accommodation_feedback", "value": selected}
                 
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 6:
                 st.markdown("### Session Participation 1/2")
                 stream_once_then_write("### This may be the most difficult question today. Your opinion matters...")
@@ -274,7 +308,7 @@ def practical_questions():
                 with st.spinner("Let's phrase this properly..."):
                     time.sleep(3)
                 txt_1 = """We\'ve been presented with the opportunity to integrate our work into a plenary session during the conference. Specifically, Ruth Wodak\'s talk on _“Coping with crises, fear, and uncertainty. Analyzing appeals to \'normality\' and \'common-sense\'_” aligns strikingly with our discussions and ideas."""
-                txt_2 = """Ruth Wodak is a renowned linguist and professor, and bringing our “results” into her plenary could significantly amplify our exposure and trace. This requires enthusiasm and collaboration to connect with Ruth Wodak and the University’s Provost, Themis P. Kaniklidou, to present our ideas compellingly."""
+                txt_2 = """Ruth Wodak is a renowned linguist and professor, and bringing our “results” into her plenary could significantly amplify our exposure and trace. This requires enthusiasm and collaboration to connect with Ruth Wodak and the University\'s Provost, Themis P. Kaniklidou, to present our ideas compellingly."""
                 stream_once_then_write(txt_1)
                 stream_once_then_write(txt_2)
                 stream_once_then_write("#### Let's find out together whether this is a good idea...")
@@ -283,9 +317,12 @@ def practical_questions():
                     label="> Ruth Wodak on wikipedia (external link)", icon="📣")
                 st.page_link("https://www.youtube.com/results?search_query=Ruth+Wodak",
                     label="> Ruth Wodak on youtube (external link)", icon="📺")
-                st.page_link("https://www.youtube.com/results?search_query=Ruth+Wodak",
+                st.page_link("https://www.hauniv.edu/about/latest-news/item/567-new-provost",
                     label="> University\'s Provost, Themis P. Kaniklidou (external link)", icon="🎓")
 
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 7:
                 st.markdown("### Session Participation 2/2")
                 txt_1 = """### $\mathcal{Q}$uestion: Do you feel confident about pursuing this opportunity, and do you think it\'s a good idea?"""
@@ -307,6 +344,9 @@ def practical_questions():
                                                 'inverse_choice': inverse_choice,
                                                 'callback': lambda x: ''}
                 )
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 8:
                 # we have collected the data
                 
@@ -330,6 +370,9 @@ def practical_questions():
                 # add serialised data to session state
                 st.session_state['serialised_data'] = serialised_data
                     
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
             elif pages.current == 9:
                 st.markdown("### Thank you again! ")
                 stream_once_then_write("### Time now to integrate your preferences with the others.")
@@ -337,7 +380,44 @@ def practical_questions():
                 st.divider()
                 stream_once_then_write("### _In the next episode..._")
                 stream_once_then_write("### We will share more _general_ questions and perspectives.")
-                
+
+def create_button_with_styles(key, survey, label, bg_color="gray", image_url=None):
+    image_style = f'background-image:url("{image_url}") fixed center;' if image_url else ""
+    with stylable_container(
+        key=key,
+        css_styles=f"""
+        {{
+            [data-testid="baseButton-primary"] {{
+                box-shadow: 0px 10px 14px -7px #3e7327;
+                {image_style}
+                background-color: {bg_color};
+                border-radius:4px;
+                border:1px solid #4b8f29;
+                display:inline-block;
+                cursor:pointer;
+                color:#ffffff;
+                font-family:Arial;
+                font-size:13px;
+                font-weight:bold;
+                padding:14px 31px;
+                height: 150px;
+                text-decoration:none;
+                text-shadow:0px 1px 0px #5b8a3c;
+            }}
+            [data-testid="baseButton-primary"]:hover {{
+                background-color:#72b352;
+                cursor: arrow;
+            }}
+            [data-testid="baseButton-primary"]:active {{
+                position:relative;
+                background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
+                top:1px;
+            }}
+        }}
+        """,
+    ):
+        return survey.button(label, type='primary', use_container_width=True, key=key)
+           
 def general_questions():
     general = CustomStreamlitSurvey('General map')
     with st.expander("Questions, general perspectives", expanded=False, icon=":material/recenter:"):
@@ -362,149 +442,16 @@ def general_questions():
 
                 
                 col1, _, col2 = st.columns([1, .1, 1])
-                    
                 with col1:
                     st.markdown('## <center> Negative </center>', unsafe_allow_html=True)
+                    open_play = create_button_with_styles("play_button", "High energy / Negative", "gray", "data/qrcode_1.png")
+                    open_bet = create_button_with_styles("bet_button", "Low energy / Negative", "red", "data/qrcode_1.png")
 
-                    with stylable_container(key="play_button", css_styles="""
-                    {
-                        [data-testid="baseButton-primary"] {
-                            box-shadow: 0px 10px 14px -7px #3e7327;
-                            background-image:url("data/qrcode_1.png") fixed center;
-                            border-radius:4px;
-                            border:1px solid #4b8f29;
-                            display:inline-block;
-                            cursor:pointer;
-                            color:#ffffff;
-                            font-family:Arial;
-                            font-size:13px;
-                            font-weight:bold;
-                            padding:14px 31px;
-                            height: 150px;
-                            text-decoration:none;
-                            text-shadow:0px 1px 0px #5b8a3c;
-                        }
-                        [data-testid="baseButton-primary"]:hover {
-                            # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
-                            background-color:#72b352;
-                            cursor: arrow;
-                        }
-                        [data-testid="baseButton-primary"]:active {
-                            position:relative;
-                            background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-                            top:1px;
-                        }
-                    }
-                    """,):
-                        # general.button("button", type='primary', on_click=foo, use_container_width=True, key="_payment")
-                        open_play = general.button("High energy / Negative", type='primary', use_container_width=True, key="play2")
-                    with stylable_container(key="bet_button", css_styles="""
-                    {
-                        [data-testid="baseButton-primary"] {
-                            box-shadow: 0px 10px 14px -7px #3e7327;
-                            background-image:url("data/qrcode_1.png") fixed center;
-                            background-color: gray;
-                            border-radius:4px;
-                            border:1px solid #4b8f29;
-                            display:inline-block;
-                            cursor:pointer;
-                            color:#ffffff;
-                            font-family:Arial;
-                            font-size:13px;
-                            font-weight:bold;
-                            padding:14px 31px;
-                            height: 150px;
-                            text-decoration:none;
-                            text-shadow:0px 1px 0px #5b8a3c;
-                        }
-                        [data-testid="baseButton-primary"]:hover {
-                            # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
-                            background-color:#72b352;
-                            background-color: red;
-                            cursor: arrow;
-                        }
-                        [data-testid="baseButton-primary"]:active {
-                            position:relative;
-                            background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-                            top:1px;
-                        }
-                    }
-                    """,):
-                        open_bet = general.button("Low energy / Negative", type='primary', use_container_width=True, key="bet")
-
-                    # if open_bet:
-                    #     modal.open(src=src_bet)
-
-                    # if open_play:
-                    #         modal.open(src=src_101)
-                    
                 with col2:
                     st.markdown('## <center> Positive </center>', unsafe_allow_html=True)
-                    with stylable_container(key="betray_button", css_styles="""
-                    {
-                        [data-testid="baseButton-primary"] {
-                            box-shadow: 0px 10px 14px -7px #3e7327;
-                            border-radius:4px;
-                            border:1px solid #4b8f29;
-                            background-color: black;
-                            display:inline-block;
-                            cursor:pointer;
-                            color:#ffffff;
-                            font-family:Arial;
-                            font-size:13px;
-                            font-weight:bold;
-                            padding:14px 31px;
-                            height: 150px;
-                            text-decoration:none;
-                            text-shadow:0px 1px 0px #5b8a3c;
-                        }
-                        [data-testid="baseButton-primary"]:hover {
-                            # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
-                            background-color:#72b352;
-                            background-color: black;
-                            cursor: arrow;
-                        }
-                        [data-testid="baseButton-primary"]:active {
-                            position:relative;
-                            background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-                            top:1px;
-                        }
-                    }
-                    """,):
-                        open_betray = general.button("High energy / Positive", type='primary', use_container_width=True, key="betray")
-                    with stylable_container(key="move_button", css_styles="""
-                    {
-                        [data-testid="baseButton-primary"] {
-                            box-shadow: 0px 10px 14px -7px #3e7327;
-                            border-radius:4px;
-                            border:1px solid #4b8f29;
-                            background-color: green;
-                            display:inline-block;
-                            cursor:pointer;
-                            color:#ffffff;
-                            font-family:Arial;
-                            font-size:13px;
-                            font-weight:bold;
-                            padding:14px 31px;
-                            height: 150px;
-                            text-decoration:none;
-                            text-shadow:0px 1px 0px #5b8a3c;
-                        }
-                        [data-testid="baseButton-primary"]:hover {
-                            # background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
-                            background-color:#72b352;
-                            background-color: green;
-                            cursor: arrow;
-                        }
-                        [data-testid="baseButton-primary"]:active {
-                            position:relative;
-                            background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
-                            top:1px;
-                        }
-                    }
-                    """,):
-                        open_move = general.button("Low energy / Positive", type='primary', use_container_width=True, key="move")
-
+                    open_betray = create_button_with_styles("betray_button", "High energy / Positive", "black")
+                    open_move = create_button_with_styles("move_button", "Low energy / Positive", "green")
+                    
                     if open_betray:
                         betray.open()
                         
