@@ -168,6 +168,13 @@ def _submit():
             st.write(e)
     
     
+intro_text = """
+We are exploring collective values and a shared purpose through the proposed reconstruction of the social contract.
+
+Our aim is to create an experience that connects, integrating our diverse ideas and perspectives to enhance our journey. 
+
+As part of this, we are considering options to share certain aspects of this experience, maybe even accommodation. Connect with your _access key_ and share your preferences to help us make the best decisions.
+"""
 
 def practical_questions():
 
@@ -262,35 +269,9 @@ def practical_questions():
                 create_flag_ui(pages, survey)
                     
             elif pages.current == 3:
-                st.markdown("### Financial Support Needs")
-                stream_once_then_write("### We all have different conditions and arrangements. To provide assistance where needed, we need to know if you require financial support for the trip.")
-                stream_once_then_write("Is this the case?")
-                financial_support = st.radio("Financial support", horizontal=True, options=["Yes", "No"], index=1)
-                if financial_support ==  "Yes":
-                    stream_once_then_write("Please specify the kind of support you require.")
-                    # travel, accommodation, or food
-                    options = ["Travel", "Accommodation", "Food", "Other"]
-                    survey.multiselect("Financial Support:", options=options, key = "kind_financial_support")
-                st.divider()
-                create_flag_ui(pages, survey)
-                    
-            elif pages.current == 4:
-                st.markdown("### Stay Duration")
-                stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, let's share our travel dates.")
-                stream_once_then_write("What are the dates of your stay in Athens?")
-                default_start = datetime(2024, 9, 24)
-                default_end = default_start + timedelta(days=5)
-                date_range = survey.mandatory_date_range(name = "Which days to stay in Athena?",
-                                                                    label = "athena-dates", 
-                                                                    id='athena-range-dates', 
-                                                                    default_start=default_start, 
-                                                                    default_end=default_end
-                                                                    )
-                st.divider()
-                create_flag_ui(pages, survey)
-                    
-            elif pages.current == 5:
+
                 st.markdown("### Accommodation Preferences")
+                stream_once_then_write("### ")
                 stream_once_then_write("### We've compiled a list of potential accommodations and want to ensure everyone's preferences are accounted for and everyone is comfortable with the options.")
                 # stream_once_then_write("How much do you like each of them? (Please rate from 0 to 1.)")
                 st.page_link("https://www.airbnb.com/wishlists/1557728571",
@@ -311,6 +292,34 @@ def practical_questions():
                     # st.markdown(f"You selected: {sentiment_mapping[selected]}")            
                     survey.data["accommodation_feedback"] = {"label": "accommodation_feedback", "value": selected}
                 
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
+            elif pages.current == 4:
+                st.markdown("### Stay Duration")
+                stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, let's share our travel dates.")
+                stream_once_then_write("### Our panel discussion is set for September 26-27, 2024. Could you provide an estimated date range for your stay in Athens?")
+                default_start = datetime(2024, 9, 24)
+                default_end = default_start + timedelta(days=5)
+                date_range = survey.mandatory_date_range(name = "Which days to stay in Athena?",
+                                                                    label = "athena-dates", 
+                                                                    id='athena-range-dates', 
+                                                                    default_start=default_start, 
+                                                                    default_end=default_end
+                                                                    )
+                st.divider()
+                create_flag_ui(pages, survey)
+                    
+            elif pages.current == 5:
+                st.markdown("### Financial Support Needs")
+                stream_once_then_write("### We all have different conditions and arrangements. To provide assistance where needed, we need to know if you require financial support for the trip.")
+                stream_once_then_write("Is this the case?")
+                financial_support = st.radio("Financial support", horizontal=True, options=["Yes", "No"], index=1)
+                if financial_support ==  "Yes":
+                    stream_once_then_write("Please specify the kind of support you require.")
+                    # travel, accommodation, or food
+                    options = ["Travel", "Accommodation", "Food", "Other"]
+                    survey.multiselect("Financial Support:", options=options, key = "kind_financial_support")
                 st.divider()
                 create_flag_ui(pages, survey)
                     
@@ -339,7 +348,7 @@ def practical_questions():
                     
             elif pages.current == 7:
                 st.markdown("### Session Participation 2/2")
-                txt_1 = """### $\mathcal{Q}$uestion: Do you feel confident about pursuing this opportunity, and do you think it\'s a good idea?"""
+                txt_1 = """### $\mathcal{Q}$uestion: Do you feel confident about the opportunity to expand our scope through R. Wodak's plenary session? Do you think it\'s a good idea?"""
                 stream_once_then_write(txt_1)
                 with st.spinner("Use this new strange interface below to tell..."):
                     time.sleep(5)
@@ -352,7 +361,7 @@ def practical_questions():
                                                 'question': 'Click to express your viewpoint: the gray area represents uncertainty, the extremes: clarity.',
                                                 'gradientWidth': 50,
                                                 'height': 250,
-                                                'title': 'I think',
+                                                'title': '',
                                                 'name': 'intuition',
                                                 'messages': ["Yes, it's a good idea", "No, it's not a good idea", "I'm not sure"],
                                                 'inverse_choice': inverse_choice,
@@ -393,7 +402,7 @@ def practical_questions():
                 stream_once_then_write("### Submit your raw preferences and let's see if we can make sense of all ours.")
                 st.divider()
                 stream_once_then_write("### _In the next episode..._")
-                stream_once_then_write("### We will share more _general_ questions and perspectives.")
+                stream_once_then_write("### We will `visualise` our individual preferences and share more _general_ questions and perspectives.")
 
 def create_button_with_styles(key, survey, label, bg_color="gray", image_url=None):
     image_style = f'background-image:url("{image_url}") fixed center;' if image_url else ""
@@ -473,6 +482,12 @@ def general_questions():
                         modal.open(src=src_100K)
 
 
+if st.session_state['authentication_status'] is None:
+    stream_once_then_write("### Towards our conference in Athens _Europe in Discourse_")
+    
+    cols = st.columns([1,3,1])
+    with cols[1]:
+        stream_once_then_write(intro_text)
 
 if st.session_state['authentication_status']:
     st.toast('Initialised authentication model')
