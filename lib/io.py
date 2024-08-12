@@ -22,7 +22,7 @@ def create_dichotomy(key, id = None, kwargs = {}):
     callable = kwargs.get('callback')
 
     _response = kwargs.get('response', '## You can always change your mind. Now, to the next step.')
-    col1, col2, col3 = st.columns([3, .1, 1])
+    col1, col2, col3 = st.columns([2, .1, 1])
     with col1:    
         response = survey.dichotomy(name=name, 
                                 id = id,
