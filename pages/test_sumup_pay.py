@@ -4,6 +4,7 @@ from sumup_oauthsession import OAuth2Session
 from pages.test_sumup import generate_checkout_reference
 import json
 import streamlit.components.v1 as components
+from streamlit_javascript import st_javascript as stjs
 
 
 # Replace with your SumUp API credentials
@@ -167,16 +168,56 @@ def sumup_widget(checkout_id):
                         SumUpCard.mount({{
                             id: 'sumup-card',
                             checkoutId: '{checkout_id}',
+                            donateSubmitButton: false,
+                            showInstallments: true,
                             onResponse: function (type, body) {{
                             console.log('Type', type);
                             console.log('Body', body);
+                            SumUpCard.unmount();
                             }},
                         }});
                     </script>
                     """
         # st.write(js_code)
-        components.html(js_code)
+        with st.container():
+            components.html(js_code, height=600)
 
+
+@st.dialog("This is a dialogue")
+def sumup_widget_component(checkout_id):
+    st.markdown("<div id='sumup-card'></div>", unsafe_allow_html=True)
+
+    js_code = f"""
+        async function loadSumUpSDK() {{
+            return new Promise((resolve, reject) => {{
+                const script = document.createElement('script');
+                script.src = "https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js";
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load SumUp SDK'));
+                document.head.appendChild(script);
+            }});
+        }}
+        async function initializeSumUpCard() {{
+            await loadSumUpSDK();
+            SumUpCard.mount({{
+                id: 'sumup-card',
+                checkoutId: '{checkout_id}',
+                donateSubmitButton: false,
+                showInstallments: true,
+                onResponse: function (type, body) {{
+                    console.log('Type', type);
+                    console.log('Body', body);
+                    SumUpCard.unmount();
+                }},
+            }});
+        }}
+
+        initializeSumUpCard();
+        """
+    response = stjs(js_code)
+    if response:
+        st.write(response)
+        
 def main():
 
     st.title("SumUp Payment Integration")
@@ -261,6 +302,11 @@ def main():
     for checkout in st.session_state['checkouts']:
         if st.button(f"Pay Now {checkout}", key=f"pay-{checkout}"):
             sumup_widget(checkout)
+            
+    st.title("SumUp Payment Component")
+    for checkout in st.session_state['checkouts']:
+        if st.button(f"Pay Now {checkout}", key=f"component-{checkout}"):
+            sumup_widget_component(checkout)
             
 if __name__ == '__main__':
     main()

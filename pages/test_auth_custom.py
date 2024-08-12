@@ -125,7 +125,6 @@ class _AuthenticationModel(AuthenticationModel):
         # update logged-in remote session state
         if response:
             return True, access_key, response
-        
 class _AuthenticationController(AuthenticationController):
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
@@ -288,6 +287,7 @@ class AuthenticateWithKey(Authenticate):
                                                                 pre_authorization, domains,
                                                                 callback, captcha, entered_captcha)
         return None, None, None
+
 authenticator = AuthenticateWithKey(
     config['credentials'],
     config['cookie']['name'],
