@@ -1,9 +1,24 @@
 import streamlit as st
-st.set_page_config(
-    page_title="Questions and Perspectives",
-    page_icon="👋",
-    initial_sidebar_state="collapsed"
-)
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Questions and Perspectives",
+        page_icon="👋",
+        initial_sidebar_state="collapsed"
+    )
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+        [data-testid="stHeader"] {
+            display: none
+            }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
 import numpy as np
 import streamlit_survey as ss
 from lib.survey import CustomStreamlitSurvey
