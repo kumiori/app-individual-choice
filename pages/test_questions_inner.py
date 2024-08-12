@@ -1,4 +1,9 @@
 import streamlit as st
+st.set_page_config(
+    page_title="Questions and Perspectives",
+    page_icon="👋",
+    initial_sidebar_state="collapsed"
+)
 import numpy as np
 import streamlit_survey as ss
 from lib.survey import CustomStreamlitSurvey
