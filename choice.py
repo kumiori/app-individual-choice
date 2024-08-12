@@ -1,16 +1,30 @@
 import streamlit as st
+if st.secrets["runtime"]["STATUS"] == "Production":
+    st.set_page_config(
+        page_title="Questions and Perspectives",
+        page_icon="👋",
+        initial_sidebar_state="collapsed"
+    )
+    st.markdown(
+        """
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none
+        }
+        [data-testid="stHeader"] {
+            display: none
+            }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
 import streamlit_survey as ss
 from streamlit_extras.streaming_write import write as streamwrite 
 from pages.test_1d import _stream_example, corrupt_string
 from lib.texts import _stream_once
 import time
 import pages
-
-# st.set_page_config(
-#     page_title="Choice choosen",
-#     page_icon="👋",
-#     initial_sidebar_state="collapsed"
-# )
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
