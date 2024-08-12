@@ -453,12 +453,13 @@ def general_questions():
                         modal.open(src=src_100K)
 
 
-practical_questions()
 
 if st.session_state['authentication_status']:
     st.toast('Initialised authentication model')
     authenticator.logout()
     st.write(f'`Your signature is {st.session_state["username"][0:4]}***{st.session_state["username"][-4:]}`')
+    practical_questions()
+    
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:

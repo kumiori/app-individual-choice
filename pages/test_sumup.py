@@ -45,7 +45,6 @@ def display_transaction_details(transaction_data):
         total_price = product.get("total_price", "N/A")
         st.write(f" - {name}: {quantity} x {price} = {total_price} {currency}")
 
-
 def generate_checkout_reference(length=6):
     # Define the characters to choose from for the random string
     characters = string.ascii_uppercase + string.digits
