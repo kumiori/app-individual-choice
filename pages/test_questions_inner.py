@@ -16,6 +16,7 @@ import philoui as ph
 from philoui.texts import hash_text, stream_text, _stream_once
 from philoui.geo import get_coordinates, reverse_lookup
 from philoui.authentication_v2 import AuthenticateWithKey
+from philoui.survey import create_flag_ui
 # from philoui.io import check_existence
 from philoui.survey import date_decoder
 
@@ -74,7 +75,6 @@ def stream_once_then_write(text):
     else:
         st.markdown(text)
         
-
 cols = st.columns(4)
 db = IODatabase(conn, "discourse-data")
 
@@ -94,22 +94,21 @@ with cols[3]:
     ui.badges(badge_list=[("experimental", "secondary")], class_name="flex gap-2", key="viz_badges2")
     ui.badges(badge_list=[("production", "primary")], class_name="flex gap-2", key="viz_badges3")
 
+# def create_flag_ui(pages, survey):
+#     # Checkbox to flag the question
+#     flag_question = st.checkbox(f"This question (Q{pages.current + 1}) is inappropriate, misplaced, ill-formed, abusive, unfit, or unclear")
 
-def create_flag_ui(pages, survey):
-    # Checkbox to flag the question
-    flag_question = st.checkbox(f"This question (Q{pages.current + 1}) is inappropriate, misplaced, ill-formed, abusive, unfit, or unclear")
-
-    # If the question is flagged, show a text input for the user to provide details
-    flag_reason = ""
+#     # If the question is flagged, show a text input for the user to provide details
+#     flag_reason = ""
     
-    if "flagged_questions" not in survey.data:
-        survey.data["flagged_questions"] = {}
+#     if "flagged_questions" not in survey.data:
+#         survey.data["flagged_questions"] = {}
 
-    if flag_question:
-        flag_reason = st.text_area("Let me specify why I think this question is inappropriate or unclear...")
-        survey.data["flagged_questions"][f"Question {pages.current + 1}"] = {
-                        "reason": flag_reason
-                    }
+#     if flag_question:
+#         flag_reason = st.text_area("Let me specify why I think this question is inappropriate or unclear...")
+#         survey.data["flagged_questions"][f"Question {pages.current + 1}"] = {
+#                         "reason": flag_reason
+#                     }
         
 def mask_string(s):
     return f"{s[0:4]}***{s[-4:]}"
@@ -125,34 +124,29 @@ def _submit():
     signature = st.session_state["username"]
     
     with st.spinner("Checking your signature..."):
-        st.write(f"Checking existence of your signature {mask_string(signature)}")
         # time.sleep(2)
         preferences_exists = db.check_existence(signature)
+        st.write(f"Integrating signature preferences `{mask_string(signature)}`")
         _response = "Yes!" if preferences_exists else "Not yet"
-        st.info(f"Some preferences of yours exist? {_response}")
+        st.info(f"Some of your preferences exist...{_response}")
         serialised_data = st.session_state['serialised_data']
-        st.write(serialised_data)
-        st.write(json.dumps(serialised_data))
-        if preferences_exists:
-            try:
-                data = {
-                    'practical_questions_01': json.dumps(serialised_data)
-                }
-                st.write(survey.data)
-            except Exception as e:
-                st.error(f"Failed to update data. {e}")
-        
-        else:
-            try:
-                data = {
-                    'signature': signature,
-                    'practical_questions_01': json.dumps(serialised_data)
-                }
-                
-            except Exception as e:
-                st.error("Failed to update data.")
+
+        try:
+            data = {
+                'signature': signature,
+                'practical_questions_01': json.dumps(serialised_data)
+            }
+            query = conn.table('discourse-data')                \
+                   .upsert(data, on_conflict=['signature'])     \
+                   .execute()
             
-    st.success('Thank you!')
+            if query:
+                st.success("🎊 Preferences integrated successfully!")
+                
+        except Exception as e:
+            st.error("🫥 Sorry! Failed to update data.")
+            st.write(e)
+    
     
 
 def practical_questions():
@@ -262,7 +256,7 @@ def practical_questions():
                     
             elif pages.current == 4:
                 st.markdown("### Stay Duration")
-                stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, we need to know our travel dates.")
+                stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, let's share our travel dates.")
                 stream_once_then_write("What are the dates of your stay in Athens?")
                 default_start = datetime(2024, 9, 24)
                 default_end = default_start + timedelta(days=5)
@@ -307,7 +301,7 @@ def practical_questions():
                 
                 with st.spinner("Let's phrase this properly..."):
                     time.sleep(3)
-                txt_1 = """We\'ve been presented with the opportunity to integrate our work into a plenary session during the conference. Specifically, Ruth Wodak\'s talk on _“Coping with crises, fear, and uncertainty. Analyzing appeals to \'normality\' and \'common-sense\'_” aligns strikingly with our discussions and ideas."""
+                txt_1 = """We\'ve been presented with the opportunity to integrate our work into a plenary session during the conference. Specifically, Ruth Wodak\'s talk on _“Coping with crises, fear, and uncertainty._” aligns strikingly with our discussions and ideas."""
                 txt_2 = """Ruth Wodak is a renowned linguist and professor, and bringing our “results” into her plenary could significantly amplify our exposure and trace. This requires enthusiasm and collaboration to connect with Ruth Wodak and the University\'s Provost, Themis P. Kaniklidou, to present our ideas compellingly."""
                 stream_once_then_write(txt_1)
                 stream_once_then_write(txt_2)
@@ -375,7 +369,7 @@ def practical_questions():
                     
             elif pages.current == 9:
                 st.markdown("### Thank you again! ")
-                stream_once_then_write("### Time now to integrate your preferences with the others.")
+                stream_once_then_write("### Time now to integrate your preferences with the others'.")
                 stream_once_then_write("### Submit your raw preferences and let's see if we can make sense of all ours.")
                 st.divider()
                 stream_once_then_write("### _In the next episode..._")
