@@ -163,11 +163,66 @@ np.random.seed(42)
 #     st.pyplot(plt)
 
 
+
+
+
+
+
+import pandas as pd
+
+# Title for the Streamlit app
+st.title("Scatter Plot with NaN Values")
+
+# Example matrix with NaN values
+matrix = np.array([
+    [1.0, 2.0, np.nan],
+    [4.0, np.nan, 6.0],
+    [7.0, 8.0, 9.0]
+])
+
+# Convert matrix to a DataFrame for plotting
+df = pd.DataFrame(matrix, columns=['A', 'B', 'C'])
+
+# Melt the DataFrame to a long format
+df_long = df.reset_index().melt(id_vars='index', var_name='Category', value_name='Value')
+
+# Create a new column to indicate NaN values
+df_long['IsNaN'] = df_long['Value'].isna()
+
+# Replace NaN values with a specific value for plotting (e.g., -1)
+df_long['Value'] = df_long['Value'].fillna(-1)
+
+# Create a scatter plot
+fig = px.scatter(
+    df_long,
+    x='index',
+    y='Value',
+    color='IsNaN',
+    symbol='IsNaN',
+    labels={'index': 'Index', 'Value': 'Value', 'IsNaN': 'NaN Status'},
+    title='Scatter Plot with NaN Values'
+)
+
+# Customize markers: differentiate NaN points
+fig.update_traces(marker=dict(size=12), selector=dict(marker_symbol='circle'))
+fig.update_traces(marker=dict(size=12, color='red'), selector=dict(marker_symbol='cross'))
+
+# Display the plot in Streamlit
+_scatter_layout(fig)
+st.plotly_chart(fig)
+
+
+
 # Function to plot histograms
 def plot_distribution(data, title, distribution_formula):
     fig = px.histogram(data, nbins=50, title=title)
     st.plotly_chart(fig)
     st.latex(f'''f(x) = {distribution_formula}''')
+
+
+
+
+
 
 # Streamlit App
 st.title("Distribution Plots")

@@ -18,45 +18,26 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     """,
         unsafe_allow_html=True,
     )
-import matplotlib.pyplot as plt
-import numpy as np
-import streamlit_survey as ss
-from lib.survey import CustomStreamlitSurvey
 from lib.io import (
-    create_button, create_checkbox, create_dichotomy, create_equaliser, create_equaliser,
-    create_globe, create_next, create_qualitative, create_textinput,
-    create_yesno, create_yesno_row, fetch_and_display_data, conn
+    conn
 )
 # from lib.texts import stream_text, _stream_once
 from datetime import datetime, timedelta
-from streamlit_extras.stateful_button import button as stateful_button 
-from streamlit_extras.stylable_container import stylable_container
-import pandas as pd
-import philoui as ph
-from philoui.texts import hash_text, stream_text, _stream_once
-from philoui.geo import get_coordinates, reverse_lookup
 from philoui.authentication_v2 import AuthenticateWithKey
-from philoui.survey import create_flag_ui
 # from philoui.io import check_existence
-from philoui.survey import date_decoder
 from collections import defaultdict
 
 import json
-import os
-import random
 # from streamlit_authenticator import Authenticate
-from philoui.authentication_v2 import AuthenticateWithKey
 
 # from pages.test_alignment import get_next_image
-import streamlit_shadcn_ui as ui
 import yaml
 from yaml import SafeLoader
 
-import time
-import string
-from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IODatabase
-from streamlit_elements import elements, dashboard, mui, editor, media, lazy, sync, nivo
-
+from lib.io import QuestionnaireDatabase as IODatabase
+from streamlit_elements import elements, mui, nivo
+import plotly.express as px
+import numpy as np
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
     
@@ -88,6 +69,36 @@ fields_forge = {'Form name':'Forge access key', 'Email':'Email', 'Username':'Use
 
 db = IODatabase(conn, "discourse-data")
 
+def _scatter_layout(fig):
+    # fig.update_layout(xaxis_title="Column", yaxis_title="Row")
+    fig.update_xaxes(showgrid=False, showticklabels=False, showline=False)
+    fig.update_yaxes(showgrid=False, showticklabels=False, showline=False)
+# Set square aspect ratio
+    fig.update_layout(
+    xaxis_title="",
+    yaxis_title="",
+    xaxis=dict(
+        scaleanchor="y",
+        scaleratio=1
+    ),
+    yaxis=dict(
+        scaleanchor="x",
+        scaleratio=1
+    )
+)
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+
+def custom_tooltip(d):
+    return {
+        "background": "#fff",
+        "padding": "9px 12px",
+        "border": "1px solid #ccc",
+        "color": "black",
+        "fontSize": "12px",
+        "fontWeight": "bold",
+        "content": f"{d['serie']['id']}: {d['point']['data']['xFormatted']} - {d['point']['data']['yFormatted']}",
+    }
+    
 def extend_date_range(date_counts, days_before=3, days_after=5):
     # Convert string dates to datetime objects for manipulation
     date_keys = [datetime.strptime(date, "%Y-%m-%d") for date in date_counts.keys()]
@@ -126,11 +137,11 @@ def fetch_and_display_personal_data(conn, kwargs):
     
     if 'path' in kwargs:
         path = kwargs.get('path')
-        st.write(f"Fetching {path} data from the {table_name} table.")
+        st.toast(f"Fetching {path} data from the {table_name} table.")
         response = conn.table(table_name).select(path).eq('signature', signature).execute()
         updated_at = conn.table(table_name).select("updated_at").eq('signature', signature).execute()
     else:
-        st.write(f"Fetching all data from the {table_name} table.")
+        st.toast(f"Fetching all data from the {table_name} table.")
         response = conn.table(table_name).select("*").eq('signature', signature).execute()
 
     # Check if there is any data in the response
@@ -192,7 +203,7 @@ if st.session_state['authentication_status']:
                                         'key': signature,
                                         'index': 'signature',
                                         'path': "practical_questions_01"})
-    st.write(dataset)
+    # st.write(dataset)
     
     # Parse the JSON object within the dataset
     practical_questions = json.loads(dataset[0]["practical_questions_01"])
@@ -230,55 +241,35 @@ if st.session_state['authentication_status']:
     
     col1, col2, col3 = st.columns([1, 1.2, 1])
     if col1.button("Fetch all data"):
-        # data = db.fetch_data(kwargs={'verbose': True})
-        # data = conn.table('discourse-data').select("*").execute()
         response = conn.table('discourse-data').select('signature', 'updated_at', 'personal_data', 'practical_questions_01').execute()
 
         athena_dates = []
-
+        alignment_values = []
+        
         if response and response.data:
             data = response.data
             for entry in data:
-                # st.write(entry['signature'])
-
                 for key in ['personal_data', 'practical_questions_01']:
                     if entry[key]:
                         parsed_data = json.loads(entry[key])
                         if "athena-range-dates" in parsed_data:
-                            # st.write(parsed_data["athena-range-dates"])
                             athena_dates.append(
                                 {'signature': entry['signature'], 'dates': parsed_data["athena-range-dates"]})
+            
+                # Step 1: Extract alingment values       
+                if entry['practical_questions_01']:            
+                    entry_align = json.loads(entry['practical_questions_01'])["executive"]["value"]
+                    alignment_values.append({entry['signature']: entry_align})
                 
-                # if entry['practical_questions_01'] is not None:
-                #     practical_questions = json.loads(entry['practical_questions_01'])
-
-                # else:
-                    # practical_questions = None
-                # st.write(practical_questions)
-                # st.write(entry['practical_questions_01']["go_forward"]["value"])
-            # st.write(athena_dates)
             st.json(data, expanded=False)
+            # st.json(alignment_values, expanded=True)
             date_ranges = []
+            
             for entry in athena_dates:
                 start_date = date(entry['dates'][0]['year'], entry['dates'][0]['month'], entry['dates'][0]['day'])
                 end_date = date(entry['dates'][1]['year'], entry['dates'][1]['month'], entry['dates'][1]['day'])
                 date_ranges.append((start_date, end_date, entry['signature']))
 
-            # Plot the date ranges
-            # plt.figure(figsize=(10, 6))
-
-            # for i, (start_date, end_date, signature) in enumerate(date_ranges):
-            #     plt.plot([start_date, end_date], [i, i], marker='o', label=signature)
-
-            # plt.yticks(range(len(date_ranges)), [signature for _, _, signature in date_ranges])
-            # plt.xlabel('Date')
-            # plt.ylabel('Signatures')
-            # plt.title('Athena Date Ranges')
-            # plt.grid(True)
-            # plt.legend()
-            # plt.show()
-    
-    
             date_counts = defaultdict(int)
             for entry in athena_dates:
                 start_date = date(entry['dates'][0]['year'], entry['dates'][0]['month'], entry['dates'][0]['day'])
@@ -313,15 +304,15 @@ if st.session_state['authentication_status']:
             nivo_bump_data = [{"id": "presence", "data": cumulative_counts}]
             # st.write(nivo_bump_data)
             
-            
             with elements("nivo_charts"):
                     # Third element of the dashboard, the Media player.
-                with mui.Box(sx={"height": 500}):
+                st.markdown("### Presence forecast in Athens")
+                with mui.Box(sx={"height": 300}):
                         nivo.Bump(
                             data=nivo_bump_data,
-                            colors={ "scheme": "spectral" },
-                            lineWidth=3,
-                            width=500,
+                            colors={ "scheme": "nivo" },
+                            lineWidth=7,
+                            width=700,
                             height=300,
                             activeLineWidth=6,
                             inactiveLineWidth=3,
@@ -333,38 +324,70 @@ if st.session_state['authentication_status']:
                             pointBorderWidth=3,
                             activePointBorderWidth=3,
                             pointBorderColor={ "from": "serie.color" },
-                            axisTop={
-                                "tickSize": 5,
-                                "tickPadding": 5,
-                                "tickRotation": 0,
-                                "legend": "",
-                                "legendPosition": "middle",
-                                "legendOffset": -36
-                            },
+                            axisTop=None,
+                            enableGridX=False,
+                            enableGridY=False,
                             axisBottom={
                                 "tickSize": 5,
                                 "tickPadding": 5,
                                 "tickRotation": 0,
-                                "legend": "",
+                                "legend": "Days in Athens",
                                 "legendPosition": "middle",
-                                "legendOffset": 32
+                                "legendOffset": 32,
+                                "tickValues": ["2024-09-24", "2024-09-26", "2024-09-28", "2024-10-01"],
+
                             },
                             axisLeft={
                                 "tickSize": 5,
                                 "tickPadding": 5,
                                 "tickRotation": 0,
-                                "legend": "ranking",
+                                "legend": "missing",
                                 "legendPosition": "middle",
                                 "legendOffset": -40
                             },
                             margin={ "top": 40, "right": 100, "bottom": 40, "left": 60 },
                             axisRight=None,
+                            # tooltip=custom_tooltip,
                         )
-   
+
+            st.markdown("### Visualising aligning values")
+            # st.write(alignment_values)
+            matrix_size = int(np.ceil(np.sqrt(len(data))))
+            # st.write(f"Matrix size: {matrix_size}")
+            matrix = np.full((matrix_size, matrix_size), .5)
+
+            # Map the hash strings to indices
+            hash_to_index = {list(d.keys())[0]: idx for idx, d in enumerate(alignment_values)}
+
+            # Fill the matrix with the values from the dataset
+            index = 0
+            for i in range(matrix_size):
+                for j in range(matrix_size):
+                    if index < len(alignment_values):
+                        hash_str, value = list(alignment_values[index].items())[0]
+                        matrix[i, j] = float(value)  # Place the value in the matrix
+                        index += 1
+                        
             
+            # matrix = np.random.rand(matrix_size, matrix_size)
             
-            
-            
+            fig = px.scatter(x=np.arange(matrix_size).repeat(matrix_size),
+                 y=np.tile(np.arange(matrix_size), matrix_size),
+                 size=np.array([[100. for j in range(matrix_size)] for i in range(matrix_size) ]).flatten(),
+                 color=matrix.flatten(),
+                 size_max=50,
+                 labels={"Row": "", "Column": ""},
+                #  color_continuous_scale="Blues",
+                #  color_continuous_scale="Blues",
+                #  color_continuous_scale="Blues",
+                 color_continuous_scale="PiYG",
+                #  color_continuous_scale="Spectral",
+                #  color_continuous_scale=[(0, "black"), (0.5, "gray"), (1, "white")],
+                 range_color=[0, 1],
+                 title="Matrix Visualization")
+            _scatter_layout(fig)
+            st.plotly_chart(fig)
+
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:
