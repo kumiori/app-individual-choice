@@ -18,7 +18,7 @@ if st.secrets["runtime"]["STATUS"] == "Production":
     """,
         unsafe_allow_html=True,
     )
-
+import matplotlib.pyplot as plt
 import numpy as np
 import streamlit_survey as ss
 from lib.survey import CustomStreamlitSurvey
@@ -39,6 +39,7 @@ from philoui.authentication_v2 import AuthenticateWithKey
 from philoui.survey import create_flag_ui
 # from philoui.io import check_existence
 from philoui.survey import date_decoder
+from collections import defaultdict
 
 import json
 import os
@@ -54,6 +55,7 @@ from yaml import SafeLoader
 import time
 import string
 from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IODatabase
+from streamlit_elements import elements, dashboard, mui, editor, media, lazy, sync, nivo
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
@@ -86,13 +88,41 @@ fields_forge = {'Form name':'Forge access key', 'Email':'Email', 'Username':'Use
 
 db = IODatabase(conn, "discourse-data")
 
+def extend_date_range(date_counts, days_before=3, days_after=5):
+    # Convert string dates to datetime objects for manipulation
+    date_keys = [datetime.strptime(date, "%Y-%m-%d") for date in date_counts.keys()]
+    min_date = min(date_keys)
+    max_date = max(date_keys)
+
+    # Create a new dictionary to store the extended dates
+    extended_dates = {}
+
+    # Add the days before the minimum date
+    for x in range(1, days_before + 1):
+        new_date = min_date - timedelta(days=x)
+        extended_dates[new_date] = 0
+
+    # Add the original date counts
+    for date, count in date_counts.items():
+        extended_dates[datetime.strptime(date, "%Y-%m-%d")] = count
+
+    # Add the days after the maximum date
+    for x in range(1, days_after + 1):
+        new_date = max_date + timedelta(days=x)
+        extended_dates[new_date] = 0
+
+    # Convert the extended dates back to strings for the nivo bump chart
+    extended_date_counts = {date.strftime("%Y-%m-%d"): count for date, count in extended_dates.items()}
+
+    # Sort the dictionary by date
+    extended_date_counts = dict(sorted(extended_date_counts.items()))
+
+    return extended_date_counts
 
 def fetch_and_display_personal_data(conn, kwargs):
-    
     # Fetch all data from the "questionnaire" table
     table_name = kwargs.get('database')
     signature = kwargs.get('key')
-    
     
     if 'path' in kwargs:
         path = kwargs.get('path')
@@ -197,6 +227,144 @@ if st.session_state['authentication_status']:
 
     st.write(discursive_text)    
     st.write(f'`My signature is {st.session_state["username"][0:4]}***{st.session_state["username"][-4:]}`')
+    
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    if col1.button("Fetch all data"):
+        # data = db.fetch_data(kwargs={'verbose': True})
+        # data = conn.table('discourse-data').select("*").execute()
+        response = conn.table('discourse-data').select('signature', 'updated_at', 'personal_data', 'practical_questions_01').execute()
+
+        athena_dates = []
+
+        if response and response.data:
+            data = response.data
+            for entry in data:
+                # st.write(entry['signature'])
+
+                for key in ['personal_data', 'practical_questions_01']:
+                    if entry[key]:
+                        parsed_data = json.loads(entry[key])
+                        if "athena-range-dates" in parsed_data:
+                            # st.write(parsed_data["athena-range-dates"])
+                            athena_dates.append(
+                                {'signature': entry['signature'], 'dates': parsed_data["athena-range-dates"]})
+                
+                # if entry['practical_questions_01'] is not None:
+                #     practical_questions = json.loads(entry['practical_questions_01'])
+
+                # else:
+                    # practical_questions = None
+                # st.write(practical_questions)
+                # st.write(entry['practical_questions_01']["go_forward"]["value"])
+            # st.write(athena_dates)
+            st.json(data, expanded=False)
+            date_ranges = []
+            for entry in athena_dates:
+                start_date = date(entry['dates'][0]['year'], entry['dates'][0]['month'], entry['dates'][0]['day'])
+                end_date = date(entry['dates'][1]['year'], entry['dates'][1]['month'], entry['dates'][1]['day'])
+                date_ranges.append((start_date, end_date, entry['signature']))
+
+            # Plot the date ranges
+            # plt.figure(figsize=(10, 6))
+
+            # for i, (start_date, end_date, signature) in enumerate(date_ranges):
+            #     plt.plot([start_date, end_date], [i, i], marker='o', label=signature)
+
+            # plt.yticks(range(len(date_ranges)), [signature for _, _, signature in date_ranges])
+            # plt.xlabel('Date')
+            # plt.ylabel('Signatures')
+            # plt.title('Athena Date Ranges')
+            # plt.grid(True)
+            # plt.legend()
+            # plt.show()
+    
+    
+            date_counts = defaultdict(int)
+            for entry in athena_dates:
+                start_date = date(entry['dates'][0]['year'], entry['dates'][0]['month'], entry['dates'][0]['day'])
+                end_date = date(entry['dates'][1]['year'], entry['dates'][1]['month'], entry['dates'][1]['day'])
+
+                current_date = start_date
+                while current_date <= end_date:
+                    date_counts[current_date.isoformat()] += 1
+                    current_date = current_date.fromordinal(current_date.toordinal() + 1)
+
+            # Step 2: Calculate cumulative presence
+            cumulative_counts = []
+            sorted_dates = sorted(date_counts.keys())
+            # print(sorted_dates)
+            # st.write("sorted dates")
+            # st.write(sorted_dates)
+            # st.write("date counts")
+            # st.write(date_counts)
+            sorted_date_counts = dict(sorted(date_counts.items()))
+            # st.write('sorted_date_counts')
+            # st.write(sorted_date_counts)
+            max_y = 17
+            cumulative_sum = 0
+            extended_counts = extend_date_range(date_counts, days_before=3, days_after=5)
+            
+            for d in extended_counts:
+                # cumulative_sum += date_counts[d]
+                cumulative_counts.append({"x": d, "y": max_y - extended_counts[d]})
+
+            # Step 3: Format for Nivo Bump Chart
+
+            nivo_bump_data = [{"id": "presence", "data": cumulative_counts}]
+            # st.write(nivo_bump_data)
+            
+            
+            with elements("nivo_charts"):
+                    # Third element of the dashboard, the Media player.
+                with mui.Box(sx={"height": 500}):
+                        nivo.Bump(
+                            data=nivo_bump_data,
+                            colors={ "scheme": "spectral" },
+                            lineWidth=3,
+                            width=500,
+                            height=300,
+                            activeLineWidth=6,
+                            inactiveLineWidth=3,
+                            inactiveOpacity=0.15,
+                            pointSize=10,
+                            activePointSize=16,
+                            inactivePointSize=0,
+                            pointColor={ "theme": "background" },
+                            pointBorderWidth=3,
+                            activePointBorderWidth=3,
+                            pointBorderColor={ "from": "serie.color" },
+                            axisTop={
+                                "tickSize": 5,
+                                "tickPadding": 5,
+                                "tickRotation": 0,
+                                "legend": "",
+                                "legendPosition": "middle",
+                                "legendOffset": -36
+                            },
+                            axisBottom={
+                                "tickSize": 5,
+                                "tickPadding": 5,
+                                "tickRotation": 0,
+                                "legend": "",
+                                "legendPosition": "middle",
+                                "legendOffset": 32
+                            },
+                            axisLeft={
+                                "tickSize": 5,
+                                "tickPadding": 5,
+                                "tickRotation": 0,
+                                "legend": "ranking",
+                                "legendPosition": "middle",
+                                "legendOffset": -40
+                            },
+                            margin={ "top": 40, "right": 100, "bottom": 40, "left": 60 },
+                            axisRight=None,
+                        )
+   
+            
+            
+            
+            
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:
