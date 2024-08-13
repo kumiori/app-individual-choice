@@ -302,11 +302,11 @@ def practical_questions():
                 default_start = datetime(2024, 9, 24)
                 default_end = default_start + timedelta(days=5)
                 date_range = survey.mandatory_date_range(name = "Which days to stay in Athena?",
-                                                                    label = "athena-dates", 
-                                                                    id='athena-range-dates', 
-                                                                    default_start=default_start, 
-                                                                    default_end=default_end
-                                                                    )
+                    label = "athena-dates", 
+                    id='athena-range-dates', 
+                    default_start=default_start, 
+                    default_end=default_end
+                )
                 st.divider()
                 create_flag_ui(pages, survey)
                     
@@ -314,12 +314,12 @@ def practical_questions():
                 st.markdown("### Financial Support Needs")
                 stream_once_then_write("### We all have different conditions and arrangements. To provide assistance where needed, we need to know if you require financial support for the trip.")
                 stream_once_then_write("Is this the case?")
-                financial_support = st.radio("Financial support", horizontal=True, options=["Yes", "No"], index=1)
+                financial_support = survey.radio("Financial support", horizontal=True, options=["Yes", "No"], index=1)
                 if financial_support ==  "Yes":
                     stream_once_then_write("Please specify the kind of support you require.")
                     # travel, accommodation, or food
                     options = ["Travel", "Accommodation", "Food", "Other"]
-                    survey.multiselect("Financial Support:", options=options, key = "kind_financial_support")
+                    survey.multiselect("Financial Support:", id="Financial details", options=options, key = "kind_financial_support")
                 st.divider()
                 create_flag_ui(pages, survey)
                     
