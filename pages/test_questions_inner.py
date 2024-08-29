@@ -57,11 +57,17 @@ from lib.io import conn, fetch_and_display_data, QuestionnaireDatabase as IOData
 
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
+  
+if 'questions' not in st.session_state:
+    st.session_state['questions'] = {}
     
 if 'serialised_data' not in st.session_state:
     st.session_state.serialised_data = {}
     
-    
+# Initialize the session state for scratches if not already done
+if 'scratches' not in st.session_state:
+    st.session_state["scratches"] = {}
+
 # ============================== AUTH ===========================
 with open('data/credentials.yml') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -178,7 +184,7 @@ As part of this, we are considering options to share certain aspects of this exp
 
 def practical_questions():
 
-    with st.expander("Questions, practical philosophy", expanded=True, icon=":material/step_over:"):
+    with st.expander("Questions, practical philosophy", expanded=False, icon=":material/step_over:"):
 
         pages_total = 10
         pages = survey.pages(pages_total, 
@@ -298,7 +304,7 @@ def practical_questions():
             elif pages.current == 4:
                 st.markdown("### Stay Duration")
                 stream_once_then_write("### To arrange and coordinate accommodations and other logistics effectively, let's share our travel dates.")
-                stream_once_then_write("### Our panel discussion is set for September 26-27, 2024. Could you provide an estimated date range for your stay in Athens?")
+                stream_once_then_write("### Our panel discussion is set for September 26-27, 2024. Could you provide a _tentative_, _estimated_ date range for your stay in Athens?")
                 default_start = datetime(2024, 9, 24)
                 default_end = default_start + timedelta(days=5)
                 date_range = survey.mandatory_date_range(name = "Which days to stay in Athena?",
@@ -318,8 +324,12 @@ def practical_questions():
                 if financial_support ==  "Yes":
                     stream_once_then_write("Please specify the kind of support you require.")
                     # travel, accommodation, or food
-                    options = ["Travel", "Accommodation", "Food", "Other"]
-                    survey.multiselect("Financial Support:", id="Financial details", options=options, key = "kind_financial_support")
+                    options = ["Travel", "Accommodation", "Food", "Conference fee", "Other"]
+                    selected_options = survey.multiselect("Financial Support:", id="Financial details", options=options, key = "kind_financial_support")
+                    
+                    if "Other" in selected_options:
+                        other_details = survey.text_input("Please specify other financial support needs:", key="other_financial_support")
+
                 st.divider()
                 create_flag_ui(pages, survey)
                     
@@ -404,6 +414,157 @@ def practical_questions():
                 stream_once_then_write("### _In the next episode..._")
                 stream_once_then_write("### We will `visualise` our individual preferences and share more _general_ questions and perspectives.")
 
+
+def add_scratch(scratch_number):
+    st.write(f"Adding scratch {scratch_number}")
+    st.session_state["scratches"][f'Scratch {scratch_number}'] = st.text_input(f'Scratch {scratch_number}', key=f'scratch_{scratch_number+1}')
+    if scratch_number < 5:
+        st.button("Add another scratch", on_click=add_scratch, args=(scratch_number + 1,), key=f'add_scratch_{scratch_number+1}')
+    else:
+        st.write("Maximum number of scratches reached.")
+        st.button("Clear scratches", on_click=lambda: st.session_state["scratches"].clear(), key="clear_scratches")
+
+def first_self_inflicted_exercise():
+    from streamlit_lottie import st_lottie
+
+    survey = CustomStreamlitSurvey('First exercise')
+
+    with st.expander("Collaborative Decision-Making Exercise", expanded=True, icon=":material/cruelty_free:"):
+        pages_total = 10
+        pages = survey.pages(pages_total, 
+                on_submit=lambda: _submit(),
+                )
+        st.markdown("### $\mathcal{W}$elcome to our $\mathcal{F}$irst Exercise")
+        st.progress(float((pages.current + 1) / pages_total))
+        with pages:
+            if pages.current == 0:
+                """
+**Outlook:**
+- Instead of merging existing contributions, _our discourse_ is to invite the audience to co-create a 'social contract from scratch.'
+- This involves thinking and proposing together, starting not from a blank slate, but from a specific point—a "scratch."
+- We have very many unique points: connecting them (connecting us) is our strentgh. We're building something different, a stepping stone for something "bigger."
+
+**How It Works:**
+- The process will involve playful interaction, thought-provoking questions, and a melting pot of ideas.
+
+**Your Role:**
+#### Your role now is to actively engage in the collaborative process of building the ‘social contract from scratch.’ This involves contributing your ideas, perspectives, and insights
+"""
+            elif pages.current == 1:
+                st.subheader("Your Role in Building the Social Contract")
+                st.write("Your input and collaboration is crucial in this phase, helping bringing clarity in the process of this collective initiative. Let's work together with creativity")
+                
+                """
+                Little by little, we shall picture  _How you imagine our panel session?_
+                
+                We are the Athena collective, a rich and diverse group of individuals with varying perspectives and expertise. 
+                
+                We think and build together, from the simple to the complex, from the small to the large, crafting a shared agreement. 
+                
+                """     
+                
+                # with st.echo():
+                st_lottie("https://lottie.host/79eac97c-2090-4460-8f31-972f1971fb92/u6yK3lWfDc.json")
+                      
+
+            elif pages.current == 2:
+                                                
+                # Function to collect scratches
+                def collect_scratches():
+                    scratches = {}
+                    scratch_1 = st.text_input("Scratch 1", key="scratch_1")
+                    if scratch_1:
+                        scratches["Scratch 1"] = scratch_1
+                        scratch_2 = st.text_input("Scratch 2", key="scratch_2")
+                        if scratch_2:
+                            scratches["Scratch 2"] = scratch_2
+                            scratch_3 = st.text_input("Scratch 3", key="scratch_3")
+                            st.session_state["scratches"]["Scratches"] = scratches
+                            if scratch_3:
+                                scratches["Scratch 3"] = scratch_3
+                                scratch_4 = st.text_input("Scratch 4", key="scratch_4")
+                                if scratch_4:
+                                    scratches["Scratch 4"] = scratch_4
+                                    scratch_5 = st.text_input("Scratch 5", key="scratch_5")
+                                    if scratch_5:
+                                        scratches["Scratch 5"] = scratch_5
+                                        st.session_state["scratches"]["Scratches"] = scratches
+                                        
+                    return scratches
+                # Keywords Input Section
+                
+                """
+                We propose to build this understanding not from a blank state but from _a point of departure_. In sports, “scratch” refers to the starting line of a race.
+                For us, it is the starting point for discourse. 
+                
+                A scratch is a concept, a hook, or a keyword that can be drawn from our contributions, personal interests, professional expertise, or human sensitivity.
+                
+                """
+                st.write("### Scratch your _Scratches_")
+                st.write("Let's identify key concepts or prompts to initiate dialogue. Let's scratch the surface of our thoughts and ideas. Let's collect five each, if nothing comes to mind, just write the word 'scratch'.")
+                # keywords = st.text_area("Input your keywords (e.g., Ocean)", "")
+                scratches = collect_scratches()
+                
+                st.write(scratches)
+                
+            elif pages.current == 3:
+
+                # Questions Input Section
+                st.write("### List of Questions for Discussion")
+                """
+                ### These questions can invite participation, challenge assumptions, and inspire collective reflection."""
+                """
+                Based on my contribution to the panel discussion at the Europe in Discourse conference, I would like to propose (up to) three key questions to guide our interaction with the audience. These questions should spark meaningful dialogue, encourage diverse perspectives, and foster a deeper understanding of the topics at hand. 
+                """
+                def collect_questions():
+                    questions = {}
+                    question_1 = st.text_input("Question 1", key="question_1")
+                    questions["Question 1"] = question_1
+                    question_2 = st.text_input("Question 2", key="question_2")
+                    questions["Question 2"] = question_2
+                    question_3 = st.text_input("Question 3", key="question_3")
+                    questions["Question 3"] = question_3
+                    st.session_state["questions"] = questions
+                    if question_3:
+                        st.text_area("Question Extended", key="question_extended", help="I want to provide more on the questions", value="Let's expand...")
+                    return questions
+
+                questions = collect_questions()
+                st.write(questions)
+                # Problem Input Section
+                st.write("### Are there any potential problems in sight?")
+                """
+                _Problems are great source of inspiration._
+                """
+
+
+            elif pages.current == 4:
+                
+                
+                                
+                """
+                Organizing a panel discussion requires careful coordination among many participants, balancing resources, and considering everyone's preferences and constraints. Given these complexities, problems may arise. Do you see any potential issues that could hinder our progress? Additionally, can you foresee possible solutions to these challenges? Please share your thoughts on how we can anticipate and address any obstacles to ensure a smooth and effective panel discussion.
+                """
+
+                problems_solutions = st.text_area("Your thoughts and suggestions")
+                
+                
+                
+            elif pages.current == 5:
+                # Plan B Section
+                st.write("### Describe Plan B (Worst Case Scenario)")
+                st.write("Detail a backup plan if things do not go as expected.")
+                plan_b = st.text_area("Describe Plan B", "")
+
+
+            elif pages.current == 6:
+                # Plan A Section
+                st.write("### Describe Plan A (Best Case Scenario)")
+                st.write("Detail how things should ideally work out.")
+                plan_a = st.text_area("Describe Plan A", "")
+                pass
+            
+            # elif pages.current == 5:
 def create_button_with_styles(key, survey, label, bg_color="gray", image_url=None):
     image_style = f'background-image:url("{image_url}") fixed center;' if image_url else ""
     with stylable_container(
@@ -493,7 +654,8 @@ if st.session_state['authentication_status']:
     st.toast('Initialised authentication model')
     authenticator.logout()
     st.write(f'`Your signature is {st.session_state["username"][0:4]}***{st.session_state["username"][-4:]}`')
-    practical_questions()
+    # practical_questions()
+    first_self_inflicted_exercise()
     
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
