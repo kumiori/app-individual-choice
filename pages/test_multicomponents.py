@@ -8,7 +8,6 @@ _qualitative_selector = components.declare_component(
     url='http://localhost:3001'
 )
 
-
 def dichotomy(name, question, rotationAngle = 0, gradientWidth = 40, invert = False, shift = 0, key=None):
     return _qualitative_selector(component = "dichotomy",
     name = name,
@@ -19,7 +18,6 @@ def dichotomy(name, question, rotationAngle = 0, gradientWidth = 40, invert = Fa
     invert = invert,
     shift = shift
     )
-
 
 def qualitative(name, question, data_values, key=None):
     return _qualitative_selector(component = "qualitative",
@@ -46,14 +44,14 @@ def main():
     # st.write('You picked', return_value)
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "perspective",
-                            rotationAngle=10,
-                            gradientWidth=30)
+                            rotationAngle=60,
+                            gradientWidth=10)
 
     st.write('You picked', return_value)
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "invert",
-                            rotationAngle=10,
                             gradientWidth=50,
+                            rotationAngle=30,
                             invert=True,
                             #  invert=False,
                             )
@@ -62,7 +60,7 @@ def main():
 
     return_value = dichotomy(name = "Spirit", question = "Dychotomies, including time...", key = "nuances",
                             gradientWidth=100,
-                            shift = 0)
+                            shift = 100)
     st.write('You picked', return_value)
 
 
@@ -74,7 +72,9 @@ def main():
 
 
 
-    return_value = qualitative(name = "Spirit", question = "How tricky is Quantity?", data_values = [1, 10, 100, 0.1], key = "qualitative")
+    return_value = qualitative(name = "Spirit", 
+        question = "How tricky is Quantity?", 
+        data_values = [1, 10, 100, 0.1], key = "qualitative")
     st.write('You picked', return_value)
 
 

@@ -22,6 +22,7 @@ from lib.io import (
     conn
 )
 # from lib.texts import stream_text, _stream_once
+import lib.texts as texts
 from datetime import datetime, timedelta
 from philoui.authentication_v2 import AuthenticateWithKey
 # from philoui.io import check_existence
@@ -38,11 +39,17 @@ from lib.io import QuestionnaireDatabase as IODatabase
 from streamlit_elements import elements, mui, nivo
 import plotly.express as px
 import numpy as np
+
+
+import pandas as pd
+from streamlit_elements import dashboard, elements, html, mui, nivo
+
+
 if 'read_texts' not in st.session_state:
     st.session_state.read_texts = set()
     
 if 'serialised_data' not in st.session_state:
-    st.session_state.serialised_data = {}
+    st.session_state["serialised_data"] = {}
     
 
 # ============================== AUTH ===========================
@@ -65,6 +72,46 @@ fields_forge = {'Form name':'Forge access key', 'Email':'Email', 'Username':'Use
             'Register':' Here • Now ', 'Captcha':'Captcha'}
 
 # ===============================================================
+
+from pages._sumup_lib import get_sumup_transaction_history, get_transaction_details, display_transaction_details
+
+def parse_json_data(input_data):
+    # Initialize counters for each category
+    yes_count = 0
+    no_count = 0
+    uncertain_count = 0
+
+    # Iterate through each dictionary in the list
+    for item in input_data:
+        for key, value in item.items():
+            numeric_value = float(value)
+            if numeric_value == 0:
+                yes_count += 1
+            elif numeric_value == 1:
+                no_count += 1
+            elif 0 < numeric_value < 1:
+                uncertain_count += 1
+
+    # Create the final structured list
+    DATA = [
+        {
+            "id": "yes",
+            "label": "Yes",
+            "value": yes_count
+        },
+        {
+            "id": "uncertain",
+            "label": "Uncertain",
+            "value": uncertain_count
+        },
+        {
+            "id": "no",
+            "label": "No",
+            "value": no_count
+        }
+    ]
+
+    return DATA
 
 
 db = IODatabase(conn, "discourse-data")
@@ -129,6 +176,7 @@ def extend_date_range(date_counts, days_before=3, days_after=5):
     extended_date_counts = dict(sorted(extended_date_counts.items()))
 
     return extended_date_counts
+
 
 def fetch_and_display_personal_data(conn, kwargs):
     # Fetch all data from the "questionnaire" table
@@ -351,7 +399,65 @@ if st.session_state['authentication_status']:
                         )
 
             st.markdown("### Visualising aligning values")
-            # st.write(alignment_values)
+            st.json(alignment_values, expanded=False)
+            
+            st.json(parse_json_data(alignment_values), expanded=False)
+            
+            DATA = parse_json_data(alignment_values)
+    #         DATA = [
+    #     {
+    #         "id": "yes",
+    #         "label": "Yes",
+    #         "value": 3
+    #     },
+    #     {
+    #         "id": "uncertain",
+    #         "label": "Uncertain",
+    #         "value": 3
+    #     },
+    #     {
+    #         "id": "no",
+    #         "label": "No",
+    #         "value": 2
+    #     }
+    # ]       
+            st.write(DATA)
+            with elements("nivo_charts_alignment"):
+
+                with mui.Box(sx={"height": 300}):
+                    nivo.Waffle(
+                        data=DATA,
+                        total=20,
+                        rows=5,
+                        columns=4,
+                        borderRadius={3},
+                        # borderWidth=3,
+                        emptyOpacity=0.15,
+                        padding=3,
+                        color_scheme="nivo",
+                        legends=[
+                            {
+                                "anchor": "bottom",
+                                "direction": "row",
+                                "justify": False,
+                                "translateX": 0,
+                                "translateY": 56,
+                                "itemsSpacing": 0,
+                                "itemWidth": 100,
+                                "itemHeight": 18,
+                                "itemDirection": "left-to-right",
+                                "itemOpacity": 0.85,
+                                "itemTextColor": "#777",
+                                "symbolSize": 12,
+                            }
+                        ]
+                    )
+
+            
+            st.write(f"{len(alignment_values)} did express their alignment value.")
+            """
+            This is a good sign.
+            """
             matrix_size = int(np.ceil(np.sqrt(len(data))))
             # st.write(f"Matrix size: {matrix_size}")
             matrix = np.full((matrix_size, matrix_size), .5)
@@ -368,7 +474,6 @@ if st.session_state['authentication_status']:
                         matrix[i, j] = float(value)  # Place the value in the matrix
                         index += 1
                         
-            
             # matrix = np.random.rand(matrix_size, matrix_size)
             
             fig = px.scatter(x=np.arange(matrix_size).repeat(matrix_size),
@@ -387,10 +492,132 @@ if st.session_state['authentication_status']:
                  title="Matrix Visualization")
             _scatter_layout(fig)
             st.plotly_chart(fig)
+            """
+            ### Greys did not respond?
+            """
+    # Display a button to retrieve the transaction history
+    if st.button('Retrieve Transaction History'):
+        # Call the function to get the transaction history
+        tx_history = get_sumup_transaction_history(10)
+        # st.write(tx_history)
+        if tx_history:
+            st.write("Transaction History")
+            st.write(tx_history["items"][0].keys())
+            transaction_rows = []
 
+            for transaction in tx_history["items"]:
+                            
+                row = {
+                    "Timestamp": transaction["timestamp"],
+                    "Transaction Code": transaction["transaction_code"],
+                    "Amount": transaction["amount"],
+                    "Currency": transaction["currency"],
+                    "Status": transaction["status"],
+                    "Card Type": transaction["card_type"],
+                    "Payment Type": transaction["payment_type"],
+                    "Transaction ID": transaction["transaction_id"],
+                }
+                transaction_rows.append(row)
+
+            # st.table(transaction_rows)
+            # st.write(transaction_rows)
+            num_transactions = st.number_input("Enter the number of transactions to dig:", min_value=1, max_value=100, value=10)
+
+            # Retrieve and display transactions
+            transactions = []
+            my_bar = st.progress(0, "Fetching transaction details")
+                
+            for i in range(num_transactions):
+                my_bar.progress((i+1)/num_transactions)
+                # For demonstration, we'll use the loop index as the transaction ID
+                transaction_id = transaction_rows[i]["Transaction ID"]
+                # st.write(f"Fetching transaction details for ID: {transaction_id}")
+                transaction_details = get_transaction_details(transaction_id)
+                transactions.append(transaction_details)
+
+
+            filtered_transactions = []
+
+            for transaction in transactions:
+                # st.write(transaction.get("product_summary", ""))
+                if "Social Contract from Scratch" in transaction.get("product_summary", ""):
+                    filtered_transactions.append(transaction)
+            
+            transactions = filtered_transactions
+            
+            # Display the transaction details in a table
+            if transactions:
+                # transactions[0]
+                st.write("Fetching Transaction Details")
+                # st.table(transactions)
+                # for transaction in transactions:
+                #     display_transaction_details(transaction)
+
+            else:
+                st.write("No transactions to display.")
+            # st.write(transactions)
+            transaction_rows = []
+            for transaction in transactions:
+                row = {
+                    "Amount": transaction["amount"],
+                    "Timestamp": transaction["local_time"],
+                    "Status": transaction["status"],
+                    "Transaction Code": transaction["transaction_code"],
+                    "Product": transaction.get("product_summary", "N/A"),
+                    "Receipt_url": next((link["href"] for link in transaction.get("links", []) if link["rel"] == "receipt" and link["type"] == "image/png"), "N/A")
+                }
+                transaction_rows.append(row)
+
+            # Convert to DataFrame for better display
+            df = pd.DataFrame(transaction_rows)
+
+            # Display the table in Streamlit
+            # st.table(df)       
+            st.write(df)
+            
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+
+            # Filter the DataFrame for transactions with status 'SUCCESSFUL'
+            df_successful = df[df['Status'] == 'SUCCESSFUL']
+            df_failed = df[df['Status'] == 'FAILED']
+
+            # Sum the amounts for all 'SUCCESSFUL' transactions
+            total_amount = df_successful['Amount'].sum()
+            st.write(f"Total transactions: {len(df)}")
+            st.write(f"Total FAILED: {len(df_failed)}")
+            st.write(f"Total Amount for SUCCESSFUL transactions: {total_amount}")
+
+            # Create a time/amount chart
+            fig = px.scatter(df_successful, x='Timestamp', y='Amount', color=px.Constant('SUCCESSFUL'), 
+                            labels={'color': 'Status'}, title='Transaction Amounts Over Time')
+            fig.add_scatter(x=df_failed['Timestamp'], y=df_failed['Amount'], mode='markers', 
+                            name='FAILED', marker=dict(color='red', symbol='x'))
+
+            # Customize the chart if needed
+            fig.update_layout(xaxis_title='Time', yaxis_title='Amount')
+
+            # Display the scatter plot in Streamlit
+            st.plotly_chart(fig)
+
+            # Compute the cumulative amount received
+            df_successful = df_successful.sort_values(by='Timestamp')
+            df_successful['Cumulative Amount'] = df_successful['Amount'].cumsum()
+
+            # Create a cumulative graph of the amount received
+            fig_cumulative = px.line(df_successful, x='Timestamp', y='Cumulative Amount', 
+                                    title='Cumulative Amount Received Over Time')
+
+            # Customize the cumulative chart if needed
+            fig_cumulative.update_layout(xaxis_title='Time', yaxis_title='Cumulative Amount')
+
+            # Display the cumulative plot in Streamlit
+            st.plotly_chart(fig_cumulative)
+            
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:
     authenticator.login('Connect', 'main', fields = fields_connect)
     st.warning('Please use your access key')
     
+if __name__ == '__main__':
+    pass

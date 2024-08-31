@@ -173,7 +173,6 @@ def sumup_widget(checkout_id):
                             onResponse: function (type, body) {{
                             console.log('Type', type);
                             console.log('Body', body);
-                            SumUpCard.unmount();
                             }},
                         }});
                     </script>

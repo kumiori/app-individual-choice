@@ -6,7 +6,7 @@ from streamlit_extras.mandatory_date_range import date_range_picker
 import hashlib
 superpowers_dict = {
     'Time-Bending Vision': {
-        'description': 'With the ability to see moments from the past, present, and future simultaneously, you navigate life with wisdom beyond your years. Embrace your time-bending vision to savor the present and make future choices with an extraordinary foresight.',
+        'description': '**With the ability** to see moments from the past, present, and future simultaneously, you navigate life with wisdom beyond your years. Embrace your time-bending vision to savor the present and make future choices with an extraordinary foresight.',
         'emoji': '🕰️'
     },
     'Quantum Resilience': {
@@ -49,19 +49,20 @@ superpowers_dict = {
 
 def show_powers():
     container = st.container()
-    empty = st.empty()
+    empty = st.container()
     
+    @st.dialog("Vote", width="small")
     def callback(description, _container):
         # st.write(description)
-        # empty.write('ad')
-        _container.write(description)
+        st.write('description')
+        # _container.write(description)
         
     links_row = row(len(superpowers_dict)//2, vertical_align="center")
 
     with container:
         for power_name, details in superpowers_dict.items():
             emoji = details['emoji']
-            description = details['description']
+            description = details['description'] 
 
             # Create a button with emoji and show description on hover
             button_text = f"{emoji}"
@@ -70,13 +71,11 @@ def show_powers():
     
     st.write('''<style>
         [data-testid="stVerticalBlock"] [data-testid="baseButton-secondary"] p {
-            font-size: 2rem;
+            font-size: 4rem;
             padding: 1rem;
         }
     </style>''', unsafe_allow_html=True)
     
-    with container:
-        st.write('asd')
 
 # Example Usage:
 def main():

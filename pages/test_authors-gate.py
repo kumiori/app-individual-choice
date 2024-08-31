@@ -357,7 +357,7 @@ def create_connection(key, kwargs = {}):
     match = kwargs.get('match', False)
     if st.session_state["authentication_status"] is None:
         try:
-            if authenticator.register_user(' Check • Point ', match = match,  preauthorization=False):
+            if authenticator.register_user(' Create access key ', match = match,  preauthorization=False):
                 st.success(f'Very good 🎊. We have created a key 🗝️ for you. Keys are a short string of characters, these 🤖 days.\
                     💨 Here is one for your access ✨ <`{ authenticator.credentials["access_key"] }`> ✨.        \
                     Keep it in your pocket, add it to your wallet...keep it safe 💭. You will use it to access to the authors mainframe 💫 at the top of the page.')

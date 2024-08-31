@@ -23,7 +23,6 @@ from lib.authentication import _Authenticate
 import hashlib
 # from pages.test_game import display_dictionary_by_indices
 # from pages.test_pleasure import display_dictionary
-from streamlit_authenticator.exceptions import RegisterError
 
 from lib.matrices import generate_random_matrix, encode_matrix, display_matrix
 from lib.dictionary_manip import display_dictionary, display_dictionary_by_indices, display_details_description
