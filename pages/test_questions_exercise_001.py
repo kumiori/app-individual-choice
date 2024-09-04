@@ -144,7 +144,7 @@ def _submit():
         try:
             data = {
                 'signature': signature,
-                'practical_questions_01': json.dumps(serialised_data)
+                'exercise_01': json.dumps(serialised_data)
             }
             query = conn.table('discourse-data')                \
                    .upsert(data, on_conflict=['signature'])     \
