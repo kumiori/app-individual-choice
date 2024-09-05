@@ -175,9 +175,9 @@ def _submit():
     
     
 intro_text = """
-We are exploring collective values and a shared purpose through the proposed reconstruction of the social contract.
+We are exploring collective values and a shared purpose through rethinking _how to interact and relate in a community_, inspiring new views in a social contract.
 
-Our aim is to create an experience that connects, integrating our diverse ideas and perspectives to enhance our journey. 
+Our aim is to create an experience that connects, integrating our diverse ideas and perspectives. 
 
 As part of this, we are considering options to share certain aspects of this experience, maybe even accommodation. Connect with your _access key_ and share your preferences to help us make the best decisions.
 """
@@ -440,26 +440,28 @@ def first_self_inflicted_exercise():
             if pages.current == 0:
                 """
 **Outlook:**
-- Instead of merging existing contributions, _our discourse_ is to invite the audience to co-create a 'social contract from scratch.'
-- This involves thinking and proposing together, starting not from a blank slate, but from a specific point—a "scratch."
+- _Our discourse_ is to invite the audience to co-create a 'social contract from scratch.'
+- For practical purposes, a 'contract' is an understanding or agreement; it is social because it involves _people_; and it is from scratch because it is built from the ground up. 
+- In our case, it is a _collective_ understanding that leaves a _transparent_ trace.
+- This involves thinking and proposing together from _starting lines_ —or "scratches."
 - We have very many unique points: connecting them (connecting us) is our strentgh. We're building something different, a stepping stone for something "bigger."
 
 **How It Works:**
 - The process will involve playful interaction, thought-provoking questions, and a melting pot of ideas.
 
 **Your Role:**
-#### Your role now is to actively engage in the collaborative process of building the ‘social contract from scratch.’ This involves contributing your ideas, perspectives, and insights
+#### Engage in the collaborative process of building the ‘social contract from scratch.' This involves contributing questions, perspectives, and insights
 """
             elif pages.current == 1:
                 st.subheader("Your Role in Building the Social Contract")
                 st.write("Your input and collaboration is crucial in this phase, helping bringing clarity in the process of this collective initiative. Let's work together with creativity")
                 
                 """
-                Little by little, we shall picture  _How you imagine our panel session?_
+                We shall picture  _How to imagine our panel session?_
                 
-                We are the Athena collective, a rich and diverse group of individuals with varying perspectives and expertise. 
+                We are the Athena collective, a rich and diverse group of individuals with varying perspectives and expertise. Let's imagine (we are creatives). _We are creating a community together, how are our interactions, what governs them, who governs them, how do we care for each other within this context, how do we care about our context?_
                 
-                We think and build together, from the simple to the complex, from the small to the large, crafting a shared agreement. 
+                We think and build together, from the simple to the complex, from the small to the large, crafting our own shared understanding... 
                 
                 """     
                 
@@ -501,10 +503,11 @@ def first_self_inflicted_exercise():
                 
                 """
                 st.write("### Scratch your _Scratches_")
-                st.write("Let's identify key concepts or prompts to initiate dialogue. Let's scratch the surface of our thoughts and ideas. Let's collect five each, if nothing comes to mind, just write the word 'scratch'.")
+                st.write("Let's identify key concepts or prompts to initiate dialogue. Let's scratch the surface of our thoughts and ideas. Let's collect five each, if nothing comes to mind, just scratch the _first idea that comes to mind_ or the word 'scratch'.")
                 # keywords = st.text_area("Input your keywords (e.g., Ocean)", "")
                 scratches = collect_scratches()
-                
+                # inject in survey data
+                survey.data["scratches"] = scratches
                 st.write(scratches)
                 
             elif pages.current == 3:
@@ -526,11 +529,13 @@ def first_self_inflicted_exercise():
                     questions["Question 3"] = question_3
                     st.session_state["questions"] = questions
                     if question_3:
-                        st.text_area("Question Extended", key="question_extended", help="I want to provide more on the questions", value="Let's expand...")
+                        survey.text_area("Question Extended", key="question_extended", help="I want to provide more on the questions", value="Let's expand...")
                     return questions
 
                 questions = collect_questions()
                 st.write(questions)
+                # inject in survey data
+                survey.data["questions"] = questions
                 # Problem Input Section
                 st.write("### Are there any potential problems in sight?")
                 """
@@ -540,31 +545,166 @@ def first_self_inflicted_exercise():
 
             elif pages.current == 4:
                 
-                
+                """
+                # Problems sometimes are the best source of inspiration.
+                """
                                 
                 """
-                Organizing a panel discussion requires careful coordination among many participants, balancing resources, and considering everyone's preferences and constraints. Given these complexities, problems may arise. Do you see any potential issues that could hinder our progress? Additionally, can you foresee possible solutions to these challenges? Please share your thoughts on how we can anticipate and address any obstacles to ensure a smooth and effective panel discussion.
+                Organising a panel discussion requires careful coordination among many participants
+                
+                Resources, everyone's preferences, and constraints are key. 
+                
+                Given these complexities, problems may arise. 
+                
+                Do you see any potential issues that could hinder our progress? 
                 """
 
-                problems_solutions = st.text_area("Your thoughts and suggestions")
+                problems = survey.text_area("Problems: your thoughts and suggestions", id="problems")
                 
+                """
+                Can you foresee possible approaches or solutions to these questions? Please share your thoughts on how we can anticipate and address any obstacles to ensure a smooth and effective panel discussion.
+                """
+                solutions = survey.text_area("Solutions: Your thoughts and suggestions", id="solutions")
                 
+                """
+                ### Let's imagine some possible scenarios..."""
                 
             elif pages.current == 5:
                 # Plan B Section
-                st.write("### Describe Plan B (Worst Case Scenario)")
-                st.write("Detail a backup plan if things do not go as expected.")
-                plan_b = st.text_area("Describe Plan B", "")
+                st.write("### Plan B (A Possible Case Scenario)")
+                """
+                ### Thank you for contributing to our panel discussion. 
+                
+                As we continue to refine our approach, we'd like to ask you to think about a Plan B scenario. 
+                
+                This isn't necessarily the worst-case situation, but rather a backup plan that can be activated if certain elements don't unfold as expected.
+
+                ### What key parts of our plan might not go as intended? 
+                
+                Perhaps the technology won't function as smoothly, audience engagement may be lower than expected, or specific logistical aspects might face delays. In these cases, what alternatives or adjustments could we consider to ensure our presentation and discussions remain impactful?
+
+                Describe a hypothetical Plan B, if some things don't go according to plan.
+                """
+                plan_b = survey.text_area("Plan B", id = "plan_b")
 
 
             elif pages.current == 6:
+                st.write("### Plan $\Omega$ (A Worst Case Scenario)")
+                """Thank you again for your contributions."""
+                """
+                Now, let's consider a **worst-case scenario** — what might happen if things don't go as planned. Everything seems doomed?
+
+                What if the audience isn't engaged, or the discussion doesn't flow as expected? 
+
+                How does a _worst-case scenario_ look like, for us? Consider what could go wrong and how we could still turn the situation around. Can still deliver a meaningful and productive session?
+                """
+                plan_omega = survey.text_area("Plan $\Omega$", id="plan_omega")
+                
+            elif pages.current == 7:
+                
                 # Plan A Section
-                st.write("### Describe Plan A (Best Case Scenario)")
+                st.write("### Describe Plan $A$ (Best Case Scenario)")
                 st.write("Detail how things should ideally work out.")
-                plan_a = st.text_area("Describe Plan A", "")
-                pass
+                
+                """
+                Now, we'd like to envision a Plan A — the best-case scenario for our panel discussion. 
+                
+                ## Imagine everything unfolds perfectly. How does it look like?
+                
+                The technology works seamlessly? Audience participation is high, food is great and our messages resonate deeply with everyone involved?
+
+                What does _success_ look like to you? For example, perhaps the discussions spark new collaborations, or our interactive tools lead to unexpected insights. Thematic segments could flow together naturally, leading to productive dialogue and an engaged audience that is inspired to take action.
+
+                Please describe your Plan A - the best case scenario for our panel discussion, as you envision it.
+                
+                Don't worry about being too detailed or specific; we're looking for a broad _sense_.
+                """
+                
+                plan_a = survey.text_area("Describe Plan A", id="plan_a")
             
-            # elif pages.current == 5:
+            elif pages.current == 8:
+                """
+                ### Let's reflect on the possible outcomes and the broader impact we aim to achieve. 
+                
+                
+                • New Future Events: 
+                    Future gatherings and dialogues? This session spark a new series of 
+                    events that bring people together to rethink?
+                • New Grassroots & Participatory Policies in EU Regulation: 
+                    This session could influence new grassroots-driven initiatives. 
+                    What if citizen participation played a central role in 
+                    shaping EU regulations and governance?
+                • Pilot Projects (Singular Perturbations & Counterexamples): 
+                    The value of counterexamples and pilot projects. _Can_ we initiate 
+                    small-scale experiments that challenge conventional norms and offer 
+                    alternative models?
+                • Remote Collaborative Working Groups: What if... we continue working 
+                    together beyond this session? Remote, interdisciplinary, collaborative 
+                    working groups can sustain exploration of new ideas, pushing forward innovative
+                    solutions.
+                • Observatory of Perceptions: Creating an “observatory,” not for stars, 
+                    but for points-of-view, where we continually assess public views, 
+                    challenges, priorities, and societal shifts. An ongoing dialogue to 
+                    monitor and better understand societal transformations.
+                • Executive Actions: Consider the direct actions that could emerge 
+                    from this session. Concrete executive decisions! Launch new initiatives, or even 
+                    immediate changes within existing structures.
+
+            Which of these potential outcomes excites you the most? What role do you envision playing in helping bring one or more of these to life? 
+"""
+                """
+                        By adjusting the sliders, express your level of interest or engagement in each category.
+        
+                """
+        
+                # st.write(engage)
+                equaliser_data = [
+                    ("New Future Events", ""),
+                    ("New Grassroots & Participatory Policies in EU Regulation", ""),
+                    ("Pilot Projects (Singular perturbations & Counterexamples)", ""),
+                    ("Remote Collaborative Working Groups", ""),
+                    ("Observatory of Perceptions", ""),
+                    ("Executive Actions", "")
+                    ]
+
+                create_equaliser(key = "equaliser", id= "equaliser", kwargs={"survey": survey, "data": equaliser_data})
+                
+                st.text_input("Other outcomes?", key="outcomes")
+                
+            elif pages.current == 9:
+                st.write("### Thank you for your participation!")
+                st.session_state['serialised_data'] = survey.data
+                """
+                You can double-check the data you've provided, below. If everything looks good, hit the _Submit_ button to integrate them.
+                
+                Additionally, you can download the responses for your records.
+                
+                """
+                with st.container():
+                    st.json(survey.data, expanded=False)
+                    csv_filename = f"my_responses_first_exercise_{datetime.now().strftime('%Y-%m-%d')}.data"
+                    if st.download_button(label=f"Download Panel session 01", use_container_width=True, data=json.dumps(survey.data), file_name=csv_filename, mime='text/csv', type='secondary'):
+                        st.success(f"Saved {csv_filename}")
+                
+                
+                # with st.expander("As a side note (on singularity)", expanded=False):
+                    """
+                    The concept of singularity—often referred to as the technological singularity—is tied to the idea that at some point in the future, _some_ intelligence (e.g. AI) could surpass human intelligence. This event, sometimes envisioned as a rapid, transformative moment, has profound implications for knowledge, power, ethics, and society as a whole. It's seen as a “point of no return,” where human control over technology could become irrelevant.
+
+                    Some viewpoints frame singularity as the gateway to the everything-unknown. It could give us rapid access to vast knowledge and capabilities that are currently beyond our comprehension. But it also opens up questions of forbidden realms, like control over life itself, or the blurring boundaries between _this_ and _that_ (e.g. human and machine).
+
+                    There's also a strong fear element. Will humans lose control over what they have created? 
+                    Would our understanding of ethics, freedom, _and choice_ (!) hold up in such a radically different reality? The singularity, in this sense, becomes not just a technological leap but an existential challenge.
+
+                    It could represent an entrance to limitless possibilities, where creativity, thought, and innovation expand beyond anything we could imagine. Or it could usher in an era where those who understand and control such advancements wield unimaginable power, which poses its own dangers.
+
+                    In essence, the singularity offers a fast route to answers that humanity has been chasing for millennia, but whether we are ready for those answers—or the questions they raise—is an entirely different matter.
+                    
+                    Who is ready? Who is not? Who is willing to take the leap? Who is not?
+
+                    """
+
+        st.json(survey.data, expanded=False)
 def create_button_with_styles(key, survey, label, bg_color="gray", image_url=None):
     image_style = f'background-image:url("{image_url}") fixed center;' if image_url else ""
     with stylable_container(
@@ -654,21 +794,11 @@ if st.session_state['authentication_status']:
     st.toast('Initialised authentication model')
     authenticator.logout()
     st.write(f'`Your signature is {st.session_state["username"][0:4]}***{st.session_state["username"][-4:]}`')
-    # practical_questions()
-    first_self_inflicted_exercise()
+    practical_questions()
+    # first_self_inflicted_exercise()
     
 elif st.session_state['authentication_status'] is False:
     st.error('Access key does not open')
 elif st.session_state['authentication_status'] is None:
     authenticator.login('Connect', 'main', fields = fields_connect)
     st.warning('Please use your access key')
-    # # try:
-    # #     match = True
-    # #     success, access_key, response = authenticator.register_user(data = match, captcha=True, pre_authorization=False, 
-    # #                                                                 fields = fields_forge)
-    # #     if success:
-    # #         st.success('Registered successfully')
-    # #         st.toast(f'Access key: {access_key}')
-    # #         st.write(response)
-    # except Exception as e:
-    #     st.error(e)
