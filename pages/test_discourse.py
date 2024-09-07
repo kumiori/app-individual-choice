@@ -1000,12 +1000,5 @@ if __name__ == "__main__":
     
     st.markdown("## We are happy to share more and connect.")
 
-    st.markdown("""##
-        On est dans la merde.
-        On est revenu à un état de chaos dans les 
-    relations géopolitiques internationales.
-    
-    <Ariane Ahmadi>
-                """)
     authenticator.login('Author access', key='author_access')
 
