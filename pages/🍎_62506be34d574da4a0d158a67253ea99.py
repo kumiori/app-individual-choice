@@ -34,6 +34,75 @@ def compute_protein_intake(
     return protein_intake
 
 
+def calculate_bmr(
+    sex, age, weight, height, lean_body_mass=None, formula="Mifflin-St Jeor"
+):
+    """
+    Calculate the Basal Metabolic Rate (BMR) using one of five popular formulas.
+
+    Parameters:
+    - sex: str ("male" or "female")
+    - age: int (years)
+    - weight: float (kg)
+    - height: float (cm)
+    - lean_body_mass: float (kg, optional for Katch-McArdle)
+    - formula: str (choose from "Mifflin-St Jeor", "Harris-Benedict", "Revised Harris-Benedict", "Katch-McArdle", "Schofield")
+
+    Returns:
+    - bmr: float (cal/day)
+    """
+    sex = sex.lower()
+    if sex not in ["male", "female"]:
+        raise ValueError("Invalid value for 'sex'. Choose 'male' or 'female'.")
+
+    if formula == "Mifflin-St Jeor":
+        if sex == "male":
+            return 10 * weight + 6.25 * height - 5 * age + 5
+        else:  # female
+            return 10 * weight + 6.25 * height - 5 * age - 161
+
+    elif formula == "Harris-Benedict":
+        if sex == "male":
+            return 66.47 + 13.75 * weight + 5.003 * height - 6.755 * age
+        else:  # female
+            return 655.1 + 9.563 * weight + 1.85 * height - 4.676 * age
+
+    elif formula == "Revised Harris-Benedict":
+        if sex == "male":
+            return 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age
+        else:  # female
+            return 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age
+
+    elif formula == "Katch-McArdle":
+        if lean_body_mass is None:
+            raise ValueError(
+                "Lean body mass is required for the Katch-McArdle formula."
+            )
+        return 370 + 21.6 * lean_body_mass
+
+    elif formula == "Schofield":
+        if sex == "male":
+            if 18 <= age <= 30:
+                return 15.057 * weight + 692.2
+            elif 30 < age <= 60:
+                return 11.472 * weight + 873.1
+            else:  # age > 60
+                return 11.711 * weight + 587.7
+        else:  # female
+            if 18 <= age <= 30:
+                return 14.818 * weight + 486.6
+            elif 30 < age <= 60:
+                return 8.126 * weight + 845.6
+            else:  # age > 60
+                return 9.082 * weight + 658.5
+    else:
+        raise ValueError(
+            "Invalid formula name. Choose from 'Mifflin-St Jeor', 'Harris-Benedict', 'Revised Harris-Benedict', 'Katch-McArdle', 'Schofield'."
+        )
+
+
+# Example usage
+
 if __name__ == "__main__":
     survey = ss.StreamlitSurvey()
 
@@ -260,3 +329,25 @@ if __name__ == "__main__":
     st.write(f"""{st.session_state.get('age', 'N/A')}""")
 
     st.json(survey.data)
+
+    # Test data
+    sex = "male"
+    age = 25
+    weight = 70  # in kg
+    height = 175  # in cm
+    lean_body_mass = 60  # in kg
+
+    # Calculate BMR using each formula
+    formulas = [
+        "Mifflin-St Jeor",
+        "Harris-Benedict",
+        "Revised Harris-Benedict",
+        "Katch-McArdle",
+        "Schofield",
+    ]
+    for formula in formulas:
+        try:
+            bmr = calculate_bmr(sex, age, weight, height, lean_body_mass, formula)
+            st.write(f"{formula}: {bmr:.2f} kcal/day")
+        except ValueError as e:
+            st.write(f"{formula}: Error - {e}")
