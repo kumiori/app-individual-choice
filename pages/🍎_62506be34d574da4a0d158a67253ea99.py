@@ -5,9 +5,73 @@ import pandas as pd
 import numpy as np
 import streamlit_tags as st_tags
 
+from fatsecret import Fatsecret
+from streamlit import secrets
+
+# Replace with your own API key and API secret
+app_id = secrets["food"]["FATSECRET_ID"]
+app_key = secrets["food"]["FATSECRET_KEY"]
+fs = Fatsecret(app_id, app_key)
+
 # Initialize session state for food items if not already set
 if "food_items" not in st.session_state:
     st.session_state["food_items"] = []
+
+if "food_nutrition_data" not in st.session_state:
+    st.session_state.food_nutrition_data = pd.DataFrame(
+        columns=["Food Item", "Calories", "Protein", "Fat", "Carbs"]
+    )
+
+if "food_data" not in st.session_state:
+    st.session_state.food_data = pd.DataFrame(columns=["Food Item", "Quantity", "Unit"])
+
+
+def get_nutrient_info(food_item):
+    # Perform food search to get food_id
+    # st.write(f"Searching for {food_item}...")
+    try:
+        search_results = fs.foods_search(food_item)
+        # st.write(search_results)
+        generic_foods = [
+            food for food in search_results if food.get("food_type") == "Generic"
+        ]
+        if not generic_foods:
+            return {"Error": "No generic food found"}
+        # else:
+        # st.write(f"Found {len(generic_foods)} generic foods")
+        food_id = generic_foods[0]["food_id"]
+
+        # Get detailed nutritional info by food_id
+        food_details = fs.food_get(food_id)
+        if "servings" in food_details:
+            servings = food_details["servings"]["serving"]
+            if isinstance(
+                servings, dict
+            ):  # If there's only one serving, it's returned as a dict
+                servings = [servings]
+            # Find the serving with metric_serving_amount of 100 and metric_serving_unit of 'g'
+            target_serving = next(
+                (
+                    serving
+                    for serving in servings
+                    if serving.get("metric_serving_amount") == "100.000"
+                    and serving.get("metric_serving_unit") == "g"
+                ),
+                None,
+            )
+
+            if target_serving:
+                return target_serving
+            else:
+                return {"Error": "No serving size of 100g found"}
+
+        else:
+            st.session_state.not_found.append(food_item)
+            return {"Error": "No detailed nutritional info found"}
+
+    except Exception as e:
+        st.session_state.not_found.append(food_item)
+        return {"Error": str(e)}
 
 
 def compute_nutrient_contributions(food_data):
@@ -493,6 +557,51 @@ if __name__ == "__main__":
     if st.session_state["food_items"]:
         st.markdown("### Current Food Items")
         st.write(st.session_state["food_items"])
+
+    if st.button(f"Get Food Info {len(st.session_state.food_items)}"):
+        progress_bar = st.progress(0)
+        nutrient_data = []
+        total_items = len(st.session_state.food_items)
+        print(total_items)
+        print(st.session_state.food_data)
+
+        with st.spinner("Fetching nutrient information..."):
+            for idx, food_item in enumerate(st.session_state.food_items):
+                # food_item = row["Food Item"]
+                st.info(f"Searching for {food_item}...")
+                try:
+                    # Fetch nutrient information for the food item
+                    nutrient_info = get_nutrient_info(food_item)
+
+                    # Log the nutrient info for debugging
+                    # st.info(nutrient_info)
+
+                    # Add or update the information in the DataFrame
+                    new_row = {"Food Item": food_item}
+                    new_row.update(nutrient_info)
+                    st.session_state.food_nutrition_data = pd.concat(
+                        [st.session_state.food_nutrition_data, pd.DataFrame([new_row])],
+                        ignore_index=True,
+                    )
+
+                except Exception as e:
+                    st.error(f"Failed to fetch data for {food_item}: {e}")
+
+            st.session_state.food_nutrition_data.drop(
+                columns=[
+                    "metric_serving_amount",
+                    "metric_serving_unit",
+                    "serving_description",
+                    "serving_id",
+                    "serving_url",
+                    "serving_url",
+                ],
+                inplace=True,
+            )
+            st.dataframe(st.session_state.food_nutrition_data)
+
+            st.success("Market information fetched successfully")
+            st.table(st.session_state.food_data)
 
     "## Given Food items"
     uploaded_file = st.file_uploader("Given food data", type="csv")
