@@ -1,5 +1,35 @@
 import streamlit as st
 import streamlit_survey as ss
+import plotly.express as px
+import pandas as pd
+import numpy as np
+import streamlit_tags as st_tags
+
+# Initialize session state for food items if not already set
+if "food_items" not in st.session_state:
+    st.session_state["food_items"] = []
+
+
+def compute_nutrient_contributions(food_data):
+    # Compute the overall nutrient contributions based on quantities
+    overall_energy = sum(
+        food_data["Quantity"][i] * food_data["calories"][i] / 100
+        for i in range(len(food_data))
+    )
+    overall_carbs = sum(
+        food_data["Quantity"][i] * food_data["carbohydrate"][i] / 100
+        for i in range(len(food_data))
+    )
+    overall_protein = sum(
+        food_data["Quantity"][i] * food_data["protein"][i] / 100
+        for i in range(len(food_data))
+    )
+    overall_fat = sum(
+        food_data["Quantity"][i] * food_data["fat"][i] / 100
+        for i in range(len(food_data))
+    )
+
+    return overall_energy, overall_carbs, overall_protein, overall_fat
 
 
 def compute_protein_intake(
@@ -27,7 +57,7 @@ def compute_protein_intake(
         base_factor = 1.3
     else:
         base_factor = activity_factors.get(activity_level.lower(), 0.8)
-    st.info(f"Base Factor: {base_factor}")
+    # st.info(f"Base Factor: {base_factor}")
     # Compute minimum protein intake
     protein_intake = weight * base_factor
 
@@ -35,13 +65,13 @@ def compute_protein_intake(
 
 
 def calculate_bmr(
-    sex, age, weight, height, lean_body_mass=None, formula="Mifflin-St Jeor"
+    gender, age, weight, height, lean_body_mass=None, formula="Mifflin-St Jeor"
 ):
     """
     Calculate the Basal Metabolic Rate (BMR) using one of five popular formulas.
 
     Parameters:
-    - sex: str ("male" or "female")
+    - gender: str ("male" or "female")
     - age: int (years)
     - weight: float (kg)
     - height: float (cm)
@@ -51,24 +81,24 @@ def calculate_bmr(
     Returns:
     - bmr: float (cal/day)
     """
-    sex = sex.lower()
-    if sex not in ["male", "female"]:
-        raise ValueError("Invalid value for 'sex'. Choose 'male' or 'female'.")
+    gender = gender.lower()
+    if gender not in ["male", "female"]:
+        raise ValueError("Invalid value for 'gender'. Choose 'male' or 'female'.")
 
     if formula == "Mifflin-St Jeor":
-        if sex == "male":
+        if gender == "male":
             return 10 * weight + 6.25 * height - 5 * age + 5
         else:  # female
             return 10 * weight + 6.25 * height - 5 * age - 161
 
     elif formula == "Harris-Benedict":
-        if sex == "male":
+        if gender == "male":
             return 66.47 + 13.75 * weight + 5.003 * height - 6.755 * age
         else:  # female
             return 655.1 + 9.563 * weight + 1.85 * height - 4.676 * age
 
     elif formula == "Revised Harris-Benedict":
-        if sex == "male":
+        if gender == "male":
             return 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age
         else:  # female
             return 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age
@@ -81,7 +111,7 @@ def calculate_bmr(
         return 370 + 21.6 * lean_body_mass
 
     elif formula == "Schofield":
-        if sex == "male":
+        if gender == "male":
             if 18 <= age <= 30:
                 return 15.057 * weight + 692.2
             elif 30 < age <= 60:
@@ -99,6 +129,52 @@ def calculate_bmr(
         raise ValueError(
             "Invalid formula name. Choose from 'Mifflin-St Jeor', 'Harris-Benedict', 'Revised Harris-Benedict', 'Katch-McArdle', 'Schofield'."
         )
+
+
+def mifflin_st_jeor(weight, height, age, gender):
+    if gender.lower() == "male":
+        return 10 * weight + 6.25 * height - 5 * age + 5
+    elif gender.lower() == "female":
+        return 10 * weight + 6.25 * height - 5 * age - 161
+    else:
+        raise ValueError("Gender must be either 'male' or 'female'")
+
+
+def harris_benedict(weight, height, age, gender):
+    if gender.lower() == "male":
+        return 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age)
+    elif gender.lower() == "female":
+        return 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age)
+    else:
+        raise ValueError("Gender must be either 'male' or 'female'")
+
+
+def revised_harris_benedict(weight, height, age, gender):
+    if gender.lower() == "male":
+        return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    elif gender.lower() == "female":
+        return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+    else:
+        raise ValueError("Gender must be either 'male' or 'female'")
+
+
+def katch_mcardle(lean_body_mass):
+    return 370 + (21.6 * lean_body_mass)
+
+
+def schofield(weight, age, gender):
+    if gender.lower() == "male":
+        if age <= 18:
+            return 17.6 * weight + 656
+        else:
+            return 15.0 * weight + 692
+    elif gender.lower() == "female":
+        if age <= 18:
+            return 13.3 * weight + 692
+        else:
+            return 14.8 * weight + 486
+    else:
+        raise ValueError("Gender must be either 'male' or 'female'")
 
 
 # Example usage
@@ -328,13 +404,11 @@ if __name__ == "__main__":
 
     st.write(f"""{st.session_state.get('age', 'N/A')}""")
 
-    st.json(survey.data)
-
     # Test data
-    sex = "male"
-    age = 25
-    weight = 70  # in kg
-    height = 175  # in cm
+    # gender = "male"
+    # age = 25
+    # weight = 70  # in kg
+    # height = 175  # in cm
     lean_body_mass = 60  # in kg
 
     # Calculate BMR using each formula
@@ -347,7 +421,194 @@ if __name__ == "__main__":
     ]
     for formula in formulas:
         try:
-            bmr = calculate_bmr(sex, age, weight, height, lean_body_mass, formula)
+            bmr = calculate_bmr(gender, age, weight, height, lean_body_mass, formula)
             st.write(f"{formula}: {bmr:.2f} kcal/day")
         except ValueError as e:
             st.write(f"{formula}: Error - {e}")
+
+    ages = np.linspace(15, 80, 60)
+    weight = 70  # kg
+    height = 175  # cm
+    gender = "male"
+
+    # Collecting data for different models
+    data = {
+        "Age": ages,
+        "Mifflin-St Jeor": [
+            mifflin_st_jeor(weight, height, age, gender) for age in ages
+        ],
+        "Harris-Benedict": [
+            harris_benedict(weight, height, age, gender) for age in ages
+        ],
+        "Revised Harris-Benedict": [
+            revised_harris_benedict(weight, height, age, gender) for age in ages
+        ],
+        "Schofield": [schofield(weight, age, gender) for age in ages],
+    }
+
+    # Create a DataFrame for plotting
+    df = pd.DataFrame(data)
+    # st.table(df)
+    # Plot using Plotly
+    fig = px.line(
+        df,
+        x="Age",
+        y=[
+            "Mifflin-St Jeor",
+            "Harris-Benedict",
+            "Revised Harris-Benedict",
+            "Schofield",
+        ],
+        labels={"value": "BMR (kcal/day)", "variable": "Model"},
+        title="BMR Comparison Across Models",
+    )
+    fig.update_layout(template="plotly_dark")
+
+    # Display plot in Streamlit
+    st.plotly_chart(fig)
+
+    st.json(survey.data)
+
+    st.markdown(
+        """
+        ### Add Food Items to Your Diet
+        Specify the food items you want to include in your diet. 
+        Their quantities will remain as variables to be determined in the dietary plan.
+        """
+    )
+
+    food_items = st_tags.st_tags(
+        label="## Free Food items",
+        text="Food items, unknown quantities",
+        suggestions=[],
+    )
+    # Save food items to session state
+    if food_items:
+        st.session_state["food_items"] = food_items
+
+    if st.button("Clear Food Items"):
+        st.session_state["food_items"] = []
+
+    # Display added food items
+    if st.session_state["food_items"]:
+        st.markdown("### Current Food Items")
+        st.write(st.session_state["food_items"])
+
+    "## Given Food items"
+    uploaded_file = st.file_uploader("Given food data", type="csv")
+
+    if uploaded_file is not None:
+        uploaded_data = pd.read_csv(uploaded_file)
+        # st.session_state.food_data = pd.concat([st.session_state.food_data, uploaded_data], ignore_index=True)
+        st.session_state.food_data = uploaded_data
+        st.success("CSV file loaded successfully")
+
+        st.table(uploaded_data)
+
+    st.session_state.food_data["energy"] = st.session_state.food_data["calories"] * 4184
+    df = st.session_state.food_data
+
+    overall_energy, overall_carbs, overall_protein, overall_fat = (
+        compute_nutrient_contributions(df)
+    )
+    # st.write(res)
+
+    # Macronutrient energy densities
+    CARB_CALORIES_PER_GRAM = 4
+    PROTEIN_CALORIES_PER_GRAM = 4
+    FAT_CALORIES_PER_GRAM = 9
+
+    st.header("Nutrient Contributions:")
+    st.write(f"Overall Energy Content: {overall_energy:.2f} kcal")
+    st.write(f"Overall Carbohydrates: {overall_carbs:.2f} grams")
+    st.write(f"Overall Protein: {overall_protein:.2f} grams")
+    st.write(f"Overall Fat: {overall_fat:.2f} grams")
+
+    st.divider()
+    cols = st.columns(3)
+
+    with cols[0]:
+        # Target energy requirement and nutrient split
+        target_energy = st.number_input(
+            "Target Energy Requirement (kcal/day)", value=1500
+        )
+        target_carbs = st.number_input(
+            "Target Carbohydrates (%)", min_value=0, max_value=100, value=40
+        )
+        target_protein = st.number_input(
+            "Target Protein (%)", min_value=0, max_value=100, value=30
+        )
+        target_fat = st.number_input(
+            "Target Fat (%)", min_value=0, max_value=100, value=30
+        )
+
+        _target_carbs = target_carbs / 100 * target_energy
+        _target_protein = target_protein / 100 * target_energy
+        _target_fat = target_fat / 100 * target_energy
+
+        # Convert to grams
+        _target_carbs_grams = _target_carbs / CARB_CALORIES_PER_GRAM
+        _target_protein_grams = _target_protein / PROTEIN_CALORIES_PER_GRAM
+        _target_fat_grams = _target_fat / FAT_CALORIES_PER_GRAM
+
+        # Display target energy and macronutrient breakdown
+        st.write(f"### Target Energy and Macronutrient Breakdown per Day")
+        st.write(f"Target Energy: {target_energy} kcal")
+        st.write(
+            f"Target Carbs: {_target_carbs:.2f} kcal ({_target_carbs_grams:.2f} g)"
+        )
+        st.write(
+            f"Target Protein: {_target_protein:.2f} kcal ({_target_protein_grams:.2f} g)"
+        )
+        st.write(f"Target Fat: {_target_fat:.2f} kcal ({_target_fat_grams:.2f} g)")
+
+    with cols[1]:
+
+        # Calculate distance from target split
+        distance_carbs = overall_carbs - _target_carbs_grams
+        distance_protein = overall_protein - _target_protein_grams
+        distance_fat = overall_fat - _target_fat_grams
+        # Display results
+        st.header("Nutrient Target:")
+        st.write(f"Current Carbohydrates: {overall_carbs:.2f} grams")
+        st.write(f"Current Protein: {overall_protein:.2f} grams")
+        st.write(f"Current Fat: {overall_fat:.2f} grams")
+
+        st.header("Weekly Target:")
+
+        st.write(f"Target Carbs: ({7*_target_carbs_grams:.2f} g)")
+        st.write(f"Target Protein: ({7*_target_protein_grams:.2f} g)")
+        st.write(f"Target Fat: ({7*_target_fat_grams:.2f} g)")
+
+    with cols[2]:
+        # Display distance from target split
+        st.header("Distance from Target Split:")
+        st.write(f"Carbohydrates: {distance_carbs:.2f} grams")
+        st.write(f"Protein: {distance_protein:.2f} grams")
+        st.write(f"Fat: {distance_fat:.2f} grams")
+
+    # Slider to adjust the protein coefficient
+    protein_coefficient = st.slider(
+        "Protein Coefficient (g/kg body weight)",
+        min_value=0.8,
+        max_value=2.0,
+        value=1.5,
+        step=0.1,
+    )
+
+    # Calculate minimum protein requirement
+    min_protein_grams = weight * protein_coefficient
+
+    # Add the constraint to the target protein
+    if _target_protein_grams < min_protein_grams:
+        st.warning(
+            f"The computed target protein ({_target_protein_grams:.2f} g) is below the minimum recommended protein intake ({min_protein_grams:.2f} g)."
+        )
+    else:
+        st.success(
+            f"The computed target protein ({_target_protein_grams:.2f} g) meets the minimum recommended protein intake ({min_protein_grams:.2f} g)."
+        )
+
+    # Display the minimum protein constraint
+    st.write(f"### Minimum Protein Constraint")
+    st.write(f"Minimum Protein Requirement: {min_protein_grams:.2f} g")
