@@ -165,7 +165,7 @@ if st.button(f"Get Groceries Info {len(st.session_state.food_data)}"):
         )
         st.dataframe(st.session_state.food_data)
 
-csv_filename = f"food_info_{current_date}.csv"
+csv_filename = f"groceries-food_info_{current_date}.csv"
 csv = st.session_state.food_data.to_csv(index=False)
 
 if st.download_button(

@@ -5,21 +5,35 @@ import plotly.graph_objects as go
 import streamlit_tags as st_tags
 from fatsecret import Fatsecret
 from streamlit import secrets
+from streamlit_scroll_navigation import scroll_navbar
 
 app_id = secrets["food"]["FATSECRET_ID"]
 app_key = secrets["food"]["FATSECRET_KEY"]
 
 fs = Fatsecret(app_id, app_key)
 
+
+# Anchor IDs and icons
+anchor_ids = ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5"]
+anchor_icons = ["info-circle", "lightbulb", "gear", "tag", "envelope"]
+
+
+# 2. horizontal menu
+st.subheader("Example 2", help="Horizontal menu")
+scroll_navbar(
+    anchor_ids, key="navbar2", anchor_icons=anchor_icons, orientation="horizontal"
+)
+
+
 if "weekly_intake" not in st.session_state:
     st.session_state.weekly_intake = None
 
 if "food_data" not in st.session_state:
     # st.session_state.food_data = None
-    st.session_state.food_info = pd.DataFrame(columns=["Food Item", "Quantity", "Unit"])
+    st.session_state.food_data = []
 
 if "food_info" not in st.session_state:
-    st.session_state.food_info = pd.DataFrame(columns=["Food Item", "Quantity", "Unit"])
+    st.session_state.food_info = pd.DataFrame(columns=["Food Item", "Quantity"])
 
 if "food_ingredients" not in st.session_state:
     st.session_state.food_ingredients = []
@@ -34,6 +48,65 @@ def compute_rwi(data):
 def get_autocomplete_suggestions(query):
     # Placeholder for autocomplete suggestions
     return ["Bananas", "Apples", "Oranges", "Broccoli"]
+
+
+def paginator(label, items, items_per_page=10, on_sidebar=False):
+    """Lets the user paginate a set of items.
+    Parameters
+    ----------
+    label : str
+        The label to display over the pagination widget.
+    items : Iterator[Any]
+        The items to display in the paginator.
+    items_per_page: int
+        The number of items to display per page.
+    on_sidebar: bool
+        Whether to display the paginator widget on the sidebar.
+
+    Returns
+    -------
+    Iterator[Tuple[int, Any]]
+        An iterator over *only the items on that page*, including
+        the item's index.
+    Example
+    -------
+    This shows how to display a few pages of fruit.
+    >>> fruit_list = [
+    ...     'Kiwifruit', 'Honeydew', 'Cherry', 'Honeyberry', 'Pear',
+    ...     'Apple', 'Nectarine', 'Soursop', 'Pineapple', 'Satsuma',
+    ...     'Fig', 'Huckleberry', 'Coconut', 'Plantain', 'Jujube',
+    ...     'Guava', 'Clementine', 'Grape', 'Tayberry', 'Salak',
+    ...     'Raspberry', 'Loquat', 'Nance', 'Peach', 'Akee'
+    ... ]
+    ...
+    ... for i, fruit in paginator("Select a fruit page", fruit_list):
+    ...     st.write('%s. **%s**' % (i, fruit))
+    """
+
+    # Figure out where to display the paginator
+    if on_sidebar:
+        location = st.sidebar.empty()
+    else:
+        location = st.empty()
+
+    # Display a pagination selectbox in the specified location.
+    items = list(items)
+    n_pages = len(items)
+    n_pages = (len(items) - 1) // items_per_page + 1
+    page_format_func = lambda i: "Page %s" % i
+    page_number = location.selectbox(
+        label, range(n_pages), format_func=page_format_func
+    )
+
+    # Iterate over the items in the page to let the user display them.
+    min_index = page_number * items_per_page
+    max_index = min_index + items_per_page
+    # import itertools
+
+    # return itertools.islice(enumerate(items), min_index, max_index)
+
+    # Return the chunk of items for the current page
+    return list(enumerate(items[min_index:max_index]))
 
 
 def fetch_food_data(food_query):
@@ -163,8 +236,24 @@ df = pd.DataFrame(macro_splits).T
 # Streamlit application
 st.title("Food Nutritional Application")
 
+option_map = {
+    0: ":material/add:",
+    1: ":material/zoom_in:",
+    2: ":material/zoom_out:",
+    3: ":material/zoom_out_map:",
+}
+selection = st.segmented_control(
+    "Tool",
+    options=option_map.keys(),
+    format_func=lambda option: option_map[option],
+    selection_mode="single",
+)
+st.write(
+    "Your selected option: " f"{None if selection is None else option_map[selection]}"
+)
+
 # Stage 1: Determination of weekly necessary nutrients
-st.header("Stage 1: Determination of Weekly Necessary Nutrients")
+st.header("Stage 1: Determination of Weekly Necessary Nutrients", anchor="Stage 1")
 with st.form(key="rwi_form"):
     age = st.number_input("Age", min_value=0, max_value=120, value=25)
     height = st.number_input("Height (cm)", min_value=0, max_value=250, value=175)
@@ -190,12 +279,14 @@ with st.form(key="rwi_form"):
             "gender": gender,
             "activity": activity,
         }
-        weekly_intake = compute_rwi(data)
+        weekly_intake = compute_rwi(data) * 7
         st.session_state.weekly_intake = weekly_intake
-        st.success(f"Recommended Weekly Intake: {weekly_intake} kcal")
+        st.success(
+            f"Recommended Weekly Intake: {weekly_intake} kcal, {weekly_intake * 4.184} kJ"
+        )
 
 # Stage 2: Selection of dietary preferences
-st.header("Stage 2: Selection of Dietary Preferences")
+st.header("Stage 2: Selection of Dietary Preferences", anchor="Stage 2")
 selected_preference = st.selectbox("Select Your Dietary Preference", df.index)
 st.markdown(f"### {selected_preference}")
 st.write(df.loc[selected_preference])
@@ -209,7 +300,7 @@ fig.update_layout(template="plotly_dark")
 st.plotly_chart(fig, use_container_width=True)
 
 # Stage 3: Identification of set of preferred food items
-st.header("Stage 3: Identification of Preferred Food Items")
+st.header("Stage 3: Identification of Preferred Food Items", anchor="Stage 3")
 food_items = st_tags.st_tags(
     label="## Food items",
     text="Food items",
@@ -253,7 +344,7 @@ elif food_items == [] and st.session_state.food_items:
 #         st.error(f"Error: {e}")
 
 # Stage 4: Equalisation of the quantities
-st.header("Stage 4: Equalisation of Quantities")
+st.header("Stage 4: Equalisation of Quantities", anchor="Stage 4")
 import numpy as np
 
 
@@ -263,7 +354,9 @@ st.write(
     macro_splits[selected_preference],
     " is the selected dietary preference. The recommended weekly intake is ",
     st.session_state.weekly_intake,
-    " kcal.",
+    " kcal, ",
+    "in Joule",
+    st.session_state.weekly_intake * 4.184,
 )
 
 
@@ -288,7 +381,7 @@ st.write(
 )
 
 # Stage 5: Possible refinement of food items
-st.header("Stage 5: Refinement of Food Items")
+st.header("Stage 5: Refinement of Food Items", anchor="Stage 5")
 st.write(
     "This stage will involve refining the selection of food items based on user feedback or additional criteria."
 )
@@ -363,6 +456,20 @@ selected_cuisine = st.pills(
     "Cuisine Types", options=cuisine_options, selection_mode="single", format_func=str
 )
 
+"""### Add vegetables"""
+
+"""### Protein versus energy, heatmap"""
+
+"""### Add custom ingredient (from label)
+    how much a standard portion is worth? 
+    
+    Recipe: Kama
+"""
+
+"""
+Go to the market
+add nutritional yeast
+"""
 
 if selected_cuisine:
     # Display the corresponding staple ingredients
@@ -395,7 +502,8 @@ if selected_cuisine:
 
     f"""### Selected {len(flat_ingredients)} Staple Ingredients"""
     # st.pills("Remove Ingredients", options=flat_ingredients, selection_mode="multi")
-    st.write(", ".join(sorted(st.session_state["food_ingredients"])))
+    st.markdown("### " + ", ".join(sorted(st.session_state["food_ingredients"])))
+
     # st.write("### Select Ingredients to Remove")
     # st.session_state["selected_to_remove"] = st.pills(
     #     "Ingredients to Remove",
@@ -406,24 +514,75 @@ if selected_cuisine:
     #     key="remove_ingredients",
     # )
 
-    if st.session_state["selected_staples2"]:
-        st.write(", ".join(sorted(st.session_state["selected_staples2"])))
+    # if st.session_state["selected_staples2"]:
+    #     st.write(", ".join(sorted(st.session_state["selected_staples2"])))
 
+
+# create a long list of elements to showcase the paginator
+elements = list(range(100))
+
+# for i, fruit in paginator("Select a fruit page", elements):
+#     st.write("%s. **%s**" % (i, fruit))
+
+# Example list of food items
+food_items = [
+    "Kiwifruit",
+    "Honeydew",
+    "Cherry",
+    "Honeyberry",
+    "Pear",
+    "Apple",
+    "Nectarine",
+    "Soursop",
+    "Pineapple",
+    "Satsuma",
+    "Fig",
+    "Huckleberry",
+    "Coconut",
+    "Plantain",
+    "Jujube",
+    "Guava",
+    "Clementine",
+    "Grape",
+    "Tayberry",
+    "Salak",
+    "Raspberry",
+    "Loquat",
+    "Nance",
+    "Peach",
+    "Akee",
+]
+
+st.divider()
+st.title("Food Item Selector with Pagination")
+
+# Paginate the food items
+paginated_items = paginator(
+    "Select a page of food items", food_items, items_per_page=15
+)
+# Display the items on the current page using st.pills
+if paginated_items:
+    st.write("### Choose from the following items:")
+    _, current_page_items = zip(*paginated_items)
+    selected_items = st.pills(
+        label="Select your items", options=current_page_items, selection_mode="multi"
+    )
+
+    st.write("### Selected Items:")
+    st.write(selected_items)
 
 st.divider()
 
-print(st.session_state["selected_staples2"])
-
 if st.session_state.food_items and st.session_state.food_ingredients:
     st.write("### List of Items:")
-    st.write(set(st.session_state.food_items).union(st.session_state.food_ingredients))
     all_food_items = set(st.session_state.food_items).union(
         st.session_state.food_ingredients
     )
+    st.write(all_food_items)
     # now search food data
     # Fetch data for all food items and store in a list of dictionaries
 
-    if st.button("Search", key="search"):
+    if st.button("Basic search", key="search"):
         try:
             # Fetch data for all food items and store in a list of dictionaries
             all_food_data = []
@@ -450,8 +609,7 @@ if st.session_state.food_items and st.session_state.food_ingredients:
         except Exception as e:
             st.error(f"Error: {e}")
 
-    all_food_items
-    if st.button(f"Get Groceries Info {len(all_food_items)}"):
+    if st.button(f"Get detailed info ({len(all_food_items)} ingredients)"):
         progress_bar = st.progress(0)
         nutrient_data = []
         total_items = len(all_food_items)
@@ -475,6 +633,7 @@ if st.session_state.food_items and st.session_state.food_ingredients:
                     "metric_serving_amount",
                     "metric_serving_unit",
                     "serving_description",
+                    "measurement_description",
                     "serving_id",
                     "serving_url",
                     "serving_url",
@@ -513,7 +672,7 @@ if st.session_state.food_info is not None:
     st.session_state.food_info["calories"] = pd.to_numeric(
         st.session_state.food_info["calories"], errors="coerce"
     )
-    st.write(df.columns)
+    # st.write(df.columns)
     st.session_state.food_info["energy"] = st.session_state.food_info["calories"] * 4184
 
     st.info("Market information fetched successfully")
@@ -561,7 +720,7 @@ if st.session_state.food_info["Quantity"].notna().any():
     )
 
     # Display detailed table
-    st.write("### Detailed Nutritional Table")
+    st.write("### Nutritional Table")
     st.dataframe(
         food_info[
             [
